@@ -1,5 +1,5 @@
 /**
- * Highlight manager for <rich-search>
+ * Highlight manager for <rich-input>
  * Uses the OpaqueRange API and CSS Custom Highlight API to apply syntax highlighting.
  */
 
@@ -70,27 +70,33 @@ class HighlightRegistryManager {
         try {
           CSS.highlights.set(kw, new Highlight(...ranges));
         } catch (e) {
-          console.warn(`[rich-search] Failed to register highlight for "${kw}":`, e);
+          console.warn(`[rich-input] Failed to register highlight for "${kw}":`, e);
         }
       } else {
         CSS.highlights.delete(kw);
       }
     }
 
-    // 2. Set generic highlights
+    // 2. Set generic highlights (register both rich-input-* and legacy rich-search-*)
     if (allKeywordRanges.length > 0) {
       try {
-        CSS.highlights.set('rich-search-keyword', new Highlight(...allKeywordRanges));
+        const kwHl = new Highlight(...allKeywordRanges);
+        CSS.highlights.set('rich-input-keyword', kwHl);
+        CSS.highlights.set('rich-search-keyword', kwHl);
       } catch (e) {}
     } else {
+      CSS.highlights.delete('rich-input-keyword');
       CSS.highlights.delete('rich-search-keyword');
     }
 
     if (allValueRanges.length > 0) {
       try {
-        CSS.highlights.set('rich-search-value', new Highlight(...allValueRanges));
+        const valHl = new Highlight(...allValueRanges);
+        CSS.highlights.set('rich-input-value', valHl);
+        CSS.highlights.set('rich-search-value', valHl);
       } catch (e) {}
     } else {
+      CSS.highlights.delete('rich-input-value');
       CSS.highlights.delete('rich-search-value');
     }
   }

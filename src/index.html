@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>&lt;rich-search&gt; – Rich Keyword Search Custom Element</title>
-  <meta name="description" content="A rich search custom element with keyword-based autocomplete and syntax highlighting powered by OpaqueRange and the Custom Highlight API">
+  <title>&lt;rich-input&gt; – A Rich Input Field</title>
+  <meta name="description" content="A rich input field with keyword-based autocomplete and syntax highlighting powered by OpaqueRange and the Custom Highlight API">
 
   <link rel="stylesheet" href="css/style.css">
-  <script type="module" src="js/rich-search/index.js"></script>
+  <script type="module" src="js/rich-input/index.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
 
@@ -17,16 +17,16 @@
     <header>
       <div class="header-top">
         <div class="title-group">
-          <h1><span class="title-tag">&lt;rich-search&gt;</span></h1>
+          <h1><span class="title-tag">&lt;rich-input&gt;</span></h1>
         </div>
         <div class="header-actions">
-          <a href="https://github.com/bramus/rich-search" class="github-btn" target="_blank" rel="noopener noreferrer" aria-label="View on GitHub">
+          <a href="https://github.com/bramus/rich-input" class="github-btn" target="_blank" rel="noopener noreferrer" aria-label="View on GitHub">
             <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
             </svg>
             <span>GitHub</span>
           </a>
-          <a href="https://npmjs.com/package/rich-search" class="npm-btn" target="_blank" rel="noopener noreferrer" aria-label="View on npm">
+          <a href="https://npmjs.com/package/rich-input" class="npm-btn" target="_blank" rel="noopener noreferrer" aria-label="View on npm">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
               <path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z" />
             </svg>
@@ -35,7 +35,7 @@
         </div>
       </div>
       <p class="description">
-        A custom element that acts like a regular <code>&lt;input type="text"&gt;</code>, enhanced with contextual keyword-based autocompletion (<code>keyword:value</code>) and live syntax highlighting powered by the <strong>OpaqueRange API</strong> and the <strong>CSS Custom Highlight API</strong>.
+        A rich input field that acts like a regular <code>&lt;input type="text"&gt;</code>, enhanced with contextual keyword-based autocompletion (<code>keyword:value</code>) and live syntax highlighting powered by the <strong>OpaqueRange API</strong> and the <strong>CSS Custom Highlight API</strong>.
       </p>
 
       <!-- Dynamic Browser Support Banner -->
@@ -73,7 +73,7 @@
         <section id="overview">
           <h2>Overview</h2>
           <p class="section-desc">
-            <code>&lt;rich-search&gt;</code> brings search engine-grade filter intelligence to standard web forms. Users can search with plain free-text or structured key-value filters such as <code>label:"We Play House Recordings"</code>, <code>year:2026</code>, or <code>playlist:"WPH Classics"</code>.
+            <code>&lt;rich-input&gt;</code> brings search engine-grade filter intelligence to standard web forms. Users can search with plain free-text or structured key-value filters such as <code>label:"We Play House Recordings"</code>, <code>year:2026</code>, or <code>playlist:"WPH Classics"</code>.
           </p>
 
           <div class="card">
@@ -81,7 +81,7 @@
               <span class="card-title">Live Demonstration</span>
             </div>
 
-            <rich-search id="demo-search" value='ambient artist:"Aphex Twin" label:"XL Recordings"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+            <rich-input id="demo-search" value='ambient artist:"Aphex Twin" label:"XL Recordings"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
               <datalist id="label" label="Record Label">
                 <option value="Defected">
                   <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -142,7 +142,7 @@
                 <option value="Dub Techno"></option>
                 <option value="Minimal"></option>
               </datalist>
-            </rich-search>
+            </rich-input>
 
             <!-- Preset Queries -->
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; margin-bottom: 0.5rem;">Click a preset search query to load it:</p>
@@ -185,7 +185,7 @@
             </div>
             <div class="feature-item">
               <h3>🧩 Declarative &lt;datalist&gt;</h3>
-              <p>Zero JavaScript configuration required. Add standard <code>&lt;datalist id="..." label="..."&gt;</code> elements with <code>&lt;option&gt;</code> children inside <code>&lt;rich-search&gt;</code>.</p>
+              <p>Zero JavaScript configuration required. Add standard <code>&lt;datalist id="..." label="..."&gt;</code> elements with <code>&lt;option&gt;</code> children inside <code>&lt;rich-input&gt;</code>.</p>
             </div>
             <div class="feature-item">
               <h3>📋 Form Associated</h3>
@@ -207,15 +207,15 @@
             <div class="card-header">
               <span class="card-title">npm</span>
             </div>
-            <pre><code>npm install rich-search</code></pre>
+            <pre><code>npm install rich-input</code></pre>
           </div>
 
           <div class="card">
             <div class="card-header">
               <span class="card-title">JavaScript Module Import</span>
             </div>
-            <pre><code>import 'rich-search';
-// &lt;rich-search&gt; is now registered and ready to use!</code></pre>
+            <pre><code>import 'rich-input';
+// &lt;rich-input&gt; is now registered and ready to use!</code></pre>
           </div>
         </section>
 
@@ -223,11 +223,11 @@
         <section id="configuration">
           <h2>Datalist Configuration</h2>
           <p class="section-desc">
-            Configure filters and values declaratively by nesting <code>&lt;datalist&gt;</code> elements directly inside <code>&lt;rich-search&gt;</code>:
+            Configure filters and values declaratively by nesting <code>&lt;datalist&gt;</code> elements directly inside <code>&lt;rich-input&gt;</code>:
           </p>
 
           <div class="card">
-            <pre><code>&lt;rich-search placeholder="Search tracks, labels, artists..."&gt;
+            <pre><code>&lt;rich-input placeholder="Search tracks, labels, artists..."&gt;
   &lt;!-- String keyword with options --&gt;
   &lt;datalist id="label" label="Record Label"&gt;
     &lt;option value="Defected"&gt;&lt;/option&gt;
@@ -244,7 +244,7 @@
     &lt;option value="2025"&gt;&lt;/option&gt;
     &lt;option value="2024"&gt;&lt;/option&gt;
   &lt;/datalist&gt;
-&lt;/rich-search&gt;</code></pre>
+&lt;/rich-input&gt;</code></pre>
 
             <div class="data-table-wrapper">
               <table class="data-table">
@@ -289,7 +289,7 @@
         <section id="rich-options">
           <h2>Rich Option Markup</h2>
           <p class="section-desc">
-            <code>&lt;rich-search&gt;</code> supports embedding custom HTML markup inside <code>&lt;datalist&gt;</code> options. For example, for record labels or artists, you can prepend an image with the label’s logo.
+            <code>&lt;rich-input&gt;</code> supports embedding custom HTML markup inside <code>&lt;datalist&gt;</code> options. For example, for record labels or artists, you can prepend an image with the label’s logo.
           </p>
 
           <div class="card">
@@ -300,7 +300,7 @@
             <p>
               Embed markup directly inside the <code>&lt;option&gt;</code> element:
             </p>
-            <pre><code>&lt;rich-search placeholder="Search..."&gt;
+            <pre><code>&lt;rich-input placeholder="Search..."&gt;
   &lt;datalist id="label" label="Record Label"&gt;
     &lt;option value="Defected"&gt;
       &lt;img
@@ -345,11 +345,11 @@
       XL Recordings
     &lt;/option&gt;
   &lt;/datalist&gt;
-&lt;/rich-search&gt;</code></pre>
+&lt;/rich-input&gt;</code></pre>
             <p>
               When suggestions appear, the custom HTML markup is rendered directly inside the suggestion list. When selected, the clean <code>value</code> (<code>"We Play House Recordings"</code>) is inserted into the input:
             </p>
-            <rich-search placeholder="Try typing 'label:' to preview rich options...">
+            <rich-input placeholder="Try typing 'label:' to preview rich options...">
               <datalist id="label" label="Record Label">
                 <option value="Defected">
                   <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -376,7 +376,7 @@
                   XL Recordings
                 </option>
               </datalist>
-            </rich-search>
+            </rich-input>
           </div>
         </section>
 
@@ -389,10 +389,10 @@
 
           <div class="card">
             <div class="card-header">
-              <span class="card-title">How &lt;rich-search&gt; uses OpaqueRange</span>
+              <span class="card-title">How &lt;rich-input&gt; uses OpaqueRange</span>
             </div>
             <p>
-              When a user types inside <code>&lt;rich-search&gt;</code>:
+              When a user types inside <code>&lt;rich-input&gt;</code>:
             </p>
             <ol style="margin: 1rem 0 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
               <li><strong>Range Positioning:</strong> The component queries <code>range.getBoundingClientRect()</code> on the active value <code>OpaqueRange</code>. The suggestion popover is anchored at the start of the range (such as the opening quotation mark) rather than shifting with the cursor.</li>
@@ -440,7 +440,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 }
 
 /* Generic prefix highlight for any keyword identifier */
-::highlight(rich-search-keyword) {
+::highlight(rich-input-keyword) {
   color: #64748b;
 }</code></pre>
           </div>
@@ -450,7 +450,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
         <section id="parts-styling">
           <h2>Shadow Parts (::part) &amp; Anatomy</h2>
           <p class="section-desc">
-            All internal elements of <code>&lt;rich-search&gt;</code> are exposed for external styling through <code>::part()</code> and CSS Custom Highlight pseudo-elements:
+            All internal elements of <code>&lt;rich-input&gt;</code> are exposed for external styling through <code>::part()</code> and CSS Custom Highlight pseudo-elements:
           </p>
 
           <div class="card" style="padding: 1rem; overflow: hidden; margin-bottom: 1.5rem;">
@@ -844,7 +844,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
   <!-- ===================================================================== -->
   <g class="code-label lbl-host">
     <rect class="label-hitbox" x="30" y="34" width="170" height="30" rx="6"/>
-    <text class="label-text" x="40" y="54" fill="var(--c-host)">&lt;rich-search&gt;</text>
+    <text class="label-text" x="40" y="54" fill="var(--c-host)">&lt;rich-input&gt;</text>
   </g>
 
   <g class="code-label lbl-control">
@@ -954,9 +954,9 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
               <span class="card-meta">getParsedQuery()</span>
             </div>
 
-            <!-- Playground <rich-search> Element -->
+            <!-- Playground <rich-input> Element -->
             <div style="margin-bottom: 1.25rem;">
-              <rich-search id="playground-search" value='label:"We Play House Recordings" year:2026 style:"Deep House"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+              <rich-input id="playground-search" value='label:"We Play House Recordings" year:2026 style:"Deep House"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
                 <datalist id="label" label="Record Label">
                   <option value="Defected">
                     <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -1017,7 +1017,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                   <option value="Dub Techno"></option>
                   <option value="Minimal"></option>
                 </datalist>
-              </rich-search>
+              </rich-input>
             </div>
 
             <!-- Inspector Panels -->
@@ -1041,14 +1041,14 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
         <section id="example-form">
           <h2>2. Form Integration</h2>
           <p class="section-desc">
-            <code>&lt;rich-search&gt;</code> seamlessly participates in form submissions, validation, and FormData extraction via <code>formAssociated = true</code>.
+            <code>&lt;rich-input&gt;</code> seamlessly participates in form submissions, validation, and FormData extraction via <code>formAssociated = true</code>.
           </p>
 
           <div class="card">
             <form id="demo-form" style="display: flex; flex-direction: column; gap: 1rem;">
               <div>
                 <label for="form-search" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Search Filter:</label>
-                <rich-search id="form-search" name="q" placeholder="Type query and submit form..." required>
+                <rich-input id="form-search" name="q" placeholder="Type query and submit form..." required>
                   <datalist id="artist" label="Artist">
                     <option value="Aphex Twin">
                       <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
@@ -1076,7 +1076,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                     <option value="Ambient"></option>
                     <option value="Techno"></option>
                   </datalist>
-                </rich-search>
+                </rich-input>
               </div>
 
               <div style="display: flex; gap: 0.75rem; align-items: center;">
@@ -1101,7 +1101,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
               <div class="card-header">
                 <span class="card-title">Pill / Rounded Spotlight Theme</span>
               </div>
-              <rich-search class="theme-pill" placeholder="Minimalist pill styling via ::part(control)...">
+              <rich-input class="theme-pill" placeholder="Minimalist pill styling via ::part(control)...">
                 <datalist id="label" label="Record Label">
                   <option value="Defected">
                     <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -1128,8 +1128,8 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                     XL Recordings
                   </option>
                 </datalist>
-              </rich-search>
-              <pre><code>rich-search.theme-pill::part(control) {
+              </rich-input>
+              <pre><code>rich-input.theme-pill::part(control) {
   border-radius: 9999px;
   border: 2px solid #3b82f6;
   padding: 0 1.25rem;
@@ -1140,17 +1140,17 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
               <div class="card-header">
                 <span class="card-title">Retro Terminal Theme</span>
               </div>
-              <rich-search class="theme-terminal" placeholder="Matrix terminal styling via ::part(input)...">
+              <rich-input class="theme-terminal" placeholder="Matrix terminal styling via ::part(input)...">
                 <datalist id="style" label="Style">
                   <option value="Acid"></option>
                   <option value="Techno"></option>
                 </datalist>
-              </rich-search>
-              <pre><code>rich-search.theme-terminal::part(control) {
+              </rich-input>
+              <pre><code>rich-input.theme-terminal::part(control) {
   background: #0f172a;
   border: 1px solid #22c55e;
 }
-rich-search.theme-terminal::part(input) {
+rich-input.theme-terminal::part(input) {
   color: #4ade80;
   font-family: monospace;
 }</code></pre>
@@ -1174,7 +1174,7 @@ rich-search.theme-terminal::part(input) {
               In this example, the record label logos are styled via <code>::part(suggestion-image)</code> as circular avatars:
             </p>
 
-            <rich-search placeholder="Type 'label:' to preview the circular logos...">
+            <rich-input placeholder="Type 'label:' to preview the circular logos...">
               <datalist id="label" label="Record Label">
                 <option value="Defected">
                   <img
@@ -1219,10 +1219,10 @@ rich-search.theme-terminal::part(input) {
                   XL Recordings
                 </option>
               </datalist>
-            </rich-search>
+            </rich-input>
 
             <pre><code>/* Style suggestion logos as circular avatar icons */
-rich-search::part(suggestion-image) {
+rich-input::part(suggestion-image) {
   width: 2.5em;
   height: 2.5em;
   border-radius: 50%;
@@ -1244,7 +1244,7 @@ rich-search::part(suggestion-image) {
               + Dynamically Add "bpm" Datalist Filter
             </button>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">
-              Clicking the button above injects <code>&lt;datalist id="bpm" label="Beats Per Minute"&gt;</code> into all <code>&lt;rich-search&gt;</code> instances on the page.
+              Clicking the button above injects <code>&lt;datalist id="bpm" label="Beats Per Minute"&gt;</code> into all <code>&lt;rich-input&gt;</code> instances on the page.
             </p>
           </div>
         </section>
@@ -1253,7 +1253,7 @@ rich-search::part(suggestion-image) {
         <section id="javascript-api">
           <h2>JavaScript API</h2>
           <p class="section-desc">
-            Methods, properties, and events exposed by the <code>RichSearch</code> class.
+            Methods, properties, and events exposed by the <code>RichInput</code> class.
           </p>
 
           <div class="data-table-wrapper">
@@ -1292,9 +1292,9 @@ rich-search::part(suggestion-image) {
                   <td>Sets caret or text selection range on the internal input.</td>
                 </tr>
                 <tr>
-                  <td><code>rich-search-select</code></td>
+                  <td><code>rich-input-select</code></td>
                   <td><code>CustomEvent</code></td>
-                  <td>Dispatched when a suggestion is selected (detail includes <code>type</code>, <code>keyword</code>, <code>value</code>, <code>query</code>).</td>
+                  <td>Dispatched when a suggestion is selected (detail includes <code>type</code>, <code>keyword</code>, <code>value</code>, <code>query</code>). Also dispatched as <code>rich-search-select</code> for backwards compatibility.</td>
                 </tr>
                 <tr>
                   <td><code>search</code></td>

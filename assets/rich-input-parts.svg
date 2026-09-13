@@ -388,7 +388,7 @@
   <!-- ===================================================================== -->
   <g class="code-label lbl-host">
     <rect class="label-hitbox" x="30" y="34" width="170" height="30" rx="6"/>
-    <text class="label-text" x="40" y="54" fill="var(--c-host)">&lt;rich-search&gt;</text>
+    <text class="label-text" x="40" y="54" fill="var(--c-host)">&lt;rich-input&gt;</text>
   </g>
 
   <g class="code-label lbl-control">

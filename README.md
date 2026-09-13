@@ -1,11 +1,11 @@
-# rich-search
+# rich-input
 
-> A rich search custom element `<rich-search>` with keyword-based autocomplete and live syntax highlighting powered by the **OpaqueRange API** and **CSS Custom Highlight API**.
+> A rich input field `<rich-input>` with keyword-based autocomplete and live syntax highlighting powered by the **OpaqueRange API** and **CSS Custom Highlight API**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Custom Elements](https://img.shields.io/badge/Web_Components-Custom_Elements_v1-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements)
 
-The `<rich-search>` component acts like a standard `<input type="text">` so users can type ordinary text or search terms, but enhances it with contextual autocomplete and in-input syntax highlighting for structured `keyword:value` searches (such as `label:"We Play House Recordings" year:2026 playlist:"WPH Classics"`).
+The `<rich-input>` component is a rich input field that acts like a standard `<input type="text">` so users can type ordinary text or search terms, but enhances it with contextual autocomplete and in-input syntax highlighting for structured `keyword:value` entries (such as `label:"We Play House Recordings" year:2026 playlist:"WPH Classics"`).
 
 ---
 
@@ -17,7 +17,7 @@ The `<rich-search>` component acts like a standard `<input type="text">` so user
   - **Values**: Typing within a keyword value (e.g. `label:"K` or `label:K`) suggests matching options like `"Keinemusik"` and `"Kranky"`.
 - **Range-Based Positioning via OpaqueRange**: Positions autocomplete dropdown popovers anchored to the start of the active `OpaqueRange` (e.g. at the opening quotation mark of a value) using `range.getBoundingClientRect()`, rather than shifting with the cursor.
 - **Native In-Input Highlighting via CSS Custom Highlight API**: Highlights keyword values inside the `<input>` control using standard CSS rules like `::highlight(label)` or `::highlight(year)` without brittle mirror-div overlays.
-- **Declarative Configuration via `<datalist>`**: Configure keywords and options purely in HTML by nesting standard `<datalist>` elements with `<option>` tags inside `<rich-search>`.
+- **Declarative Configuration via `<datalist>`**: Configure keywords and options purely in HTML by nesting standard `<datalist>` elements with `<option>` tags inside `<rich-input>`.
 - **Rich Option Markup**: Embed custom HTML markup (such as logos, images, icons, and avatars) directly inside `<option>` elements for rich, visual suggestion popovers.
 - **Form Associated**: Implements `static formAssociated = true` and `ElementInternals` to participate seamlessly in `<form>` submission, `FormData`, and form reset lifecycles.
 - **Shadow Parts Theming (`::part`)**: Full CSS customizability using `::part(input)`, `::part(control)`, `::part(popover)`, `::part(suggestion-item)`, etc.
@@ -31,10 +31,10 @@ The `<rich-search>` component acts like a standard `<input type="text">` so user
 The visual below illustrates the internal Shadow DOM elements, exposed CSS Shadow Parts (`::part`), and CSS Custom Highlight pseudo-elements (`::highlight`), showing how they relate to one another:
 
 <p align="center">
-  <img src="assets/rich-search-parts.svg" alt="<rich-search> Component Anatomy, Shadow Parts, and Highlight Pseudos" width="100%">
+  <img src="assets/rich-input-parts.svg" alt="<rich-input> Component Anatomy, Shadow Parts, and Highlight Pseudos" width="100%">
 </p>
 
-- `<rich-search>`: The host custom element wrapping the control, datalists, and suggestions popover.
+- `<rich-input>`: The host custom element wrapping the control, datalists, and suggestions popover.
 - `::part(control)`: The outer input container enclosing the icon, input, and clear button.
 - `::part(icon)`: The leading search magnifying glass SVG icon.
 - `::part(input)`: The native `<input type="text">` where users type.
@@ -57,27 +57,27 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 Install via npm:
 
 ```bash
-npm install rich-search
+npm install rich-input
 ```
 
 Or import directly in your HTML/JavaScript bundle:
 
 ```javascript
-import 'rich-search';
+import 'rich-input';
 ```
 
 Or via CDN:
 
 ```html
-<script type="module" src="https://esm.sh/rich-search"></script>
+<script type="module" src="https://esm.sh/rich-input"></script>
 ```
 
 ### 2. Basic Usage
 
-Nest `<datalist>` elements inside `<rich-search>` to configure keywords and autocomplete suggestions:
+Nest `<datalist>` elements inside `<rich-input>` to configure keywords and autocomplete suggestions:
 
 ```html
-<rich-search placeholder="Search music catalog...">
+<rich-input placeholder="Search music catalog...">
   <datalist id="label" label="Record Label">
     <option value="Defected"></option>
     <option value="Keinemusik"></option>
@@ -97,14 +97,14 @@ Nest `<datalist>` elements inside `<rich-search>` to configure keywords and auto
     <option value="WPH Classics"></option>
     <option value="Late Night Grooves"></option>
   </datalist>
-</rich-search>
+</rich-input>
 ```
 
 ---
 
 ## Datalist Configuration
 
-Configuration is defined by standard HTML `<datalist>` elements placed inside the `<rich-search>` element:
+Configuration is defined by standard HTML `<datalist>` elements placed inside the `<rich-input>` element:
 
 | Element / Attribute | Type | Description |
 |---|---|---|
@@ -115,16 +115,16 @@ Configuration is defined by standard HTML `<datalist>` elements placed inside th
 | `<option label="...">` | `string` | Optional descriptive label shown alongside the value. |
 | `<option>` children | `Node` | Optional image (`<img>`) prepended to the suggested value. |
 
-Datalists can be added, updated, or removed dynamically at runtime; `<rich-search>` observes changes via `slotchange` and `MutationObserver`.
+Datalists can be added, updated, or removed dynamically at runtime; `<rich-input>` observes changes via `slotchange` and `MutationObserver`.
 
 ---
 
 ## Rich Option Markup
 
-`<rich-search>` supports rich HTML markup inside `<option>` elements. For example, for record labels or artists, you can prepend a logo image:
+`<rich-input>` supports rich HTML markup inside `<option>` elements. For example, for record labels or artists, you can prepend a logo image:
 
 ```html
-<rich-search placeholder="Search...">
+<rich-input placeholder="Search...">
   <datalist id="label" label="Record Label">
     <option value="Defected">
       <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -151,13 +151,13 @@ Datalists can be added, updated, or removed dynamically at runtime; `<rich-searc
       XL Recordings
     </option>
   </datalist>
-</rich-search>
+</rich-input>
 ```
 
-When suggesting values for `label:`, `<rich-search>` sniffs the image inside the `<option>`, renders it alongside the option's text content, and exposes `::part(suggestion-image)` for external CSS styling (e.g. as a `1em` circular icon):
+When suggesting values for `label:`, `<rich-input>` sniffs the image inside the `<option>`, renders it alongside the option's text content, and exposes `::part(suggestion-image)` for external CSS styling (e.g. as a `1em` circular icon):
 
 ```css
-rich-search::part(suggestion-image) {
+rich-input::part(suggestion-image) {
   width: 1em;
   height: 1em;
   border-radius: 50%;
@@ -188,7 +188,7 @@ const highlight = new Highlight(valueRange);
 CSS.highlights.set('label', highlight);
 ```
 
-`<rich-search>` automatically checks `typeof HTMLInputElement.prototype.createValueRange === 'function'`. On supported browsers, caret tracking and `::highlight()` are applied natively. On browsers without `createValueRange`, `<rich-search>` falls back to input-relative popover positioning.
+`<rich-input>` automatically checks `typeof HTMLInputElement.prototype.createValueRange === 'function'`. On supported browsers, caret tracking and `::highlight()` are applied natively. On browsers without `createValueRange`, `<rich-input>` falls back to input-relative popover positioning.
 
 ---
 
@@ -223,23 +223,23 @@ Values corresponding to configured keywords are registered into the global `CSS.
 }
 
 /* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
-::highlight(rich-search-keyword) {
+::highlight(rich-input-keyword) {
   color: #64748b;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
 }
 ```
 
-> **Note:** Supported CSS properties on `::highlight()` include `color`, `background-color`, `text-decoration`, `text-shadow`, `-webkit-text-stroke-color`, `-webkit-text-stroke-width`, and `-webkit-text-fill-color`.
+> **Note:** Supported CSS properties on `::highlight()` include `color`, `background-color`, `text-decoration`, `text-shadow`, `-webkit-text-stroke-color`, `-webkit-text-stroke-width`, and `-webkit-text-fill-color`. For backwards compatibility, `::highlight(rich-search-keyword)` is also registered.
 
 ---
 
 ## Styling the Input with Shadow Parts (`::part`)
 
-Every internal element of `<rich-search>` is exposed via `::part()`:
+Every internal element of `<rich-input>` is exposed via `::part()`:
 
 ```css
 /* Style the outer control container */
-rich-search::part(control) {
+rich-input::part(control) {
   border-radius: 9999px;
   border: 2px solid #2563eb;
   padding: 0 1.25rem;
@@ -247,19 +247,19 @@ rich-search::part(control) {
 }
 
 /* Style the native text input */
-rich-search::part(input) {
+rich-input::part(input) {
   font-family: 'JetBrains Mono', monospace;
   font-size: 1rem;
 }
 
 /* Style the suggestions popover */
-rich-search::part(popover) {
+rich-input::part(popover) {
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
 }
 
 /* Style active suggestion item */
-rich-search::part(suggestion-item-active) {
+rich-input::part(suggestion-item-active) {
   background-color: #dbeafe;
 }
 ```
@@ -319,23 +319,23 @@ rich-search::part(suggestion-item-active) {
 - `input`: Dispatched when the search value changes (bubbles, composed).
 - `change`: Dispatched on blur or when a search change is committed.
 - `search`: Dispatched when the user presses `Enter` with suggestions closed.
-- `rich-search-select`: Dispatched when an autocomplete suggestion is selected.
+- `rich-input-select`: Dispatched when an autocomplete suggestion is selected (also dispatched as `rich-search-select` for backwards compatibility).
   - `event.detail`: `{ type, keyword, value, label, query }`
 
 ---
 
 ## Form Integration
 
-`<rich-search>` supports native `<form>` submission through standard `ElementInternals`:
+`<rich-input>` supports native `<form>` submission through standard `ElementInternals`:
 
 ```html
 <form id="search-form" action="/search" method="GET">
-  <rich-search name="q" placeholder="Search tracks...">
+  <rich-input name="q" placeholder="Search tracks...">
     <datalist id="genre" label="Genre">
       <option value="House"></option>
       <option value="Techno"></option>
     </datalist>
-  </rich-search>
+  </rich-input>
   <button type="submit">Search</button>
 </form>
 

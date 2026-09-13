@@ -1,5 +1,5 @@
 /**
- * Query tokenizer and parser for <rich-search>
+ * Query tokenizer and parser for <rich-input>
  * Handles keyword:value tokenization, caret context inspection, and suggestion application.
  */
 

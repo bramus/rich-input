@@ -1,10 +1,10 @@
 /**
- * <rich-search> Demo Application Controller
+ * <rich-input> Demo Application Controller
  */
 
-import { RichSearch, isOpaqueRangeSupported, isHighlightSupported, getCaretCoordinates } from './rich-search/index.js';
+import { RichInput, isOpaqueRangeSupported, isHighlightSupported, getCaretCoordinates } from './rich-input/index.js';
 
-export class RichSearchDemoApp {
+export class RichInputDemoApp {
   constructor() {
     this.demoSearch = document.getElementById('demo-search');
     this.playground = document.getElementById('playground-search');
@@ -99,6 +99,7 @@ export class RichSearchDemoApp {
     };
 
     this.playground.addEventListener('input', updateInspector);
+    this.playground.addEventListener('rich-input-select', updateInspector);
     this.playground.addEventListener('rich-search-select', updateInspector);
     this.playground.addEventListener('keyup', updateInspector);
     this.playground.addEventListener('click', updateInspector);
@@ -111,7 +112,7 @@ export class RichSearchDemoApp {
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const query = btn.getAttribute('data-preset');
-        const target = btn.closest('.card')?.querySelector('rich-search') || this.demoSearch || this.playground;
+        const target = btn.closest('.card')?.querySelector('rich-input, rich-search') || this.demoSearch || this.playground;
         if (target) {
           target.value = query;
           target.focus();
@@ -128,7 +129,7 @@ export class RichSearchDemoApp {
       e.preventDefault();
       const formData = new FormData(this.demoForm);
       const query = formData.get('q');
-      const searchEl = this.demoForm.querySelector('rich-search');
+      const searchEl = this.demoForm.querySelector('rich-input, rich-search');
       const parsed = searchEl ? searchEl.getParsedQuery() : null;
 
       this.formResult.hidden = false;
@@ -150,7 +151,7 @@ export class RichSearchDemoApp {
         return;
       }
 
-      const targets = document.querySelectorAll('rich-search');
+      const targets = document.querySelectorAll('rich-input, rich-search');
       if (targets.length === 0) return;
 
       const createBpmDatalist = () => {
@@ -179,7 +180,7 @@ export class RichSearchDemoApp {
       this.addFilterBtn.disabled = true;
       this.addFilterBtn.textContent = '✓ Filter "bpm" Added';
 
-      alert('Added <datalist id="bpm"> to all <rich-search> instances! You can now type "b" to autocomplete "bpm:" with values 120, 124, 126, 128, etc.');
+      alert('Added <datalist id="bpm"> to all <rich-input> instances! You can now type "b" to autocomplete "bpm:" with values 120, 124, 126, 128, etc.');
     });
   }
 
@@ -214,11 +215,13 @@ export class RichSearchDemoApp {
   }
 }
 
+export const RichSearchDemoApp = RichInputDemoApp;
+
 // Auto-instantiate on DOM load
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new RichSearchDemoApp());
+    document.addEventListener('DOMContentLoaded', () => new RichInputDemoApp());
   } else {
-    new RichSearchDemoApp();
+    new RichInputDemoApp();
   }
 }

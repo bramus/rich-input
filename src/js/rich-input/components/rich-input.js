@@ -1,6 +1,6 @@
 /**
- * <rich-search> Custom Element
- * Keyword-based autocomplete search input powered by OpaqueRange and Custom Highlight API.
+ * <rich-input> Custom Element
+ * Keyword-based autocomplete input field powered by OpaqueRange and Custom Highlight API.
  */
 
 import { parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion } from '../utils/query-parser.js';
@@ -37,21 +37,21 @@ TEMPLATE.innerHTML = `
     align-items: center;
     position: relative;
     width: 100%;
-    background-color: var(--rs-input-bg, #ffffff);
-    border: 1px solid var(--rs-input-border, #d1d5db);
-    border-radius: var(--rs-input-radius, 8px);
+    background-color: var(--ri-input-bg, var(--rs-input-bg, #ffffff));
+    border: 1px solid var(--ri-input-border, var(--rs-input-border, #d1d5db));
+    border-radius: var(--ri-input-radius, var(--rs-input-radius, 8px));
     padding: 0 0.75rem;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .control:focus-within {
-    border-color: var(--rs-primary, #2563eb);
-    box-shadow: 0 0 0 3px var(--rs-focus-ring, rgba(37, 99, 235, 0.2));
+    border-color: var(--ri-primary, var(--rs-primary, #2563eb));
+    box-shadow: 0 0 0 3px var(--ri-focus-ring, var(--rs-focus-ring, rgba(37, 99, 235, 0.2)));
   }
 
   :host([disabled]) .control {
-    background-color: var(--rs-disabled-bg, #f3f4f6);
-    border-color: var(--rs-disabled-border, #e5e7eb);
+    background-color: var(--ri-disabled-bg, var(--rs-disabled-bg, #f3f4f6));
+    border-color: var(--ri-disabled-border, var(--rs-disabled-border, #e5e7eb));
     opacity: 0.7;
     cursor: not-allowed;
   }
@@ -60,7 +60,7 @@ TEMPLATE.innerHTML = `
     flex-shrink: 0;
     width: 1.125rem;
     height: 1.125rem;
-    color: var(--rs-icon-color, #9ca3af);
+    color: var(--ri-icon-color, var(--rs-icon-color, #9ca3af));
     margin-right: 0.5rem;
     pointer-events: none;
   }
@@ -76,11 +76,11 @@ TEMPLATE.innerHTML = `
     font-size: 0.95rem;
     line-height: 1.5;
     padding: 0.625rem 0;
-    color: var(--rs-input-color, #111827);
+    color: var(--ri-input-color, var(--rs-input-color, #111827));
   }
 
   .search-input::placeholder {
-    color: var(--rs-placeholder-color, #9ca3af);
+    color: var(--ri-placeholder-color, var(--rs-placeholder-color, #9ca3af));
   }
 
   .clear-button {
@@ -94,8 +94,8 @@ TEMPLATE.innerHTML = `
     margin-left: 0.375rem;
     border: none;
     border-radius: 9999px;
-    background: var(--rs-clear-bg, #e5e7eb);
-    color: var(--rs-clear-color, #4b5563);
+    background: var(--ri-clear-bg, var(--rs-clear-bg, #e5e7eb));
+    color: var(--ri-clear-color, var(--rs-clear-color, #4b5563));
     cursor: pointer;
     transition: background-color 0.15s ease, color 0.15s ease;
   }
@@ -105,8 +105,8 @@ TEMPLATE.innerHTML = `
   }
 
   .clear-button:hover {
-    background: var(--rs-clear-hover-bg, #d1d5db);
-    color: var(--rs-clear-hover-color, #111827);
+    background: var(--ri-clear-hover-bg, var(--rs-clear-hover-bg, #d1d5db));
+    color: var(--ri-clear-hover-color, var(--rs-clear-hover-color, #111827));
   }
 
   .clear-button svg {
@@ -124,10 +124,10 @@ TEMPLATE.innerHTML = `
     max-width: 420px;
     max-height: 290px;
     overflow-y: auto;
-    background-color: var(--rs-popover-bg, #ffffff);
-    border: 1px solid var(--rs-popover-border, #e2e8f0);
-    border-radius: var(--rs-popover-radius, 8px);
-    box-shadow: var(--rs-popover-shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1));
+    background-color: var(--ri-popover-bg, var(--rs-popover-bg, #ffffff));
+    border: 1px solid var(--ri-popover-border, var(--rs-popover-border, #e2e8f0));
+    border-radius: var(--ri-popover-radius, var(--rs-popover-radius, 8px));
+    box-shadow: var(--ri-popover-shadow, var(--rs-popover-shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)));
     z-index: 10000;
     font-family: system-ui, -apple-system, sans-serif;
   }
@@ -141,13 +141,13 @@ TEMPLATE.innerHTML = `
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid var(--rs-popover-border, #e2e8f0);
-    background-color: var(--rs-header-bg, #f8fafc);
+    border-bottom: 1px solid var(--ri-popover-border, var(--rs-popover-border, #e2e8f0));
+    background-color: var(--ri-header-bg, var(--rs-header-bg, #f8fafc));
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--rs-header-color, #64748b);
+    color: var(--ri-header-color, var(--rs-header-color, #64748b));
   }
 
   .suggestions-list {
@@ -166,12 +166,12 @@ TEMPLATE.innerHTML = `
     line-height: 1.4;
     transition: background-color 0.1s ease;
     user-select: none;
-    color: var(--rs-item-title-color, #0f172a);
+    color: var(--ri-item-title-color, var(--rs-item-title-color, #0f172a));
   }
 
   .suggestion-item:hover,
   .suggestion-item.active {
-    background-color: var(--rs-item-active-bg, #f1f5f9);
+    background-color: var(--ri-item-active-bg, var(--rs-item-active-bg, #f1f5f9));
   }
 
   .suggestion-content {
@@ -184,7 +184,7 @@ TEMPLATE.innerHTML = `
 
   .suggestion-title {
     font-weight: 600;
-    color: var(--rs-item-title-color, #0f172a);
+    color: var(--ri-item-title-color, var(--rs-item-title-color, #0f172a));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -192,7 +192,7 @@ TEMPLATE.innerHTML = `
 
   .suggestion-desc {
     font-size: 0.75rem;
-    color: var(--rs-item-desc-color, #64748b);
+    color: var(--ri-item-desc-color, var(--rs-item-desc-color, #64748b));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -253,7 +253,7 @@ TEMPLATE.innerHTML = `
 </div>
 `;
 
-export class RichSearch extends HTMLElement {
+export class RichInput extends HTMLElement {
   static formAssociated = true;
 
   static get observedAttributes() {
@@ -629,11 +629,11 @@ export class RichSearch extends HTMLElement {
             this._ownedRanges.push(valRange);
             bucket.valueRanges.push(valRange);
           } catch (e) {
-            console.warn('[rich-search] Range creation error:', e);
+            console.warn('[rich-input] Range creation error:', e);
           }
         }
 
-        // 2. Keyword prefix range (for ::highlight(rich-search-keyword))
+        // 2. Keyword prefix range (for ::highlight(rich-input-keyword) and ::highlight(rich-search-keyword))
         if (token.keywordEnd > token.keywordStart && token.keywordEnd <= text.length) {
           try {
             const kwRange = this._input.createValueRange(token.keywordStart, token.keywordEnd);
@@ -874,7 +874,7 @@ export class RichSearch extends HTMLElement {
     this._activeSuggestions.forEach((sug, idx) => {
       const li = document.createElement('li');
       li.className = `suggestion-item${idx === this._selectedIndex ? ' active' : ''}`;
-      li.id = `rs-opt-${idx}`;
+      li.id = `ri-opt-${idx}`;
       li.setAttribute('role', 'option');
       li.setAttribute('aria-selected', idx === this._selectedIndex ? 'true' : 'false');
       li.setAttribute('part', `suggestion-item${idx === this._selectedIndex ? ' suggestion-item-active' : ''}`);
@@ -967,16 +967,22 @@ export class RichSearch extends HTMLElement {
     }
 
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    const selectDetail = {
+      type: suggestion.type,
+      keyword: suggestion.keyword || suggestion.id,
+      value: suggestion.value || null,
+      label: suggestion.label || null,
+      query: newValue,
+    };
+    this.dispatchEvent(new CustomEvent('rich-input-select', {
+      bubbles: true,
+      composed: true,
+      detail: selectDetail,
+    }));
     this.dispatchEvent(new CustomEvent('rich-search-select', {
       bubbles: true,
       composed: true,
-      detail: {
-        type: suggestion.type,
-        keyword: suggestion.keyword || suggestion.id,
-        value: suggestion.value || null,
-        label: suggestion.label || null,
-        query: newValue,
-      },
+      detail: selectDetail,
     }));
 
     // If a keyword was selected (e.g. `mix:`), immediately show value suggestions
@@ -987,3 +993,6 @@ export class RichSearch extends HTMLElement {
     }
   }
 }
+
+export class RichSearch extends RichInput {}
+

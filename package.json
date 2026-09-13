@@ -1,7 +1,7 @@
 {
-  "name": "rich-search",
+  "name": "rich-input",
   "version": "1.0.0",
-  "description": "A rich search custom element with keyword-based autocomplete and syntax highlighting powered by OpaqueRange and the Custom Highlight API",
+  "description": "A rich input field with keyword-based autocomplete and syntax highlighting powered by OpaqueRange and the Custom Highlight API",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -17,7 +17,7 @@
     "deploy": "netlify deploy --dir=src --prod"
   },
   "keywords": [
-    "rich-search",
+    "rich-input",
     "custom-element",
     "web-components",
     "opaque-range",
@@ -34,10 +34,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bramus/rich-search.git"
+    "url": "git+https://github.com/bramus/rich-input.git"
   },
   "bugs": {
-    "url": "https://github.com/bramus/rich-search/issues"
+    "url": "https://github.com/bramus/rich-input/issues"
   },
-  "homepage": "https://github.com/bramus/rich-search#readme"
+  "homepage": "https://github.com/bramus/rich-input#readme"
 }

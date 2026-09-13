@@ -1,5 +1,5 @@
 /**
- * Caret measurement and popover positioning for <rich-search>
+ * Caret measurement and popover positioning for <rich-input>
  * Uses OpaqueRange.getBoundingClientRect() with input fallback.
  */
 
