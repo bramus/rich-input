@@ -633,8 +633,12 @@ pre {
   padding: 1rem;
   font-family: var(--font-mono);
   font-size: 0.8125rem;
+  line-height: 1.5;
   max-height: 380px;
-  overflow-y: auto;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
 }
 
 .token-pill {

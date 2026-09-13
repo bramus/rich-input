@@ -6,6 +6,7 @@ import { RichSearch, isOpaqueRangeSupported, isHighlightSupported, getCaretCoord
 
 export class RichSearchDemoApp {
   constructor() {
+    this.demoSearch = document.getElementById('demo-search');
     this.playground = document.getElementById('playground-search');
     this.tokensContainer = document.getElementById('playground-tokens');
     this.jsonOutput = document.getElementById('playground-json');
@@ -58,7 +59,7 @@ export class RichSearchDemoApp {
       if (this.tokensContainer) {
         this.tokensContainer.innerHTML = '';
         if (parsed.tokens.length === 0 || (parsed.tokens.length === 1 && parsed.tokens[0].type === 'whitespace')) {
-          this.tokensContainer.innerHTML = '<span style="color: #94a3b8; font-style: italic;">No tokens yet. Start typing or pick a preset!</span>';
+          this.tokensContainer.innerHTML = '<span style="color: #94a3b8; font-style: italic;">No tokens yet. Start typing!</span>';
         } else {
           parsed.tokens.forEach((t) => {
             if (t.type === 'whitespace') return;
@@ -110,10 +111,11 @@ export class RichSearchDemoApp {
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const query = btn.getAttribute('data-preset');
-        if (this.playground) {
-          this.playground.value = query;
-          this.playground.focus();
-          this.playground.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+        const target = btn.closest('.card')?.querySelector('rich-search') || this.demoSearch || this.playground;
+        if (target) {
+          target.value = query;
+          target.focus();
+          target.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
         }
       });
     });
@@ -148,28 +150,36 @@ export class RichSearchDemoApp {
         return;
       }
 
-      const target = document.getElementById('playground-search') || document.querySelector('rich-search');
-      if (!target) return;
+      const targets = document.querySelectorAll('rich-search');
+      if (targets.length === 0) return;
 
-      const dl = document.createElement('datalist');
-      dl.id = 'bpm';
-      dl.setAttribute('label', 'Beats Per Minute (BPM)');
-      dl.dataset.type = 'number';
+      const createBpmDatalist = () => {
+        const dl = document.createElement('datalist');
+        dl.id = 'bpm';
+        dl.setAttribute('label', 'Beats Per Minute (BPM)');
+        dl.dataset.type = 'number';
 
-      const bpms = ['120', '124', '126', '128', '130', '132', '140'];
-      for (const val of bpms) {
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = `${val} BPM`;
-        dl.appendChild(opt);
-      }
+        const bpms = ['120', '124', '126', '128', '130', '132', '140'];
+        for (const val of bpms) {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = `${val} BPM`;
+          dl.appendChild(opt);
+        }
+        return dl;
+      };
 
-      target.appendChild(dl);
+      targets.forEach((target) => {
+        if (!target.querySelector('#bpm, datalist[id="bpm"]')) {
+          target.appendChild(createBpmDatalist());
+        }
+      });
+
       added = true;
       this.addFilterBtn.disabled = true;
       this.addFilterBtn.textContent = '✓ Filter "bpm" Added';
 
-      alert('Added <datalist id="bpm"> to <rich-search>! You can now type "b" to autocomplete "bpm:" with values 120, 124, 126, 128, etc.');
+      alert('Added <datalist id="bpm"> to all <rich-search> instances! You can now type "b" to autocomplete "bpm:" with values 120, 124, 126, 128, etc.');
     });
   }
 
