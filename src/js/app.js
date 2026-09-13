@@ -147,7 +147,6 @@ export class RichInputDemoApp {
     let added = false;
     this.addFilterBtn.addEventListener('click', () => {
       if (added) {
-        alert('Dynamic filter "bpm" has already been added!');
         return;
       }
 
@@ -160,7 +159,7 @@ export class RichInputDemoApp {
         dl.setAttribute('label', 'Beats Per Minute (BPM)');
         dl.dataset.type = 'number';
 
-        const bpms = ['120', '124', '126', '128', '130', '132', '140'];
+        const bpms = Array.from({ length: 30 }, (_, i) => 110 + i); // Range from 110 to 140
         for (const val of bpms) {
           const opt = document.createElement('option');
           opt.value = val;
@@ -179,8 +178,6 @@ export class RichInputDemoApp {
       added = true;
       this.addFilterBtn.disabled = true;
       this.addFilterBtn.textContent = '✓ Filter "bpm" Added';
-
-      alert('Added <datalist id="bpm"> to all <rich-input> instances! You can now type "b" to autocomplete "bpm:" with values 120, 124, 126, 128, etc.');
     });
   }
 
