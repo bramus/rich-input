@@ -1,0 +1,43 @@
+{
+  "name": "rich-search",
+  "version": "1.0.0",
+  "description": "A rich search custom element with keyword-based autocomplete and syntax highlighting powered by OpaqueRange and the Custom Highlight API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "prepublishOnly": "if [ -z $PUBLISH ]; then echo 'This package must be published using `npm run pub`\\n' && exit 1; fi",
+    "pub": "PUBLISH=true npm run build && npm publish ./dist",
+    "start": "npx -y serve src",
+    "dev": "npx -y serve src",
+    "deploy": "netlify deploy --dir=src --prod"
+  },
+  "keywords": [
+    "rich-search",
+    "custom-element",
+    "web-components",
+    "opaque-range",
+    "custom-highlight-api",
+    "autocomplete",
+    "keyword-search",
+    "search-input"
+  ],
+  "author": {
+    "name": "Bramus Van Damme",
+    "email": "bramus@bram.us",
+    "url": "https://www.bram.us/"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bramus/rich-search.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bramus/rich-search/issues"
+  },
+  "homepage": "https://github.com/bramus/rich-search#readme"
+}

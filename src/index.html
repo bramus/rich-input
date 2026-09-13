@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>&lt;rich-search&gt; – Rich Keyword Search Custom Element</title>
+  <meta name="description" content="A rich search custom element with keyword-based autocomplete and syntax highlighting powered by OpaqueRange and the Custom Highlight API">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/rich-search/index.js"></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <div class="title-group">
+          <h1><span class="title-tag">&lt;rich-search&gt;</span></h1>
+        </div>
+        <div class="header-actions">
+          <a href="https://github.com/bramus/rich-search" class="github-btn" target="_blank" rel="noopener noreferrer" aria-label="View on GitHub">
+            <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+            </svg>
+            <span>GitHub</span>
+          </a>
+          <a href="https://npmjs.com/package/rich-search" class="npm-btn" target="_blank" rel="noopener noreferrer" aria-label="View on npm">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z" />
+            </svg>
+            <span>npm</span>
+          </a>
+        </div>
+      </div>
+      <p class="description">
+        A custom element that acts like a regular <code>&lt;input type="text"&gt;</code>, enhanced with contextual keyword-based autocompletion (<code>keyword:value</code>) and live syntax highlighting powered by the <strong>OpaqueRange API</strong> and the <strong>CSS Custom Highlight API</strong>.
+      </p>
+
+      <!-- Dynamic Browser Support Banner -->
+      <div id="api-banner" class="api-banner"></div>
+    </header>
+
+    <div class="page-layout">
+      <!-- Sidenav / Scrollspy -->
+      <aside class="sidebar">
+        <nav class="sidenav" aria-label="Table of contents">
+          <div class="sidenav-title">Documentation</div>
+          <ul class="sidenav-list">
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#configuration">Datalist Configuration</a></li>
+            <li><a href="#opaquerange-api">The OpaqueRange API</a></li>
+            <li><a href="#custom-highlights">Custom Highlights Styling</a></li>
+            <li><a href="#parts-styling">Shadow Parts (::part)</a></li>
+            <li><a href="#javascript-api">JavaScript API</a></li>
+            <li class="sidenav-divider">Examples</li>
+            <li><a href="#playground">1. Live Playground</a></li>
+            <li><a href="#example-music">2. Music Catalog Search</a></li>
+            <li><a href="#example-form">3. Form Integration</a></li>
+            <li><a href="#example-themes">4. Shadow Parts Theming</a></li>
+            <li><a href="#example-dynamic">5. Dynamic Datalists</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Overview Section -->
+        <section id="overview">
+          <h2>Overview</h2>
+          <p class="section-desc">
+            <code>&lt;rich-search&gt;</code> brings search engine-grade filter intelligence to standard web forms. Users can search with plain free-text or structured key-value filters such as <code>label:"We Play House Recordings"</code>, <code>year:2026</code>, or <code>playlist:"WPH Classics"</code>.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Live Demonstration</span>
+              <span class="card-meta">Declarative HTML</span>
+            </div>
+
+            <rich-search placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+              <datalist id="label" label="Record Label">
+                <option value="Defected"></option>
+                <option value="Keinemusik"></option>
+                <option value="Kranky"></option>
+                <option value="Ninja Tune"></option>
+                <option value="We Play House Recordings"></option>
+                <option value="XL Recordings"></option>
+              </datalist>
+              <datalist id="year" label="Year" data-type="number">
+                <option value="2026"></option>
+                <option value="2025"></option>
+                <option value="2024"></option>
+                <option value="1999"></option>
+              </datalist>
+              <datalist id="artist" label="Artist">
+                <option value="Aphex Twin"></option>
+                <option value="Daft Punk"></option>
+                <option value="Four Tet"></option>
+                <option value="Larry Heard"></option>
+                <option value="Moodymann"></option>
+              </datalist>
+              <datalist id="style" label="Style">
+                <option value="Deep House"></option>
+                <option value="Acid"></option>
+                <option value="Dub Techno"></option>
+                <option value="Minimal"></option>
+              </datalist>
+            </rich-search>
+
+            <pre><code>&lt;rich-search placeholder="Search..."&gt;
+  &lt;datalist id="label" label="Record Label"&gt;
+    &lt;option value="We Play House Recordings"&gt;&lt;/option&gt;
+    &lt;option value="Keinemusik"&gt;&lt;/option&gt;
+    &lt;option value="Kranky"&gt;&lt;/option&gt;
+  &lt;/datalist&gt;
+  &lt;datalist id="year" label="Year" data-type="number"&gt;
+    &lt;option value="2026"&gt;&lt;/option&gt;
+    &lt;option value="2025"&gt;&lt;/option&gt;
+  &lt;/datalist&gt;
+  &lt;datalist id="artist" label="Artist"&gt;
+    &lt;option value="Aphex Twin"&gt;&lt;/option&gt;
+    &lt;option value="Four Tet"&gt;&lt;/option&gt;
+  &lt;/datalist&gt;
+  &lt;datalist id="style" label="Style"&gt;
+    &lt;option value="Deep House"&gt;&lt;/option&gt;
+    &lt;option value="Ambient"&gt;&lt;/option&gt;
+  &lt;/datalist&gt;
+&lt;/rich-search&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features">
+          <h2>Features</h2>
+          <p class="section-desc">
+            Built as a native, lightweight Web Component utilizing cutting-edge web platform capabilities.
+          </p>
+
+          <div class="features-grid">
+            <div class="feature-item">
+              <h3>🎯 Dual Autocompletion</h3>
+              <p>Autocompletes both filter keywords (e.g. typing <code>a</code> suggests <code>artist:</code>, typing <code>s</code> suggests <code>style:</code>) and values (e.g. typing <code>label:"K</code> suggests <code>Keinemusik</code> and <code>Kranky</code>).</p>
+            </div>
+            <div class="feature-item">
+              <h3>📍 OpaqueRange Caret Positioning</h3>
+              <p>Anchors the autocomplete dropdown directly beneath the caret coordinates measured natively inside the <code>&lt;input&gt;</code> using <code>createValueRange(caret, caret).getBoundingClientRect()</code>.</p>
+            </div>
+            <div class="feature-item">
+              <h3>🎨 CSS Custom Highlight API</h3>
+              <p>Keywords and values are directly styled inside the native <code>&lt;input&gt;</code> using standard pseudo-elements like <code>::highlight(label)</code> or <code>::highlight(year)</code> without overlay <code>&lt;div&gt;</code> hacks.</p>
+            </div>
+            <div class="feature-item">
+              <h3>🧩 Declarative &lt;datalist&gt;</h3>
+              <p>Zero JavaScript configuration required. Add standard <code>&lt;datalist id="..." label="..."&gt;</code> elements with <code>&lt;option&gt;</code> children inside <code>&lt;rich-search&gt;</code>.</p>
+            </div>
+            <div class="feature-item">
+              <h3>📋 Form Associated</h3>
+              <p>Implements <code>formAssociated = true</code> and ElementInternals so it integrates with standard <code>&lt;form&gt;</code> submission, <code>FormData</code>, and form reset lifecycles.</p>
+            </div>
+            <div class="feature-item">
+              <h3>💅 Full ::part() Theming</h3>
+              <p>Exposes shadow parts including <code>::part(input)</code>, <code>::part(control)</code>, <code>::part(popover)</code>, and <code>::part(suggestion-item)</code> for complete styling flexibility.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Installation Section -->
+        <section id="installation">
+          <h2>Installation & Setup</h2>
+          <p class="section-desc">Install via npm or load directly via ESM from your favorite CDN.</p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">npm</span>
+            </div>
+            <pre><code>npm install rich-search</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">JavaScript Module Import</span>
+            </div>
+            <pre><code>import 'rich-search';
+// &lt;rich-search&gt; is now registered and ready to use!</code></pre>
+          </div>
+        </section>
+
+        <!-- Configuration Section -->
+        <section id="configuration">
+          <h2>Datalist Configuration</h2>
+          <p class="section-desc">
+            Configure filters and values declaratively by nesting <code>&lt;datalist&gt;</code> elements directly inside <code>&lt;rich-search&gt;</code>:
+          </p>
+
+          <div class="card">
+            <pre><code>&lt;rich-search placeholder="Search tracks, labels, artists..."&gt;
+  &lt;!-- String keyword with options --&gt;
+  &lt;datalist id="label" label="Record Label"&gt;
+    &lt;option value="Defected"&gt;&lt;/option&gt;
+    &lt;option value="Keinemusik"&gt;&lt;/option&gt;
+    &lt;option value="Kranky"&gt;&lt;/option&gt;
+    &lt;option value="We Play House Recordings"&gt;&lt;/option&gt;
+  &lt;/datalist&gt;
+
+  &lt;!-- Number keyword --&gt;
+  &lt;datalist id="year" label="Release Year" data-type="number"&gt;
+    &lt;option value="2026"&gt;&lt;/option&gt;
+    &lt;option value="2025"&gt;&lt;/option&gt;
+    &lt;option value="2024"&gt;&lt;/option&gt;
+  &lt;/datalist&gt;
+&lt;/rich-search&gt;</code></pre>
+
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Element / Attribute</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>id</code> on <code>&lt;datalist&gt;</code></td>
+                    <td>The keyword identifier used in queries (e.g. <code>id="label"</code> produces <code>label:...</code>). Case-insensitive.</td>
+                  </tr>
+                  <tr>
+                    <td><code>label</code> on <code>&lt;datalist&gt;</code></td>
+                    <td>Human-readable display name shown in suggestion badges and headers. Defaults to capitalized <code>id</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><code>data-type</code> on <code>&lt;datalist&gt;</code></td>
+                    <td>Set to <code>number</code> for numeric fields (e.g. <code>year</code>). Defaults to <code>string</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><code>value</code> on <code>&lt;option&gt;</code></td>
+                    <td>The value inserted when the suggestion is accepted. Values with spaces are automatically enclosed in quotes (e.g. <code>"We Play House Recordings"</code>).</td>
+                  </tr>
+                  <tr>
+                    <td><code>label</code> or text on <code>&lt;option&gt;</code></td>
+                    <td>Optional descriptive label (e.g. <code>&lt;option value="2026" label="Current Year"&gt;</code>).</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- OpaqueRange Section -->
+        <section id="opaquerange-api">
+          <h2>The OpaqueRange API</h2>
+          <p class="section-desc">
+            Traditionally, calculating caret position or styling text inside a native <code>&lt;input&gt;</code> required brittle mirror-div hacks. With Chromium 152+, the new <strong>OpaqueRange API</strong> unlocks first-class text measurement and highlighting.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">How &lt;rich-search&gt; uses OpaqueRange</span>
+            </div>
+            <p>
+              When a user types inside <code>&lt;rich-search&gt;</code>:
+            </p>
+            <ol style="margin: 1rem 0 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+              <li><strong>Caret Positioning:</strong> The component calls <code>input.createValueRange(caretPos, caretPos)</code> to create an <code>OpaqueRange</code> and queries <code>range.getBoundingClientRect()</code>. The suggestion popover is positioned at those exact pixel coordinates.</li>
+              <li><strong>Live Highlighting:</strong> For every recognized keyword token (e.g. <code>label:"We Play House Recordings"</code>), the component creates a value range with <code>input.createValueRange(start, end)</code> and adds it to <code>new Highlight(range)</code>.</li>
+              <li><strong>Resource Cleanup:</strong> When text mutations occur, previously created ranges are cleanly disconnected using <code>range.disconnect()</code>.</li>
+            </ol>
+
+            <pre><code>// 1. Measuring caret position for the dropdown popover
+const caretRange = input.createValueRange(caretPos, caretPos);
+const rect = caretRange.getBoundingClientRect();
+popover.style.left = `${rect.left}px`;
+popover.style.top = `${rect.bottom + 4}px`;
+caretRange.disconnect();
+
+// 2. Highlighting keyword values with the Custom Highlight API
+const valueRange = input.createValueRange(valStart, valEnd);
+const labelHighlight = new Highlight(valueRange);
+CSS.highlights.set('label', labelHighlight);</code></pre>
+          </div>
+        </section>
+
+        <!-- Custom Highlights Section -->
+        <section id="custom-highlights">
+          <h2>Custom Highlights Styling</h2>
+          <p class="section-desc">
+            Values for each configured keyword can be styled using standard CSS <code>::highlight(keyword)</code> pseudo-elements:
+          </p>
+
+          <div class="card">
+            <pre><code>/* Style the value set in label:"We Play House Recordings" */
+::highlight(label) {
+  background-color: oklch(0.92 0.08 240);
+  color: oklch(0.28 0.14 240);
+  text-decoration: 2px underline solid oklch(0.5 0.15 240 / 0.5);
+}
+
+/* Style numeric year values like year:2026 */
+::highlight(year) {
+  background-color: oklch(0.93 0.1 85);
+  color: oklch(0.35 0.14 85);
+}
+
+/* Style genre filters */
+::highlight(genre) {
+  background-color: oklch(0.93 0.1 145);
+  color: oklch(0.3 0.14 145);
+}
+
+/* Generic prefix highlight for any keyword identifier */
+::highlight(rich-search-keyword) {
+  color: #64748b;
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Parts Styling Section -->
+        <section id="parts-styling">
+          <h2>Shadow Parts (::part)</h2>
+          <p class="section-desc">
+            All internal elements of <code>&lt;rich-search&gt;</code> are exposed for external styling through <code>::part()</code>:
+          </p>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Part Name</th>
+                  <th>Element Targeted</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>::part(input)</code></td><td>The internal native <code>&lt;input type="text"&gt;</code></td></tr>
+                <tr><td><code>::part(control)</code></td><td>The flex container wrapping the search icon, input, and clear button</td></tr>
+                <tr><td><code>::part(icon)</code></td><td>The leading search SVG icon</td></tr>
+                <tr><td><code>::part(clear-button)</code></td><td>The clear search button (visible when input has text)</td></tr>
+                <tr><td><code>::part(popover)</code></td><td>The autocomplete suggestions popover container</td></tr>
+                <tr><td><code>::part(suggestions-header)</code></td><td>The header bar at the top of the popover</td></tr>
+                <tr><td><code>::part(suggestions-list)</code></td><td>The <code>&lt;ul&gt;</code> container holding suggestion items</td></tr>
+                <tr><td><code>::part(suggestion-item)</code></td><td>Each individual suggestion <code>&lt;li&gt;</code> item</td></tr>
+                <tr><td><code>::part(suggestion-item-active)</code></td><td>The currently focused / hovered suggestion item</td></tr>
+                <tr><td><code>::part(suggestion-badge)</code></td><td>The badge indicating "Field" or keyword name</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Interactive Playground -->
+        <section id="playground">          <h2>1. Live Playground</h2>
+          <p class="section-desc">
+            Test typing, autocomplete, caret tracking, and live syntax highlighting in real time.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Interactive Search Input</span>
+              <span class="card-meta">Live State Inspector</span>
+            </div>
+
+            <!-- Preset Queries -->
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Click a preset search query to load it:</p>
+            <div class="preset-buttons">
+              <button type="button" class="btn" data-preset='label:"We Play House Recordings" year:2026'>
+                🎵 Music Search with Quotes
+              </button>
+              <button type="button" class="btn" data-preset='artist:"Larry Heard" style:"Deep House"'>
+                🎷 House Subgenre Search
+              </button>
+              <button type="button" class="btn" data-preset='artist:"Four Tet" year:2024 style:"Ambient"'>
+                🎧 Artist &amp; Style Search
+              </button>
+              <button type="button" class="btn" data-preset='ambient artist:"Aphex Twin" label:"XL Recordings"'>
+                🌌 Free Text + Keywords
+              </button>
+            </div>
+
+            <!-- Playground <rich-search> Element -->
+            <div style="margin: 1.25rem 0;">
+              <rich-search id="playground-search" placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+                <datalist id="label" label="Record Label">
+                  <option value="Defected"></option>
+                  <option value="Keinemusik"></option>
+                  <option value="Kranky"></option>
+                  <option value="Ninja Tune"></option>
+                  <option value="We Play House Recordings"></option>
+                  <option value="XL Recordings"></option>
+                </datalist>
+                <datalist id="year" label="Year" data-type="number">
+                  <option value="2026"></option>
+                  <option value="2025"></option>
+                  <option value="2024"></option>
+                  <option value="1999"></option>
+                </datalist>
+                <datalist id="artist" label="Artist">
+                  <option value="Aphex Twin"></option>
+                  <option value="Daft Punk"></option>
+                  <option value="Four Tet"></option>
+                  <option value="Larry Heard"></option>
+                  <option value="Moodymann"></option>
+                </datalist>
+                <datalist id="style" label="Style">
+                  <option value="Deep House"></option>
+                  <option value="Acid"></option>
+                  <option value="Dub Techno"></option>
+                  <option value="Minimal"></option>
+                </datalist>
+              </rich-search>
+            </div>
+
+            <!-- Inspector Panels -->
+            <div class="playground-layout">
+              <div>
+                <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Detected Tokens:</h4>
+                <div id="playground-tokens" style="min-height: 40px; padding: 0.5rem; background: var(--bg-surface-elevated); border-radius: 6px; margin-bottom: 0.75rem;"></div>
+
+                <div class="caret-indicator" id="playground-caret"></div>
+              </div>
+
+              <div>
+                <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Structured Query Output (getParsedQuery()):</h4>
+                <div class="inspector-box" id="playground-json"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Example 2: Music Catalog Search -->
+        <section id="example-music">
+          <h2>2. Music Catalog Search</h2>
+          <p class="section-desc">
+            Configured with music metadata fields: <code>label</code>, <code>year</code>, <code>artist</code>, and <code>style</code>.
+          </p>
+
+          <div class="card">
+            <rich-search value='label:"We Play House Recordings" year:2026 style:"Deep House"'>
+              <datalist id="label" label="Record Label">
+                <option value="We Play House Recordings"></option>
+                <option value="Keinemusik"></option>
+                <option value="Kranky"></option>
+                <option value="Ninja Tune"></option>
+              </datalist>
+              <datalist id="year" label="Year" data-type="number">
+                <option value="2026"></option>
+                <option value="2025"></option>
+                <option value="2024"></option>
+              </datalist>
+              <datalist id="artist" label="Artist">
+                <option value="San Soda"></option>
+                <option value="FCL"></option>
+                <option value="Red D"></option>
+              </datalist>
+              <datalist id="style" label="Style">
+                <option value="Deep House"></option>
+                <option value="Dub Techno"></option>
+                <option value="Ambient"></option>
+              </datalist>
+            </rich-search>
+          </div>
+        </section>
+
+        <!-- Example 3: Form Integration -->
+        <section id="example-form">
+          <h2>3. Form Integration</h2>
+          <p class="section-desc">
+            <code>&lt;rich-search&gt;</code> seamlessly participates in form submissions, validation, and FormData extraction via <code>formAssociated = true</code>.
+          </p>
+
+          <div class="card">
+            <form id="demo-form" style="display: flex; flex-direction: column; gap: 1rem;">
+              <div>
+                <label for="form-search" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Search Filter:</label>
+                <rich-search id="form-search" name="q" placeholder="Type query and submit form..." required>
+                  <datalist id="artist" label="Artist">
+                    <option value="Aphex Twin"></option>
+                    <option value="Daft Punk"></option>
+                    <option value="Larry Heard"></option>
+                  </datalist>
+                  <datalist id="style" label="Style">
+                    <option value="Deep House"></option>
+                    <option value="Ambient"></option>
+                    <option value="Techno"></option>
+                  </datalist>
+                </rich-search>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <button type="submit" class="btn btn-primary">Submit Form</button>
+                <button type="reset" class="btn">Reset Form</button>
+              </div>
+
+              <div id="form-result" class="callout" hidden style="margin: 0.5rem 0 0;"></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Example 4: Shadow Parts Theming -->
+        <section id="example-themes">
+          <h2>4. Shadow Parts Theming (::part)</h2>
+          <p class="section-desc">
+            Style components completely from page CSS without breaking encapsulation.
+          </p>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Pill / Rounded Spotlight Theme</span>
+              </div>
+              <rich-search class="theme-pill" placeholder="Minimalist pill styling via ::part(control)...">
+                <datalist id="label" label="Record Label">
+                  <option value="Keinemusik"></option>
+                  <option value="Ninja Tune"></option>
+                </datalist>
+              </rich-search>
+              <pre><code>rich-search.theme-pill::part(control) {
+  border-radius: 9999px;
+  border: 2px solid #3b82f6;
+  padding: 0 1.25rem;
+}</code></pre>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Retro Terminal Theme</span>
+              </div>
+              <rich-search class="theme-terminal" placeholder="Matrix terminal styling via ::part(input)...">
+                <datalist id="style" label="Style">
+                  <option value="Acid"></option>
+                  <option value="Techno"></option>
+                </datalist>
+              </rich-search>
+              <pre><code>rich-search.theme-terminal::part(control) {
+  background: #0f172a;
+  border: 1px solid #22c55e;
+}
+rich-search.theme-terminal::part(input) {
+  color: #4ade80;
+  font-family: monospace;
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Example 5: Dynamic Datalists -->
+        <section id="example-dynamic">
+          <h2>5. Dynamic Datalists</h2>
+          <p class="section-desc">
+            Add or update <code>&lt;datalist&gt;</code> elements dynamically at runtime. The component uses a MutationObserver and slotchange event to immediately update available keywords and suggestions.
+          </p>
+
+          <div class="card">
+            <button type="button" class="btn btn-primary" id="btn-add-filter">
+              + Dynamically Add "bpm" Datalist Filter
+            </button>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">
+              Clicking the button above injects <code>&lt;datalist id="bpm" label="Beats Per Minute"&gt;</code> into the playground.
+            </p>
+          </div>
+        </section>
+
+        <!-- JavaScript API Section -->
+        <section id="javascript-api">
+          <h2>JavaScript API</h2>
+          <p class="section-desc">
+            Methods, properties, and events exposed by the <code>RichSearch</code> class.
+          </p>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>value</code></td>
+                  <td><code>string</code></td>
+                  <td>Gets or sets the current search text, refreshing highlights and form values.</td>
+                </tr>
+                <tr>
+                  <td><code>getParsedQuery()</code></td>
+                  <td><code>() =&gt; Object</code></td>
+                  <td>Returns structured breakdown with <code>{ raw, text, keywords, tokens }</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>getKeywords()</code></td>
+                  <td><code>() =&gt; Array</code></td>
+                  <td>Returns array of all configured datalist keywords and options.</td>
+                </tr>
+                <tr>
+                  <td><code>focus()</code>, <code>blur()</code>, <code>select()</code></td>
+                  <td><code>Function</code></td>
+                  <td>Standard focus and text selection manipulation methods.</td>
+                </tr>
+                <tr>
+                  <td><code>setSelectionRange()</code></td>
+                  <td><code>Function</code></td>
+                  <td>Sets caret or text selection range on the internal input.</td>
+                </tr>
+                <tr>
+                  <td><code>rich-search-select</code></td>
+                  <td><code>CustomEvent</code></td>
+                  <td>Dispatched when a suggestion is selected (detail includes <code>type</code>, <code>keyword</code>, <code>value</code>, <code>query</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>search</code></td>
+                  <td><code>CustomEvent</code></td>
+                  <td>Dispatched when user presses Enter with suggestions closed.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+
+</html>
