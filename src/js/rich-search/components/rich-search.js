@@ -278,6 +278,7 @@ export class RichSearch extends HTMLElement {
 
     this._input = this.shadowRoot.querySelector('.search-input');
     this._popover = this.shadowRoot.querySelector('.popover');
+    this._popoverTitle = this.shadowRoot.querySelector('.popover-title');
     this._suggestionsList = this.shadowRoot.querySelector('.suggestions-list');
     this._clearBtn = this.shadowRoot.querySelector('.clear-button');
     this._slot = this.shadowRoot.querySelector('slot:not([name])');
@@ -535,7 +536,8 @@ export class RichSearch extends HTMLElement {
       if (!id) continue;
 
       const idLower = id.toLowerCase();
-      const label = dl.getAttribute('label') || id.charAt(0).toUpperCase() + id.slice(1);
+      const rawLabel = dl.hasAttribute('label') ? dl.getAttribute('label').trim() : null;
+      const label = rawLabel || id.charAt(0).toUpperCase() + id.slice(1);
       const dataType = dl.dataset.type || dl.getAttribute('type') || 'string';
 
       const options = [];
@@ -561,6 +563,7 @@ export class RichSearch extends HTMLElement {
         id,
         idLower,
         label,
+        rawLabel,
         dataType,
         options,
       });
@@ -855,6 +858,17 @@ export class RichSearch extends HTMLElement {
   }
 
   _renderSuggestions() {
+    if (this._popoverTitle) {
+      let title = 'Suggestions';
+      if (this._context?.mode === 'value' && this._context.keywordLower) {
+        const kwConfig = this._configuredKeywords.get(this._context.keywordLower);
+        if (kwConfig?.rawLabel) {
+          title = kwConfig.rawLabel;
+        }
+      }
+      this._popoverTitle.textContent = title;
+    }
+
     this._suggestionsList.replaceChildren();
 
     this._activeSuggestions.forEach((sug, idx) => {
