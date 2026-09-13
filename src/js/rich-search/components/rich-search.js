@@ -18,6 +18,11 @@ TEMPLATE.innerHTML = `
     box-sizing: border-box;
   }
 
+  :host([hidden]),
+  [hidden] {
+    display: none !important;
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
   }
@@ -93,6 +98,10 @@ TEMPLATE.innerHTML = `
     color: var(--rs-clear-color, #4b5563);
     cursor: pointer;
     transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .clear-button[hidden] {
+    display: none !important;
   }
 
   .clear-button:hover {
@@ -748,6 +757,7 @@ export class RichSearch extends HTMLElement {
   }
 
   _updateClearButton() {
+    if (!this._clearBtn || !this._input) return;
     this._clearBtn.hidden = this._input.value.length === 0;
   }
 
