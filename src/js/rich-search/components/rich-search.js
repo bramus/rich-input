@@ -180,26 +180,6 @@ TEMPLATE.innerHTML = `
     background-color: var(--rs-item-active-bg, #f1f5f9);
   }
 
-  .suggestion-badge {
-    flex-shrink: 0;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    padding: 0.125rem 0.375rem;
-    border-radius: 4px;
-    letter-spacing: 0.025em;
-  }
-
-  .suggestion-badge.badge-keyword {
-    background-color: var(--rs-badge-kw-bg, #dbeafe);
-    color: var(--rs-badge-kw-color, #1e40af);
-  }
-
-  .suggestion-badge.badge-value {
-    background-color: var(--rs-badge-val-bg, #fef3c7);
-    color: var(--rs-badge-val-color, #92400e);
-  }
-
   .suggestion-content {
     flex: 1;
     min-width: 0;
@@ -829,11 +809,6 @@ export class RichSearch extends HTMLElement {
       li.setAttribute('aria-selected', idx === this._selectedIndex ? 'true' : 'false');
       li.setAttribute('part', `suggestion-item${idx === this._selectedIndex ? ' suggestion-item-active' : ''}`);
 
-      const badge = document.createElement('span');
-      badge.className = `suggestion-badge badge-${sug.type}`;
-      badge.setAttribute('part', 'suggestion-badge');
-      badge.textContent = sug.type === 'keyword' ? 'Field' : (sug.keywordLabel || sug.keyword || 'Value');
-
       const content = document.createElement('div');
       content.className = 'suggestion-content';
       content.setAttribute('part', 'suggestion-content');
@@ -851,7 +826,6 @@ export class RichSearch extends HTMLElement {
       content.appendChild(title);
       if (desc.textContent) content.appendChild(desc);
 
-      li.appendChild(badge);
       li.appendChild(content);
 
       li.addEventListener('mousedown', (e) => {

@@ -44,7 +44,6 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(suggestions-list)`: The `<ul>` container holding autocomplete suggestion items.
 - `::part(suggestion-item)`: Each suggestion `<li>` row.
 - `::part(suggestion-item-active)`: The currently selected / keyboard-focused suggestion row.
-- `::part(suggestion-badge)`: The badge tag indicating the field type or keyword name (e.g. `FIELD`, `RECORD LABEL`).
 - `::part(suggestion-keyword)`: The keyword label text inside a keyword suggestion.
 - `::part(suggestion-value)`: The value label text inside a value suggestion.
 
@@ -109,7 +108,7 @@ Configuration is defined by standard HTML `<datalist>` elements placed inside th
 | Element / Attribute | Type | Description |
 |---|---|---|
 | `<datalist id="...">` | `string` | **Required.** The keyword identifier used in queries (e.g. `id="artist"` produces `artist:`). Case-insensitive. |
-| `<datalist label="...">` | `string` | Human-readable label displayed in suggestion badges and headers. Defaults to capitalized `id`. |
+| `<datalist label="...">` | `string` | Human-readable label displayed in suggestion headers. Defaults to capitalized `id`. |
 | `<datalist data-type="...">` | `string` | Optional data type (`"string"` or `"number"`). |
 | `<option value="...">` | `string` | The suggested value. If the value contains spaces, quotes are automatically added when inserted (e.g. `"We Play House Recordings"`). |
 | `<option label="...">` | `string` | Optional descriptive label shown alongside the value. |
@@ -228,7 +227,6 @@ rich-search::part(suggestion-item-active) {
 | `::part(suggestions-list)` | The `<ul>` list element |
 | `::part(suggestion-item)` | Each suggestion `<li>` item |
 | `::part(suggestion-item-active)` | The currently selected / hovered suggestion item |
-| `::part(suggestion-badge)` | The badge displaying "Field" or keyword name |
 | `::part(suggestion-keyword)` | Keyword name element in suggestion items |
 | `::part(suggestion-value)` | Value element in suggestion items |
 

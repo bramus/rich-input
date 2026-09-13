@@ -229,7 +229,7 @@
                   </tr>
                   <tr>
                     <td><code>label</code> on <code>&lt;datalist&gt;</code></td>
-                    <td>Human-readable display name shown in suggestion badges and headers. Defaults to capitalized <code>id</code>.</td>
+                    <td>Human-readable display name shown in suggestion headers. Defaults to capitalized <code>id</code>.</td>
                   </tr>
                   <tr>
                     <td><code>data-type</code> on <code>&lt;datalist&gt;</code></td>
@@ -351,7 +351,6 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
         --c-list: #7c3aed;       /* Violet */
         --c-item: #16a34a;       /* Green */
         --c-active: #0284c7;     /* Sky */
-        --c-badge: #db2777;      /* Pink / Magenta */
         --c-kw-text: #2563eb;    /* Blue */
         --c-val-text: #059669;   /* Emerald */
 
@@ -382,7 +381,6 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
           --c-list: #a78bfa;
           --c-item: #4ade80;
           --c-active: #38bdf8;
-          --c-badge: #f472b6;
           --c-kw-text: #60a5fa;
           --c-val-text: #34d399;
 
@@ -423,20 +421,20 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 
       .guide-line {
         fill: none;
-        stroke-width: 2px;
+        stroke-width: 1.5px;
         stroke-dasharray: 6 5;
         pointer-events: none;
       }
 
       .guide-box {
         fill: none;
-        stroke-width: 2.5px;
+        stroke-width: 1.5px;
         stroke-dasharray: 7 6;
         pointer-events: none;
       }
 
       .guide-dot {
-        stroke-width: 2px;
+        stroke-width: 1.5px;
         pointer-events: none;
       }
 
@@ -493,7 +491,6 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
       svg:has(.lbl-list:hover) .target-list,
       svg:has(.lbl-active:hover) .target-active,
       svg:has(.lbl-item:hover) .target-item,
-      svg:has(.lbl-badge:hover) .target-badge,
       svg:has(.lbl-kw:hover) .target-kw,
       svg:has(.lbl-val:hover) .target-val {
         opacity: 1 !important;
@@ -506,15 +503,13 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 
       /* When list label is hovered, keep list items active */
       svg:has(.lbl-list:hover) .target-active,
-      svg:has(.lbl-list:hover) .target-badge,
       svg:has(.lbl-list:hover) .target-kw,
       svg:has(.lbl-list:hover) .target-item,
       svg:has(.lbl-list:hover) .target-val {
         opacity: 1 !important;
       }
 
-      /* When active item is hovered, keep its badge and keyword highlighted too */
-      svg:has(.lbl-active:hover) .target-badge,
+      /* When active item is hovered, keep its keyword highlighted too */
       svg:has(.lbl-active:hover) .target-kw {
         opacity: 1 !important;
       }
@@ -531,7 +526,6 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
       svg:has(.lbl-list:hover) .target-list.guide-line,
       svg:has(.lbl-active:hover) .target-active.guide-line,
       svg:has(.lbl-item:hover) .target-item.guide-line,
-      svg:has(.lbl-badge:hover) .target-badge.guide-line,
       svg:has(.lbl-kw:hover) .target-kw.guide-line,
       svg:has(.lbl-val:hover) .target-val.guide-line {
         stroke-width: 2px;
@@ -549,7 +543,6 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
       svg:has(.lbl-list:hover) .target-list.guide-box,
       svg:has(.lbl-active:hover) .target-active.guide-box,
       svg:has(.lbl-item:hover) .target-item.guide-box,
-      svg:has(.lbl-badge:hover) .target-badge.guide-box,
       svg:has(.lbl-kw:hover) .target-kw.guide-box,
       svg:has(.lbl-val:hover) .target-val.guide-box {
         stroke-width: 2px;
@@ -584,7 +577,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
     <!-- Input Text Area (label: & caret): ::part(input) -->
     <g class="comp-part target-input">
       <text class="mono-text" x="458" y="82" font-size="15" fill="var(--text-muted)" font-weight="600">label:</text>
-      <text class="mono-text" x="756" y="82" font-size="15" fill="var(--text-color)"> m</text>
+      <text class="mono-text" x="756" y="82" font-size="15" fill="var(--text-color)"> a</text>
       <line x1="778" y1="65" x2="778" y2="87" stroke="var(--c-active)" stroke-width="2.5"/>
     </g>
 
@@ -614,54 +607,39 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 
     <!-- Item 1 (Active/Highlighted): ::part(suggestion-item-active) -->
     <rect class="comp-part target-active" x="478" y="172" width="444" height="66" rx="8" fill="var(--active-item-bg)"/>
-    <text class="ui-text comp-part target-active" x="602" y="205" font-size="13" fill="var(--text-muted)">Mix</text>
-
-    <!-- Item 1 Badge: ::part(suggestion-badge) -->
-    <g class="comp-part target-badge">
-      <rect x="490" y="188" width="56" height="24" rx="4" fill="rgba(37, 99, 235, 0.15)"/>
-      <text class="ui-text" x="501" y="205" font-size="11" font-weight="700" fill="var(--c-control)">FIELD</text>
-    </g>
-
-    <!-- Item 1 Title: ::part(suggestion-keyword) -->
     <g class="comp-part target-kw">
-      <text class="mono-text" x="558" y="206" font-size="16" font-weight="700" fill="var(--text-color)">mix:</text>
+      <text class="mono-text" x="498" y="211" font-size="16" font-weight="700" fill="var(--text-color)">artist:</text>
     </g>
+    <text class="ui-text comp-part target-active" x="580" y="210" font-size="13" fill="var(--text-muted)">Artist</text>
 
     <!-- Item 2: ::part(suggestion-item) -->
     <g class="comp-part target-item">
       <rect x="478" y="244" width="444" height="66" rx="8" fill="none"/>
-      <rect x="490" y="260" width="56" height="24" rx="4" fill="rgba(37, 99, 235, 0.15)"/>
-      <text class="ui-text" x="501" y="277" font-size="11" font-weight="700" fill="var(--c-control)">FIELD</text>
-      <text class="mono-text" x="558" y="278" font-size="16" font-weight="700" fill="var(--text-color)">mixid:</text>
-      <text class="ui-text" x="620" y="277" font-size="13" fill="var(--text-muted)">Mix ID (number)</text>
+      <text class="mono-text" x="498" y="283" font-size="16" font-weight="700" fill="var(--text-color)">style:</text>
+      <text class="ui-text" x="570" y="282" font-size="13" fill="var(--text-muted)">Style</text>
     </g>
 
-    <!-- Item 3 Badge (Category): RECORD LABEL -->
+    <!-- Item 3: ::part(suggestion-value) -->
     <g class="comp-part">
       <rect x="478" y="316" width="444" height="66" rx="8" fill="none"/>
-      <rect x="490" y="332" width="104" height="24" rx="4" fill="rgba(217, 119, 6, 0.15)"/>
-      <text class="ui-text" x="498" y="349" font-size="11" font-weight="700" fill="var(--c-hl-val)">RECORD LABEL</text>
     </g>
-    
-    <!-- Item 3 Suggestion Value: ::part(suggestion-value) -->
     <g class="comp-part target-val">
-      <text class="mono-text" x="606" y="350" font-size="16" font-weight="700" fill="var(--text-color)">Keinemusik</text>
+      <text class="mono-text" x="498" y="355" font-size="16" font-weight="700" fill="var(--text-color)">Keinemusik</text>
+      <text class="ui-text" x="625" y="354" font-size="13" fill="var(--text-muted)">Record Label</text>
     </g>
 
     <!-- Item 4 (Value Suggestion) -->
     <g class="comp-part">
       <rect x="478" y="388" width="444" height="66" rx="8" fill="none"/>
-      <rect x="490" y="404" width="104" height="24" rx="4" fill="rgba(217, 119, 6, 0.15)"/>
-      <text class="ui-text" x="498" y="421" font-size="11" font-weight="700" fill="var(--c-hl-val)">RECORD LABEL</text>
-      <text class="mono-text" x="606" y="422" font-size="16" font-weight="700" fill="var(--text-color)">Kranky</text>
+      <text class="mono-text" x="498" y="427" font-size="16" font-weight="700" fill="var(--text-color)">Kranky</text>
+      <text class="ui-text" x="585" y="426" font-size="13" fill="var(--text-muted)">Record Label</text>
     </g>
 
     <!-- Item 5 (Value Suggestion) -->
     <g class="comp-part">
       <rect x="478" y="460" width="444" height="66" rx="8" fill="none"/>
-      <rect x="490" y="476" width="104" height="24" rx="4" fill="rgba(217, 119, 6, 0.15)"/>
-      <text class="ui-text" x="498" y="493" font-size="11" font-weight="700" fill="var(--c-hl-val)">RECORD LABEL</text>
-      <text class="mono-text" x="606" y="494" font-size="16" font-weight="700" fill="var(--text-color)">Ninja Tune</text>
+      <text class="mono-text" x="498" y="499" font-size="16" font-weight="700" fill="var(--text-color)">Ninja Tune</text>
+      <text class="ui-text" x="615" y="498" font-size="13" fill="var(--text-muted)">Record Label</text>
     </g>
   </g>
 
@@ -700,45 +678,40 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
   <rect class="guide-box target-header" x="468" y="116" width="464" height="48" rx="8" stroke="var(--c-header)"/>
   <circle class="guide-dot target-header" cx="465" cy="140" r="4" fill="var(--c-header)"/>
 
-  <!-- 7. Suggestion Badge Target -->
-  <path class="guide-line target-badge" d="M300 399 L480 399 L486 200" stroke="var(--c-badge)"/>
-  <rect class="guide-box target-badge" x="486" y="184" width="64" height="32" rx="6" stroke="var(--c-badge)"/>
-  <circle class="guide-dot target-badge" cx="486" cy="200" r="4" fill="var(--c-badge)"/>
+  <!-- 7. Suggestion Keyword Target -->
+  <path class="guide-line target-kw" d="M320 404 L455 404 L455 209 L494 209" stroke="var(--c-kw-text)"/>
+  <rect class="guide-box target-kw" x="494" y="195" width="76" height="28" rx="6" stroke="var(--c-kw-text)"/>
+  <circle class="guide-dot target-kw" cx="494" cy="209" r="4" fill="var(--c-kw-text)"/>
 
-  <!-- 8. Suggestion Keyword Target -->
-  <path class="guide-line target-kw" d="M320 467 L564 467 L564 220" stroke="var(--c-kw-text)"/>
-  <rect class="guide-box target-kw" x="554" y="188" width="46" height="28" rx="6" stroke="var(--c-kw-text)"/>
-  <circle class="guide-dot target-kw" cx="564" cy="220" r="4" fill="var(--c-kw-text)"/>
-
-  <!-- 9. Clear Button Target -->
+  <!-- 8. Clear Button Target -->
   <path class="guide-line target-clear" d="M1005 73 L925 73" stroke="var(--c-clear)"/>
   <circle class="guide-box target-clear" cx="902" cy="76" r="20" stroke="var(--c-clear)"/>
   <circle class="guide-dot target-clear" cx="925" cy="73" r="4" fill="var(--c-clear)"/>
 
-  <!-- 10. Popover Target -->
+  <!-- 9. Popover Target -->
   <path class="guide-line target-popover" d="M1005 145 L938 145" stroke="var(--c-popover)"/>
   <rect class="guide-box target-popover" x="464" y="112" width="472" height="434" rx="14" stroke="var(--c-popover)"/>
   <circle class="guide-dot target-popover" cx="938" cy="145" r="4" fill="var(--c-popover)"/>
 
-  <!-- 11. Suggestions List Target -->
+  <!-- 10. Suggestions List Target -->
   <path class="guide-line target-list" d="M1005 213 L934 213" stroke="var(--c-list)"/>
   <rect class="guide-box target-list" x="474" y="166" width="452" height="368" rx="8" stroke="var(--c-list)"/>
   <circle class="guide-dot target-list" cx="934" cy="213" r="4" fill="var(--c-list)"/>
 
-  <!-- 12. Suggestion Item Active Target -->
+  <!-- 11. Suggestion Item Active Target -->
   <path class="guide-line target-active" d="M1005 281 L960 281 L960 205 L928 205" stroke="var(--c-active)"/>
   <rect class="guide-box target-active" x="474" y="168" width="452" height="74" rx="10" stroke="var(--c-active)"/>
   <circle class="guide-dot target-active" cx="928" cy="205" r="4" fill="var(--c-active)"/>
 
-  <!-- 13. Suggestion Item Target -->
+  <!-- 12. Suggestion Item Target -->
   <path class="guide-line target-item" d="M1005 349 L960 349 L960 277 L928 277" stroke="var(--c-item)"/>
   <rect class="guide-box target-item" x="474" y="240" width="452" height="74" rx="10" stroke="var(--c-item)"/>
   <circle class="guide-dot target-item" cx="928" cy="277" r="4" fill="var(--c-item)"/>
 
-  <!-- 14. Suggestion Value Target -->
-  <path class="guide-line target-val" d="M1005 417 L720 417 L720 362" stroke="var(--c-val-text)"/>
-  <rect class="guide-box target-val" x="602" y="332" width="112" height="28" rx="6" stroke="var(--c-val-text)"/>
-  <circle class="guide-dot target-val" cx="720" cy="362" r="4" fill="var(--c-val-text)"/>
+  <!-- 13. Suggestion Value Target -->
+  <path class="guide-line target-val" d="M1005 385 L950 385 L950 355 L615 355" stroke="var(--c-val-text)"/>
+  <rect class="guide-box target-val" x="492" y="337" width="118" height="28" rx="6" stroke="var(--c-val-text)"/>
+  <circle class="guide-dot target-val" cx="615" cy="355" r="4" fill="var(--c-val-text)"/>
 
 
   <!-- ===================================================================== -->
@@ -774,14 +747,9 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
     <text class="label-text" x="40" y="336" fill="var(--c-header)">::part(suggestions-header)</text>
   </g>
 
-  <g class="code-label lbl-badge">
-    <rect class="label-hitbox" x="30" y="384" width="270" height="30" rx="6"/>
-    <text class="label-text" x="40" y="404" fill="var(--c-badge)">::part(suggestion-badge)</text>
-  </g>
-
   <g class="code-label lbl-kw">
-    <rect class="label-hitbox" x="30" y="452" width="290" height="30" rx="6"/>
-    <text class="label-text" x="40" y="472" fill="var(--c-kw-text)">::part(suggestion-keyword)</text>
+    <rect class="label-hitbox" x="30" y="389" width="290" height="30" rx="6"/>
+    <text class="label-text" x="40" y="409" fill="var(--c-kw-text)">::part(suggestion-keyword)</text>
   </g>
 
 
@@ -814,10 +782,12 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
   </g>
 
   <g class="code-label lbl-val">
-    <rect class="label-hitbox" x="1005" y="402" width="270" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="422" fill="var(--c-val-text)">::part(suggestion-value)</text>
+    <rect class="label-hitbox" x="1005" y="370" width="270" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="390" fill="var(--c-val-text)">::part(suggestion-value)</text>
   </g>
 </svg>
+
+
 
           </div>
 
@@ -839,7 +809,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                 <tr><td><code>::part(suggestions-list)</code></td><td>The <code>&lt;ul&gt;</code> container holding suggestion items</td></tr>
                 <tr><td><code>::part(suggestion-item)</code></td><td>Each individual suggestion <code>&lt;li&gt;</code> item</td></tr>
                 <tr><td><code>::part(suggestion-item-active)</code></td><td>The currently focused / hovered suggestion item</td></tr>
-                <tr><td><code>::part(suggestion-badge)</code></td><td>The badge indicating "Field" or keyword name</td></tr>
+                
               </tbody>
             </table>
           </div>
