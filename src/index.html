@@ -470,466 +470,486 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
           </p>
 
           <div class="card" style="padding: 1rem; overflow: hidden; margin-bottom: 1.5rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 620" width="100%" height="100%">
-  <defs>
-    <style>
-      :root {
-        --canvas-bg: #f8fafc;
-        --card-bg: #ffffff;
-        --border-color: #cbd5e1;
-        --control-bg: #ffffff;
-        --text-color: #0f172a;
-        --text-muted: #64748b;
-        --text-hint: #94a3b8;
-        --popover-bg: #ffffff;
-        --active-item-bg: #eff6ff;
-
-        /* Annotation Colors */
-        --c-host: #059669;       /* Emerald */
-        --c-control: #2563eb;    /* Royal Blue */
-        --c-icon: #0d9488;       /* Teal */
-        --c-input: #6366f1;      /* Indigo */
-        --c-hl-val: #d97706;     /* Amber */
-        --c-clear: #dc2626;      /* Red */
-        --c-popover: #9333ea;    /* Purple */
-        --c-header: #475569;     /* Slate */
-        --c-list: #7c3aed;       /* Violet */
-        --c-item: #16a34a;       /* Green */
-        --c-active: #0284c7;     /* Sky */
-        --c-kw-text: #2563eb;    /* Blue */
-        --c-val-text: #059669;   /* Emerald */
-
-        --label-hover-bg: rgba(2, 132, 199, 0.08);
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --canvas-bg: #0f172a;
-          --card-bg: #1e293b;
-          --border-color: #334155;
-          --control-bg: #1e293b;
-          --text-color: #f8fafc;
-          --text-muted: #94a3b8;
-          --text-hint: #64748b;
-          --popover-bg: #1e293b;
-          --active-item-bg: #1e3a5f;
-
-          /* Annotation Colors (Brighter for Dark Mode) */
-          --c-host: #34d399;
-          --c-control: #60a5fa;
-          --c-icon: #2dd4bf;
-          --c-input: #818cf8;
-          --c-hl-val: #fbbf24;
-          --c-clear: #f87171;
-          --c-popover: #c084fc;
-          --c-header: #94a3b8;
-          --c-list: #a78bfa;
-          --c-item: #4ade80;
-          --c-active: #38bdf8;
-          --c-kw-text: #60a5fa;
-          --c-val-text: #34d399;
-
-          --label-hover-bg: rgba(255, 255, 255, 0.08);
-        }
-      }
-
-      .canvas { fill: var(--canvas-bg); }
-      .component-card { fill: var(--card-bg); stroke: var(--border-color); stroke-width: 1px; }
-      .control-bg { fill: var(--control-bg); stroke: var(--border-color); stroke-width: 1px; }
-      
-      .code-label {
-        cursor: pointer;
-      }
-
-      .label-hitbox {
-        fill: transparent;
-        pointer-events: all;
-        transition: fill 0.15s ease;
-      }
-
-      .code-label:hover .label-hitbox {
-        fill: var(--label-hover-bg);
-      }
-
-      .label-text {
-        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-        font-size: 15px;
-        font-weight: 600;
-        pointer-events: none;
-        user-select: none;
-        transition: font-weight 0.15s ease, opacity 0.2s ease;
-      }
-
-      .code-label:hover .label-text {
-        font-weight: 700;
-      }
-
-      .guide-line {
-        fill: none;
-        stroke-width: 1.5px;
-        stroke-dasharray: 6 5;
-        pointer-events: none;
-      }
-
-      .guide-box {
-        fill: none;
-        stroke-width: 1.5px;
-        stroke-dasharray: 7 6;
-        pointer-events: none;
-      }
-
-      .guide-dot {
-        stroke-width: 1.5px;
-        pointer-events: none;
-      }
-
-      .ui-text {
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      }
-
-      .mono-text {
-        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-      }
-
-      /* Transitions */
-      .code-label,
-      .label-hitbox,
-      .label-text,
-      .guide-line,
-      .guide-box,
-      .guide-dot,
-      .comp-part {
-        transition: opacity 0.2s ease, stroke-width 0.2s ease;
-      }
-
-      /*
-       * =====================================================================
-       * HOVER INTERACTION
-       * Hovering one of the labels dims all other labels/lines/components
-       * =====================================================================
-       */
-
-      /* 1. When ANY code-label is hovered, dim all other labels, lines, boxes, and comp-parts */
-      svg:has(.code-label:hover) .code-label:not(:hover) {
-        opacity: 0.18;
-      }
-
-      svg:has(.code-label:hover) .guide-line,
-      svg:has(.code-label:hover) .guide-box,
-      svg:has(.code-label:hover) .guide-dot {
-        opacity: 0.05;
-      }
-
-      svg:has(.code-label:hover) .comp-part {
-        opacity: 0.25;
-      }
-
-      /* 2. Specific label hover: keep matching guide line, box, dot, and element at 100% */
-      svg:has(.lbl-host:hover) .target-host,
-      svg:has(.lbl-control:hover) .target-control,
-      svg:has(.lbl-icon:hover) .target-icon,
-      svg:has(.lbl-input:hover) .target-input,
-      svg:has(.lbl-hl-val:hover) .target-hl-val,
-      svg:has(.lbl-clear:hover) .target-clear,
-      svg:has(.lbl-popover:hover) .target-popover,
-      svg:has(.lbl-header:hover) .target-header,
-      svg:has(.lbl-list:hover) .target-list,
-      svg:has(.lbl-active:hover) .target-active,
-      svg:has(.lbl-item:hover) .target-item,
-      svg:has(.lbl-kw:hover) .target-kw,
-      svg:has(.lbl-val:hover) .target-val {
-        opacity: 1 !important;
-      }
-
-      /* When host label is hovered, keep entire component at 100% */
-      svg:has(.lbl-host:hover) .comp-part {
-        opacity: 1 !important;
-      }
-
-      /* When list label is hovered, keep list items active */
-      svg:has(.lbl-list:hover) .target-active,
-      svg:has(.lbl-list:hover) .target-kw,
-      svg:has(.lbl-list:hover) .target-item,
-      svg:has(.lbl-list:hover) .target-val {
-        opacity: 1 !important;
-      }
-
-      /* When active item is hovered, keep its keyword highlighted too */
-      svg:has(.lbl-active:hover) .target-kw {
-        opacity: 1 !important;
-      }
-
-      /* Thicken active guide line when hovered */
-      svg:has(.lbl-host:hover) .target-host.guide-line,
-      svg:has(.lbl-control:hover) .target-control.guide-line,
-      svg:has(.lbl-icon:hover) .target-icon.guide-line,
-      svg:has(.lbl-input:hover) .target-input.guide-line,
-      svg:has(.lbl-hl-val:hover) .target-hl-val.guide-line,
-      svg:has(.lbl-clear:hover) .target-clear.guide-line,
-      svg:has(.lbl-popover:hover) .target-popover.guide-line,
-      svg:has(.lbl-header:hover) .target-header.guide-line,
-      svg:has(.lbl-list:hover) .target-list.guide-line,
-      svg:has(.lbl-active:hover) .target-active.guide-line,
-      svg:has(.lbl-item:hover) .target-item.guide-line,
-      svg:has(.lbl-kw:hover) .target-kw.guide-line,
-      svg:has(.lbl-val:hover) .target-val.guide-line {
-        stroke-width: 2px;
-      }
-
-      /* Thicken active guide box when hovered */
-      svg:has(.lbl-host:hover) .target-host.guide-box,
-      svg:has(.lbl-control:hover) .target-control.guide-box,
-      svg:has(.lbl-icon:hover) .target-icon.guide-box,
-      svg:has(.lbl-input:hover) .target-input.guide-box,
-      svg:has(.lbl-hl-val:hover) .target-hl-val.guide-box,
-      svg:has(.lbl-clear:hover) .target-clear.guide-box,
-      svg:has(.lbl-popover:hover) .target-popover.guide-box,
-      svg:has(.lbl-header:hover) .target-header.guide-box,
-      svg:has(.lbl-list:hover) .target-list.guide-box,
-      svg:has(.lbl-active:hover) .target-active.guide-box,
-      svg:has(.lbl-item:hover) .target-item.guide-box,
-      svg:has(.lbl-kw:hover) .target-kw.guide-box,
-      svg:has(.lbl-val:hover) .target-val.guide-box {
-        stroke-width: 2px;
-      }
-
-      .code-label:hover {
-        opacity: 1 !important;
-      }
-    </style>
-    
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.12"/>
-    </filter>
-  </defs>
-
-  <!-- Background Canvas -->
-  <rect class="canvas" width="1340" height="620" rx="16"/>
-
-  <!-- ===================================================================== -->
-  <!-- CENTER COMPONENT RENDERING (Un-nested Component Parts) -->
-  <!-- ===================================================================== -->
-  <g id="component-preview">
-    <!-- Input Control: ::part(control) -->
-    <rect class="control-bg comp-part target-control" x="410" y="50" width="520" height="52" rx="10" filter="url(#shadow)"/>
-
-    <!-- Search Icon: ::part(icon) -->
-    <g class="comp-part target-icon" transform="translate(426, 66)">
-      <circle cx="8" cy="8" r="6" fill="none" stroke="var(--text-muted)" stroke-width="2"/>
-      <line x1="12.5" y1="12.5" x2="18" y2="18" stroke="var(--text-muted)" stroke-width="2.5" stroke-linecap="round"/>
-    </g>
-
-    <!-- Input Text Area (label: & caret): ::part(input) -->
-    <g class="comp-part target-input">
-      <text class="mono-text" x="458" y="82" font-size="15" fill="var(--text-muted)" font-weight="600">label:</text>
-      <text class="mono-text" x="756" y="82" font-size="15" fill="var(--text-color)"> a</text>
-      <line x1="778" y1="65" x2="778" y2="87" stroke="var(--c-active)" stroke-width="2.5"/>
-    </g>
-
-    <!-- Highlight Pill for "We Play House Recordings": ::highlight(label) -->
-    <g class="comp-part target-hl-val">
-      <rect x="506" y="62" width="242" height="28" rx="5" fill="rgba(37, 99, 235, 0.14)"/>
-      <line x1="512" y1="87" x2="742" y2="87" stroke="var(--c-control)" stroke-width="2" stroke-linecap="round"/>
-      <text class="mono-text" x="512" y="82" font-size="15" fill="var(--c-control)" font-weight="600">"We Play House Recordings"</text>
-    </g>
-
-    <!-- Clear Button: ::part(clear-button) -->
-    <g class="comp-part target-clear">
-      <circle cx="902" cy="76" r="13" fill="rgba(148, 163, 184, 0.2)"/>
-      <path d="M897 71 L907 81 M907 71 L897 81" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
-    </g>
-
-    <!-- Suggestions Popover Background Card: ::part(popover) -->
-    <rect class="component-card comp-part target-popover" x="470" y="118" width="460" height="422" rx="10" filter="url(#shadow)"/>
-
-    <!-- Popover Header: ::part(suggestions-header) -->
-    <g class="comp-part target-header">
-      <path d="M470 128 a10 10 0 0 1 10 -10 h440 a10 10 0 0 1 10 10 v34 h-460 z" fill="rgba(148, 163, 184, 0.1)"/>
-      <line x1="470" y1="162" x2="930" y2="162" stroke="var(--border-color)" stroke-width="1"/>
-      <text class="ui-text" x="486" y="145" font-size="12" font-weight="700" letter-spacing="0.06em" fill="var(--text-muted)">SUGGESTIONS</text>
-    </g>
-
-    <!-- Item 1 (Active/Highlighted): ::part(suggestion-item-active) -->
-    <rect class="comp-part target-active" x="478" y="172" width="444" height="66" rx="8" fill="var(--active-item-bg)"/>
-    <g class="comp-part target-kw">
-      <text class="mono-text" x="498" y="211" font-size="16" font-weight="700" fill="var(--text-color)">artist:</text>
-    </g>
-    <text class="ui-text comp-part target-active" x="580" y="210" font-size="13" fill="var(--text-muted)">Artist</text>
-
-    <!-- Item 2: ::part(suggestion-item) -->
-    <g class="comp-part target-item">
-      <rect x="478" y="244" width="444" height="66" rx="8" fill="none"/>
-      <text class="mono-text" x="498" y="283" font-size="16" font-weight="700" fill="var(--text-color)">style:</text>
-      <text class="ui-text" x="570" y="282" font-size="13" fill="var(--text-muted)">Style</text>
-    </g>
-
-    <!-- Item 3: ::part(suggestion-value) -->
-    <g class="comp-part">
-      <rect x="478" y="316" width="444" height="66" rx="8" fill="none"/>
-    </g>
-    <g class="comp-part target-val">
-      <text class="mono-text" x="498" y="355" font-size="16" font-weight="700" fill="var(--text-color)">Keinemusik</text>
-    </g>
-
-    <!-- Item 4 (Value Suggestion) -->
-    <g class="comp-part">
-      <rect x="478" y="388" width="444" height="66" rx="8" fill="none"/>
-      <text class="mono-text" x="498" y="427" font-size="16" font-weight="700" fill="var(--text-color)">Kranky</text>
-    </g>
-
-    <!-- Item 5 (Value Suggestion) -->
-    <g class="comp-part">
-      <rect x="478" y="460" width="444" height="66" rx="8" fill="none"/>
-      <text class="mono-text" x="498" y="499" font-size="16" font-weight="700" fill="var(--text-color)">Ninja Tune</text>
-    </g>
-  </g>
-
-
-  <!-- ===================================================================== -->
-  <!-- ANNOTATION GUIDES (LINES, BOXES, DOTS) -->
-  <!-- ===================================================================== -->
-
-  <!-- 1. Host Target -->
-  <path class="guide-line target-host" d="M200 49 L395 49" stroke="var(--c-host)"/>
-  <rect class="guide-box target-host" x="398" y="38" width="544" height="514" rx="16" stroke="var(--c-host)"/>
-  <circle class="guide-dot target-host" cx="395" cy="49" r="4" fill="var(--c-host)"/>
-
-  <!-- 2. Control Target -->
-  <path class="guide-line target-control" d="M210 101 L402 101" stroke="var(--c-control)"/>
-  <rect class="guide-box target-control" x="406" y="46" width="528" height="60" rx="12" stroke="var(--c-control)"/>
-  <circle class="guide-dot target-control" cx="402" cy="101" r="4" fill="var(--c-control)"/>
-
-  <!-- 3. Icon Target -->
-  <path class="guide-line target-icon" d="M190 155 L408 155 L436 90" stroke="var(--c-icon)"/>
-  <circle class="guide-box target-icon" cx="435" cy="75" r="18" stroke="var(--c-icon)"/>
-  <circle class="guide-dot target-icon" cx="436" cy="90" r="4" fill="var(--c-icon)"/>
-
-  <!-- 4. Input Target -->
-  <path class="guide-line target-input" d="M200 209 L450 209 L454 100" stroke="var(--c-input)"/>
-  <rect class="guide-box target-input" x="454" y="58" width="395" height="36" rx="6" stroke="var(--c-input)"/>
-  <circle class="guide-dot target-input" cx="454" cy="100" r="4" fill="var(--c-input)"/>
-
-  <!-- 5. Highlight Label Target -->
-  <path class="guide-line target-hl-val" d="M240 263 L520 263 L520 96" stroke="var(--c-hl-val)"/>
-  <rect class="guide-box target-hl-val" x="503" y="60" width="248" height="32" rx="7" stroke="var(--c-hl-val)"/>
-  <circle class="guide-dot target-hl-val" cx="520" cy="96" r="4" fill="var(--c-hl-val)"/>
-
-  <!-- 6. Suggestions Header Target -->
-  <path class="guide-line target-header" d="M310 331 L465 331 L465 140 L470 140" stroke="var(--c-header)"/>
-  <rect class="guide-box target-header" x="468" y="116" width="464" height="48" rx="8" stroke="var(--c-header)"/>
-  <circle class="guide-dot target-header" cx="465" cy="140" r="4" fill="var(--c-header)"/>
-
-  <!-- 7. Suggestion Keyword Target -->
-  <path class="guide-line target-kw" d="M320 404 L455 404 L455 209 L494 209" stroke="var(--c-kw-text)"/>
-  <rect class="guide-box target-kw" x="494" y="195" width="76" height="28" rx="6" stroke="var(--c-kw-text)"/>
-  <circle class="guide-dot target-kw" cx="494" cy="209" r="4" fill="var(--c-kw-text)"/>
-
-  <!-- 8. Clear Button Target -->
-  <path class="guide-line target-clear" d="M1005 73 L925 73" stroke="var(--c-clear)"/>
-  <circle class="guide-box target-clear" cx="902" cy="76" r="20" stroke="var(--c-clear)"/>
-  <circle class="guide-dot target-clear" cx="925" cy="73" r="4" fill="var(--c-clear)"/>
-
-  <!-- 9. Popover Target -->
-  <path class="guide-line target-popover" d="M1005 145 L938 145" stroke="var(--c-popover)"/>
-  <rect class="guide-box target-popover" x="464" y="112" width="472" height="434" rx="14" stroke="var(--c-popover)"/>
-  <circle class="guide-dot target-popover" cx="938" cy="145" r="4" fill="var(--c-popover)"/>
-
-  <!-- 10. Suggestions List Target -->
-  <path class="guide-line target-list" d="M1005 213 L934 213" stroke="var(--c-list)"/>
-  <rect class="guide-box target-list" x="474" y="166" width="452" height="368" rx="8" stroke="var(--c-list)"/>
-  <circle class="guide-dot target-list" cx="934" cy="213" r="4" fill="var(--c-list)"/>
-
-  <!-- 11. Suggestion Item Active Target -->
-  <path class="guide-line target-active" d="M1005 281 L960 281 L960 205 L928 205" stroke="var(--c-active)"/>
-  <rect class="guide-box target-active" x="474" y="168" width="452" height="74" rx="10" stroke="var(--c-active)"/>
-  <circle class="guide-dot target-active" cx="928" cy="205" r="4" fill="var(--c-active)"/>
-
-  <!-- 12. Suggestion Item Target -->
-  <path class="guide-line target-item" d="M1005 349 L960 349 L960 277 L928 277" stroke="var(--c-item)"/>
-  <rect class="guide-box target-item" x="474" y="240" width="452" height="74" rx="10" stroke="var(--c-item)"/>
-  <circle class="guide-dot target-item" cx="928" cy="277" r="4" fill="var(--c-item)"/>
-
-  <!-- 13. Suggestion Value Target -->
-  <path class="guide-line target-val" d="M1005 385 L950 385 L950 355 L615 355" stroke="var(--c-val-text)"/>
-  <rect class="guide-box target-val" x="492" y="337" width="118" height="28" rx="6" stroke="var(--c-val-text)"/>
-  <circle class="guide-dot target-val" cx="615" cy="355" r="4" fill="var(--c-val-text)"/>
-
-
-  <!-- ===================================================================== -->
-  <!-- CODE LABELS (LEFT SIDE) -->
-  <!-- ===================================================================== -->
-  <g class="code-label lbl-host">
-    <rect class="label-hitbox" x="30" y="34" width="170" height="30" rx="6"/>
-    <text class="label-text" x="40" y="54" fill="var(--c-host)">&lt;rich-input&gt;</text>
-  </g>
-
-  <g class="code-label lbl-control">
-    <rect class="label-hitbox" x="30" y="86" width="180" height="30" rx="6"/>
-    <text class="label-text" x="40" y="106" fill="var(--c-control)">::part(control)</text>
-  </g>
-
-  <g class="code-label lbl-icon">
-    <rect class="label-hitbox" x="30" y="140" width="160" height="30" rx="6"/>
-    <text class="label-text" x="40" y="160" fill="var(--c-icon)">::part(icon)</text>
-  </g>
-
-  <g class="code-label lbl-input">
-    <rect class="label-hitbox" x="30" y="194" width="170" height="30" rx="6"/>
-    <text class="label-text" x="40" y="214" fill="var(--c-input)">::part(input)</text>
-  </g>
-
-  <g class="code-label lbl-hl-val">
-    <rect class="label-hitbox" x="30" y="248" width="210" height="30" rx="6"/>
-    <text class="label-text" x="40" y="268" fill="var(--c-hl-val)">::highlight(label)</text>
-  </g>
-
-  <g class="code-label lbl-header">
-    <rect class="label-hitbox" x="30" y="316" width="280" height="30" rx="6"/>
-    <text class="label-text" x="40" y="336" fill="var(--c-header)">::part(suggestions-header)</text>
-  </g>
-
-  <g class="code-label lbl-kw">
-    <rect class="label-hitbox" x="30" y="389" width="290" height="30" rx="6"/>
-    <text class="label-text" x="40" y="409" fill="var(--c-kw-text)">::part(suggestion-keyword)</text>
-  </g>
-
-
-  <!-- ===================================================================== -->
-  <!-- CODE LABELS (RIGHT SIDE) -->
-  <!-- ===================================================================== -->
-  <g class="code-label lbl-clear">
-    <rect class="label-hitbox" x="1005" y="58" width="225" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="78" fill="var(--c-clear)">::part(clear-button)</text>
-  </g>
-
-  <g class="code-label lbl-popover">
-    <rect class="label-hitbox" x="1005" y="130" width="185" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="150" fill="var(--c-popover)">::part(popover)</text>
-  </g>
-
-  <g class="code-label lbl-list">
-    <rect class="label-hitbox" x="1005" y="198" width="260" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="218" fill="var(--c-list)">::part(suggestions-list)</text>
-  </g>
-
-  <g class="code-label lbl-active">
-    <rect class="label-hitbox" x="1005" y="266" width="320" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="286" fill="var(--c-active)">::part(suggestion-item-active)</text>
-  </g>
-
-  <g class="code-label lbl-item">
-    <rect class="label-hitbox" x="1005" y="334" width="265" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="354" fill="var(--c-item)">::part(suggestion-item)</text>
-  </g>
-
-  <g class="code-label lbl-val">
-    <rect class="label-hitbox" x="1005" y="370" width="270" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="390" fill="var(--c-val-text)">::part(suggestion-value)</text>
-  </g>
-</svg>
-
-
-
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 480" width="100%" height="100%">
+              <defs>
+                <style>
+                  :root {
+                    --canvas-bg: #f8fafc;
+                    --card-bg: #ffffff;
+                    --border-color: #cbd5e1;
+                    --control-bg: #ffffff;
+                    --text-color: #0f172a;
+                    --text-muted: #64748b;
+                    --text-hint: #94a3b8;
+                    --popover-bg: #ffffff;
+                    --active-item-bg: #eff6ff;
+            
+                    /* Annotation Colors */
+                    --c-host: #059669;       /* Emerald */
+                    --c-control: #2563eb;    /* Royal Blue */
+                    --c-icon: #0d9488;       /* Teal */
+                    --c-input: #6366f1;      /* Indigo */
+                    --c-hl-val: #d97706;     /* Amber */
+                    --c-clear: #dc2626;      /* Red */
+                    --c-popover: #9333ea;    /* Purple */
+                    --c-header: #475569;     /* Slate */
+                    --c-list: #7c3aed;       /* Violet */
+                    --c-item: #16a34a;       /* Green */
+                    --c-active: #0284c7;     /* Sky */
+                    --c-image: #ea580c;      /* Orange */
+                    --c-val-text: #059669;   /* Emerald */
+            
+                    --label-hover-bg: rgba(2, 132, 199, 0.08);
+                  }
+            
+                  @media (prefers-color-scheme: dark) {
+                    :root {
+                      --canvas-bg: #0f172a;
+                      --card-bg: #1e293b;
+                      --border-color: #334155;
+                      --control-bg: #1e293b;
+                      --text-color: #f8fafc;
+                      --text-muted: #94a3b8;
+                      --text-hint: #64748b;
+                      --popover-bg: #1e293b;
+                      --active-item-bg: #1e3a5f;
+            
+                      /* Annotation Colors (Brighter for Dark Mode) */
+                      --c-host: #34d399;
+                      --c-control: #60a5fa;
+                      --c-icon: #2dd4bf;
+                      --c-input: #818cf8;
+                      --c-hl-val: #fbbf24;
+                      --c-clear: #f87171;
+                      --c-popover: #c084fc;
+                      --c-header: #94a3b8;
+                      --c-list: #a78bfa;
+                      --c-item: #4ade80;
+                      --c-active: #38bdf8;
+                      --c-image: #fb923c;
+                      --c-val-text: #34d399;
+            
+                      --label-hover-bg: rgba(255, 255, 255, 0.08);
+                    }
+                  }
+            
+                  .canvas { fill: var(--canvas-bg); }
+                  .component-card { fill: var(--card-bg); stroke: var(--border-color); stroke-width: 1px; }
+                  .control-bg { fill: var(--control-bg); stroke: var(--border-color); stroke-width: 1px; }
+                  
+                  .code-label {
+                    cursor: pointer;
+                  }
+            
+                  .label-hitbox {
+                    fill: transparent;
+                    pointer-events: all;
+                    transition: fill 0.15s ease;
+                  }
+            
+                  .code-label:hover .label-hitbox {
+                    fill: var(--label-hover-bg);
+                  }
+            
+                  .label-text {
+                    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+                    font-size: 15px;
+                    font-weight: 600;
+                    pointer-events: none;
+                    user-select: none;
+                    transition: font-weight 0.15s ease, opacity 0.2s ease;
+                  }
+            
+                  .code-label:hover .label-text {
+                    font-weight: 700;
+                  }
+            
+                  .guide-line {
+                    fill: none;
+                    stroke-width: 1.5px;
+                    stroke-dasharray: 6 5;
+                    pointer-events: none;
+                  }
+            
+                  .guide-box {
+                    fill: none;
+                    stroke-width: 1.5px;
+                    stroke-dasharray: 7 6;
+                    pointer-events: none;
+                  }
+            
+                  .guide-dot {
+                    stroke-width: 1.5px;
+                    pointer-events: none;
+                  }
+            
+                  .ui-text {
+                    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                  }
+            
+                  .mono-text {
+                    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+                  }
+            
+                  /* Transitions */
+                  .code-label,
+                  .label-hitbox,
+                  .label-text,
+                  .guide-line,
+                  .guide-box,
+                  .guide-dot,
+                  .comp-part {
+                    transition: opacity 0.2s ease, stroke-width 0.2s ease;
+                  }
+            
+                  /*
+                   * =====================================================================
+                   * HOVER INTERACTION
+                   * 1. By default lines and labels have opacity 1.
+                   * 2. When hovering the SVG, lines and labels go down to opacity 0.5.
+                   * 3. Hovering a specific label isolates that label and dims the others.
+                   * =====================================================================
+                   */
+            
+                  /* Resting state: by default the lines and labels have opacity 1 */
+                  .code-label,
+                  .guide-line,
+                  .guide-box,
+                  .guide-dot {
+                    opacity: 1;
+                  }
+            
+                  /* When hovering the SVG, lines and labels go down to opacity 0.5 */
+                  svg:hover .code-label,
+                  svg:hover .guide-line,
+                  svg:hover .guide-box,
+                  svg:hover .guide-dot {
+                    opacity: 0.4;
+                  }
+            
+                  /* When a specific code-label is hovered, dim all other labels, lines, boxes, and comp-parts */
+                  svg:has(.code-label:hover) .code-label:not(:hover) {
+                    opacity: 0.18;
+                  }
+            
+                  svg:has(.code-label:hover) .guide-line,
+                  svg:has(.code-label:hover) .guide-box,
+                  svg:has(.code-label:hover) .guide-dot {
+                    opacity: 0.05;
+                  }
+            
+                  svg:has(.code-label:hover) .comp-part {
+                    opacity: 0.25;
+                  }
+            
+                  /* Specific label hover: keep matching guide line, box, dot, and element at 100% */
+                  svg:has(.lbl-host:hover) .target-host,
+                  svg:has(.lbl-control:hover) .target-control,
+                  svg:has(.lbl-icon:hover) .target-icon,
+                  svg:has(.lbl-input:hover) .target-input,
+                  svg:has(.lbl-hl-val:hover) .target-hl-val,
+                  svg:has(.lbl-clear:hover) .target-clear,
+                  svg:has(.lbl-popover:hover) .target-popover,
+                  svg:has(.lbl-header:hover) .target-header,
+                  svg:has(.lbl-list:hover) .target-list,
+                  svg:has(.lbl-item:hover) .target-item,
+                  svg:has(.lbl-active:hover) .target-active,
+                  svg:has(.lbl-image:hover) .target-image,
+                  svg:has(.lbl-val:hover) .target-val {
+                    opacity: 1 !important;
+                  }
+            
+                  /* When host label is hovered, keep entire component at 100% */
+                  svg:has(.lbl-host:hover) .comp-part {
+                    opacity: 1 !important;
+                  }
+            
+                  /* Contained parts: when hovering a container, contained parts in the preview also remain at opacity 1 */
+                  /* Control contains icon, input (including highlight hou), and clear button */
+                  svg:has(.lbl-control:hover) #component-preview .target-icon,
+                  svg:has(.lbl-control:hover) #component-preview .target-input,
+                  svg:has(.lbl-control:hover) #component-preview .target-hl-val,
+                  svg:has(.lbl-control:hover) #component-preview .target-clear {
+                    opacity: 1 !important;
+                  }
+            
+                  /* Input contains highlight label (hou text and background pill) */
+                  svg:has(.lbl-input:hover) #component-preview .target-hl-val {
+                    opacity: 1 !important;
+                  }
+            
+                  /* Popover contains header, list, and all suggestion items */
+                  svg:has(.lbl-popover:hover) #component-preview .target-header,
+                  svg:has(.lbl-popover:hover) #component-preview .target-item,
+                  svg:has(.lbl-popover:hover) #component-preview .target-active {
+                    opacity: 1 !important;
+                  }
+            
+                  /* Suggestions list contains all suggestion items */
+                  svg:has(.lbl-list:hover) #component-preview .target-item,
+                  svg:has(.lbl-list:hover) #component-preview .target-active {
+                    opacity: 1 !important;
+                  }
+            
+                  /* Thicken active guide line when hovered */
+                  svg:has(.lbl-host:hover) .target-host.guide-line,
+                  svg:has(.lbl-control:hover) .target-control.guide-line,
+                  svg:has(.lbl-icon:hover) .target-icon.guide-line,
+                  svg:has(.lbl-input:hover) .target-input.guide-line,
+                  svg:has(.lbl-hl-val:hover) .target-hl-val.guide-line,
+                  svg:has(.lbl-clear:hover) .target-clear.guide-line,
+                  svg:has(.lbl-popover:hover) .target-popover.guide-line,
+                  svg:has(.lbl-header:hover) .target-header.guide-line,
+                  svg:has(.lbl-list:hover) .target-list.guide-line,
+                  svg:has(.lbl-item:hover) .target-item.guide-line,
+                  svg:has(.lbl-active:hover) .target-active.guide-line,
+                  svg:has(.lbl-image:hover) .target-image.guide-line,
+                  svg:has(.lbl-val:hover) .target-val.guide-line {
+                    stroke-width: 2px;
+                  }
+            
+                  /* Thicken active guide box when hovered */
+                  svg:has(.lbl-host:hover) .target-host.guide-box,
+                  svg:has(.lbl-control:hover) .target-control.guide-box,
+                  svg:has(.lbl-icon:hover) .target-icon.guide-box,
+                  svg:has(.lbl-input:hover) .target-input.guide-box,
+                  svg:has(.lbl-hl-val:hover) .target-hl-val.guide-box,
+                  svg:has(.lbl-clear:hover) .target-clear.guide-box,
+                  svg:has(.lbl-popover:hover) .target-popover.guide-box,
+                  svg:has(.lbl-header:hover) .target-header.guide-box,
+                  svg:has(.lbl-list:hover) .target-list.guide-box,
+                  svg:has(.lbl-item:hover) .target-item.guide-box,
+                  svg:has(.lbl-active:hover) .target-active.guide-box,
+                  svg:has(.lbl-image:hover) .target-image.guide-box,
+                  svg:has(.lbl-val:hover) .target-val.guide-box {
+                    stroke-width: 2px;
+                  }
+            
+                  .code-label:hover {
+                    opacity: 1 !important;
+                  }
+                </style>
+                
+                <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.12"/>
+                </filter>
+            
+                <clipPath id="logo-clip-madhouse">
+                  <circle cx="543" cy="180" r="19"/>
+                </clipPath>
+            
+                <clipPath id="logo-clip-wph">
+                  <circle cx="543" cy="254" r="19"/>
+                </clipPath>
+              </defs>
+            
+              <!-- Background Canvas -->
+              <rect class="canvas" width="1340" height="480" rx="16"/>
+            
+              <!-- ===================================================================== -->
+              <!-- CENTER COMPONENT RENDERING (Un-nested Component Parts) -->
+              <!-- ===================================================================== -->
+              <g id="component-preview">
+                <!-- Input Control: ::part(control) -->
+                <rect class="control-bg comp-part target-control" x="410" y="50" width="520" height="52" rx="10" filter="url(#shadow)"/>
+            
+                <!-- Search Icon: ::part(icon) -->
+                <g class="comp-part target-icon" transform="translate(426, 66)">
+                  <circle cx="8" cy="8" r="6" fill="none" stroke="var(--text-muted)" stroke-width="2"/>
+                  <line x1="12.5" y1="12.5" x2="18" y2="18" stroke="var(--text-muted)" stroke-width="2.5" stroke-linecap="round"/>
+                </g>
+            
+                <!-- Input Text Area (label: & caret): ::part(input) -->
+                <g class="comp-part target-input">
+                  <text class="mono-text" x="458" y="82" font-size="15" fill="var(--text-muted)" font-weight="600">label:</text>
+                  <line x1="540" y1="65" x2="540" y2="87" stroke="var(--c-active)" stroke-width="2.5"/>
+                </g>
+            
+                <!-- Highlight Pill for "hou": ::highlight(label) -->
+                <g class="comp-part target-hl-val">
+                  <rect x="508" y="62" width="34" height="28" rx="5" fill="rgba(37, 99, 235, 0.14)"/>
+                  <line x1="512" y1="87" x2="538" y2="87" stroke="var(--c-control)" stroke-width="2" stroke-linecap="round"/>
+                  <text class="mono-text" x="512" y="82" font-size="15" fill="var(--c-control)" font-weight="600">hou</text>
+                </g>
+            
+                <!-- Clear Button: ::part(clear-button) -->
+                <g class="comp-part target-clear">
+                  <circle cx="902" cy="76" r="13" fill="rgba(148, 163, 184, 0.2)"/>
+                  <path d="M897 71 L907 81 M907 71 L897 81" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
+                </g>
+            
+                <!-- Suggestions Popover Background Card (aligned with colored box of "hou" at x=508): ::part(popover) -->
+                <rect class="component-card comp-part target-popover" x="508" y="94" width="350" height="204" rx="10" filter="url(#shadow)"/>
+            
+                <!-- Popover Header: ::part(suggestions-header) -->
+                <g class="comp-part target-header">
+                  <path d="M508 104 a10 10 0 0 1 10 -10 h330 a10 10 0 0 1 10 10 v34 h-350 z" fill="rgba(148, 163, 184, 0.1)"/>
+                  <line x1="508" y1="138" x2="858" y2="138" stroke="var(--border-color)" stroke-width="1"/>
+                  <text class="ui-text" x="526" y="121" font-size="12" font-weight="700" letter-spacing="0.06em" fill="var(--text-muted)" style="text-transform: uppercase;">Record Label</text>
+                </g>
+            
+                <!-- Item 1: "Madhouse Records": ::part(suggestion-item) -->
+                <rect class="comp-part target-item" x="516" y="146" width="334" height="68" rx="8" fill="none"/>
+                <g class="comp-part target-image target-item">
+                  <image href="data:image/jpeg;base64,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" x="524" y="161" width="38" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#logo-clip-madhouse)"/>
+                  <circle cx="543" cy="180" r="19" fill="none" stroke="var(--border-color)" stroke-width="1.5"/>
+                </g>
+                <text class="ui-text comp-part target-item" x="574" y="185" font-size="15" font-weight="600" fill="var(--text-color)">Madhouse Records</text>
+            
+                <!-- Item 2 (Active/Highlighted): "We Play House Recordings": ::part(suggestion-item-active) -->
+                <rect class="comp-part target-active" x="516" y="220" width="334" height="68" rx="8" fill="var(--active-item-bg)"/>
+                <g class="comp-part target-active">
+                  <image href="data:image/jpeg;base64,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bEs5Vri4lkYvJNM6qoaR2JJIUADAACgAd14t8OWXjLwprPhHUZJIrTXLK4sZniIEix3MbRMULAjcAxIyCM9jXhPiHwRd6ifD974e8HnT9AtvEI1LWdHJto31GM2E1qspgSQwMIZzbTeW7gt5RcLvVA/IeIPhj401HRvEUGjaEtvpupeMPDupaZpcn2d0s7SxuLJr+5aIzJGiS+TNIYI33MCWIEkrqADuf2e/2Uvgj+zHoX9k/CzQEtryZAl1qlzifUbvH/PWcgHbnny0Cxg8hBX0bXyDpXw+8ZWvhv4X6VrvhibUbjwt4n1G81VfNs5IDDc2Wpp59qjzLts/tF1ELe3I82GIIhT93uNo/DrxriInRT/Za+PLTV9O07zbdjpWkxWsUcxOZPLAe6We4EcTOVWYKBkFVALXjX9jP4EfEr44x/Hz4i6M3iXXLaytrK2s75lk02EWzOyy/Z9oEjnfg+aXQYBCg819RNaWj2psHhRrZk8sxFRsMeNu3b0244xjGK+V9X+FviMeNNR8T+HNFVdN1rxFpkmraZdPD5Fzb2jWjJqtsqu6x3ELxMJAwRpos7gXSLOhY+DvGGm6lqc2p+Godf1yfxauoW2q3BiZI9JluE2NG/mpLE9laExCILiRkOAyys1AFLwD+xj8CPhX8cLn48/DXSG8N6zfWFxYXNjZMqabILiSORpVt9p8px5YAETImCTszzX1bXzV4D8EeKdA+LWoa+unOujag2smVtQS1e5tZLi7jlT7JeW7+ZJbXW0yeRcIzw4VQ8aqsR+laACiiigD/9P9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/1P38ooooAKKKKACiiigAooooAKKKKACiiigAooooA//V/fyiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=" x="524" y="235" width="38" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#logo-clip-wph)"/>
+                  <circle cx="543" cy="254" r="19" fill="none" stroke="var(--border-color)" stroke-width="1.5"/>
+                </g>
+                <g class="comp-part target-val target-active">
+                  <text class="ui-text" x="574" y="259" font-size="15" font-weight="600" fill="var(--text-color)">We Play House Recordings</text>
+                </g>
+              </g>
+            
+            
+              <!-- ===================================================================== -->
+              <!-- ANNOTATION GUIDES (LINES, BOXES, DOTS) -->
+              <!-- ===================================================================== -->
+            
+              <!-- 1. Host Target -->
+              <path class="guide-line target-host" d="M200 49 L395 49" stroke="var(--c-host)"/>
+              <rect class="guide-box target-host" x="398" y="38" width="544" height="272" rx="16" stroke="var(--c-host)"/>
+              <circle class="guide-dot target-host" cx="395" cy="49" r="4" fill="var(--c-host)"/>
+            
+              <!-- 2. Control Target -->
+              <path class="guide-line target-control" d="M210 101 L402 101" stroke="var(--c-control)"/>
+              <rect class="guide-box target-control" x="406" y="46" width="528" height="58" rx="12" stroke="var(--c-control)"/>
+              <circle class="guide-dot target-control" cx="402" cy="101" r="4" fill="var(--c-control)"/>
+            
+              <!-- 3. Icon Target -->
+              <path class="guide-line target-icon" d="M190 155 L408 155 L436 90" stroke="var(--c-icon)"/>
+              <circle class="guide-box target-icon" cx="435" cy="75" r="18" stroke="var(--c-icon)"/>
+              <circle class="guide-dot target-icon" cx="436" cy="90" r="4" fill="var(--c-icon)"/>
+            
+              <!-- 4. Input Target -->
+              <path class="guide-line target-input" d="M200 209 L450 209 L454 100" stroke="var(--c-input)"/>
+              <rect class="guide-box target-input" x="454" y="58" width="395" height="36" rx="6" stroke="var(--c-input)"/>
+              <circle class="guide-dot target-input" cx="454" cy="100" r="4" fill="var(--c-input)"/>
+            
+              <!-- 5. Highlight Label Target (around "hou") -->
+              <path class="guide-line target-hl-val" d="M240 263 L525 263 L525 93" stroke="var(--c-hl-val)"/>
+              <rect class="guide-box target-hl-val" x="504" y="58" width="42" height="34" rx="7" stroke="var(--c-hl-val)"/>
+              <circle class="guide-dot target-hl-val" cx="525" cy="93" r="4" fill="var(--c-hl-val)"/>
+            
+              <!-- 6. Suggestions Header Target -->
+              <path class="guide-line target-header" d="M310 331 L480 331 L480 116 L506 116" stroke="var(--c-header)"/>
+              <rect class="guide-box target-header" x="506" y="92" width="354" height="48" rx="8" stroke="var(--c-header)"/>
+              <circle class="guide-dot target-header" cx="506" cy="116" r="4" fill="var(--c-header)"/>
+            
+              <!-- 7. Suggestion Image Target -->
+              <path class="guide-line target-image" d="M300 395 L495 395 L495 180 L520 180" stroke="var(--c-image)"/>
+              <circle class="guide-box target-image" cx="543" cy="180" r="23" stroke="var(--c-image)"/>
+              <circle class="guide-dot target-image" cx="520" cy="180" r="4" fill="var(--c-image)"/>
+            
+              <!-- 8. Clear Button Target -->
+              <path class="guide-line target-clear" d="M1005 73 L925 73" stroke="var(--c-clear)"/>
+              <circle class="guide-box target-clear" cx="902" cy="76" r="20" stroke="var(--c-clear)"/>
+              <circle class="guide-dot target-clear" cx="925" cy="73" r="4" fill="var(--c-clear)"/>
+            
+              <!-- 9. Popover Target -->
+              <path class="guide-line target-popover" d="M1005 125 L862 125" stroke="var(--c-popover)"/>
+              <rect class="guide-box target-popover" x="504" y="90" width="358" height="212" rx="14" stroke="var(--c-popover)"/>
+              <circle class="guide-dot target-popover" cx="862" cy="125" r="4" fill="var(--c-popover)"/>
+            
+              <!-- 10. Suggestions List Target -->
+              <path class="guide-line target-list" d="M1005 180 L875 180 L875 150 L854 150" stroke="var(--c-list)"/>
+              <rect class="guide-box target-list" x="512" y="142" width="342" height="148" rx="8" stroke="var(--c-list)"/>
+              <circle class="guide-dot target-list" cx="854" cy="150" r="4" fill="var(--c-list)"/>
+            
+              <!-- 11. Suggestion Item Target (Item 1: Madhouse Records) -->
+              <path class="guide-line target-item" d="M1005 240 L895 240 L895 180 L852 180" stroke="var(--c-item)"/>
+              <rect class="guide-box target-item" x="514" y="144" width="338" height="72" rx="10" stroke="var(--c-item)"/>
+              <circle class="guide-dot target-item" cx="852" cy="180" r="4" fill="var(--c-item)"/>
+            
+              <!-- 12. Suggestion Item Active Target (Item 2: We Play House Recordings) -->
+              <path class="guide-line target-active" d="M1005 300 L915 300 L915 254 L852 254" stroke="var(--c-active)"/>
+              <rect class="guide-box target-active" x="514" y="218" width="338" height="72" rx="10" stroke="var(--c-active)"/>
+              <circle class="guide-dot target-active" cx="852" cy="254" r="4" fill="var(--c-active)"/>
+            
+              <!-- 13. Suggestion Value Target ("We Play House Recordings" text) -->
+              <path class="guide-line target-val" d="M1005 360 L935 360 L935 254 L770 254" stroke="var(--c-val-text)"/>
+              <rect class="guide-box target-val" x="570" y="243" width="204" height="24" rx="6" stroke="var(--c-val-text)"/>
+              <circle class="guide-dot target-val" cx="770" cy="254" r="4" fill="var(--c-val-text)"/>
+            
+            
+              <!-- ===================================================================== -->
+              <!-- CODE LABELS (LEFT SIDE) -->
+              <!-- ===================================================================== -->
+              <g class="code-label lbl-host">
+                <rect class="label-hitbox" x="30" y="34" width="170" height="30" rx="6"/>
+                <text class="label-text" x="40" y="54" fill="var(--c-host)">&lt;rich-input&gt;</text>
+              </g>
+            
+              <g class="code-label lbl-control">
+                <rect class="label-hitbox" x="30" y="86" width="180" height="30" rx="6"/>
+                <text class="label-text" x="40" y="106" fill="var(--c-control)">::part(control)</text>
+              </g>
+            
+              <g class="code-label lbl-icon">
+                <rect class="label-hitbox" x="30" y="140" width="160" height="30" rx="6"/>
+                <text class="label-text" x="40" y="160" fill="var(--c-icon)">::part(icon)</text>
+              </g>
+            
+              <g class="code-label lbl-input">
+                <rect class="label-hitbox" x="30" y="194" width="170" height="30" rx="6"/>
+                <text class="label-text" x="40" y="214" fill="var(--c-input)">::part(input)</text>
+              </g>
+            
+              <g class="code-label lbl-hl-val">
+                <rect class="label-hitbox" x="30" y="248" width="210" height="30" rx="6"/>
+                <text class="label-text" x="40" y="268" fill="var(--c-hl-val)">::highlight(label)</text>
+              </g>
+            
+              <g class="code-label lbl-header">
+                <rect class="label-hitbox" x="30" y="316" width="280" height="30" rx="6"/>
+                <text class="label-text" x="40" y="336" fill="var(--c-header)">::part(suggestions-header)</text>
+              </g>
+            
+              <g class="code-label lbl-image">
+                <rect class="label-hitbox" x="30" y="380" width="270" height="30" rx="6"/>
+                <text class="label-text" x="40" y="400" fill="var(--c-image)">::part(suggestion-image)</text>
+              </g>
+            
+            
+              <!-- ===================================================================== -->
+              <!-- CODE LABELS (RIGHT SIDE) -->
+              <!-- ===================================================================== -->
+              <g class="code-label lbl-clear">
+                <rect class="label-hitbox" x="1005" y="58" width="225" height="30" rx="6"/>
+                <text class="label-text" x="1015" y="78" fill="var(--c-clear)">::part(clear-button)</text>
+              </g>
+            
+              <g class="code-label lbl-popover">
+                <rect class="label-hitbox" x="1005" y="110" width="185" height="30" rx="6"/>
+                <text class="label-text" x="1015" y="130" fill="var(--c-popover)">::part(popover)</text>
+              </g>
+            
+              <g class="code-label lbl-list">
+                <rect class="label-hitbox" x="1005" y="165" width="260" height="30" rx="6"/>
+                <text class="label-text" x="1015" y="185" fill="var(--c-list)">::part(suggestions-list)</text>
+              </g>
+            
+              <g class="code-label lbl-item">
+                <rect class="label-hitbox" x="1005" y="225" width="265" height="30" rx="6"/>
+                <text class="label-text" x="1015" y="245" fill="var(--c-item)">::part(suggestion-item)</text>
+              </g>
+            
+              <g class="code-label lbl-active">
+                <rect class="label-hitbox" x="1005" y="285" width="320" height="30" rx="6"/>
+                <text class="label-text" x="1015" y="305" fill="var(--c-active)">::part(suggestion-item-active)</text>
+              </g>
+            
+              <g class="code-label lbl-val">
+                <rect class="label-hitbox" x="1005" y="345" width="270" height="30" rx="6"/>
+                <text class="label-text" x="1015" y="365" fill="var(--c-val-text)">::part(suggestion-value)</text>
+              </g>
+            </svg>
           </div>
 
           <div class="data-table-wrapper">

@@ -45,6 +45,7 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(suggestions-list)`: The `<ul>` container holding autocomplete suggestion items.
 - `::part(suggestion-item)`: Each suggestion `<li>` row.
 - `::part(suggestion-item-active)`: The currently selected / keyboard-focused suggestion row.
+- `::part(suggestion-image)`: The circular logo, icon, or avatar image prepended to rich suggestions.
 - `::part(suggestion-keyword)`: The keyword label text inside a keyword suggestion.
 - `::part(suggestion-value)`: The value label text inside a value suggestion.
 
