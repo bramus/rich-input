@@ -81,6 +81,11 @@ rich-search:not(:defined) {
   color: oklch(0.3 0.12 190);
 }
 
+::highlight(genre) {
+  background-color: oklch(0.93 0.1 145);
+  color: oklch(0.3 0.14 145);
+}
+
 ::highlight(rich-input-keyword),
 ::highlight(rich-search-keyword) {
   color: #64748b;

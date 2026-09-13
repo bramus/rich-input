@@ -56,13 +56,15 @@
             <li><a href="#opaquerange-api">The OpaqueRange API</a></li>
             <li><a href="#custom-highlights">Custom Highlights Styling</a></li>
             <li><a href="#parts-styling">Shadow Parts (::part)</a></li>
+            <li><a href="#slots">Slots</a></li>
             <li><a href="#javascript-api">JavaScript API</a></li>
             <li class="sidenav-divider">Examples</li>
             <li><a href="#playground">1. Parsed Query Inspector</a></li>
             <li><a href="#example-form">2. Form Integration</a></li>
             <li><a href="#example-themes">3. Shadow Parts Theming</a></li>
             <li><a href="#example-rich-styling">4. Rich Option &amp; Image Styling</a></li>
-            <li><a href="#example-dynamic">5. Dynamic Datalists</a></li>
+            <li><a href="#example-custom-icon">5. Custom Leading Icon &amp; Slots</a></li>
+            <li><a href="#example-dynamic">6. Dynamic Datalists</a></li>
           </ul>
         </nav>
       </aside>
@@ -963,7 +965,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
               <tbody>
                 <tr><td><code>::part(input)</code></td><td>The internal native <code>&lt;input type="text"&gt;</code></td></tr>
                 <tr><td><code>::part(control)</code></td><td>The flex container wrapping the search icon, input, and clear button</td></tr>
-                <tr><td><code>::part(icon)</code></td><td>The leading search SVG icon</td></tr>
+                <tr><td><code>::part(icon)</code></td><td>The default leading search SVG icon (fallback in <code>slot="leading"</code>)</td></tr>
                 <tr><td><code>::part(clear-button)</code></td><td>The clear search button (visible when input has text)</td></tr>
                 <tr><td><code>::part(popover)</code></td><td>The autocomplete suggestions popover container</td></tr>
                 <tr><td><code>::part(suggestions-header)</code></td><td>The header bar at the top of the popover</td></tr>
@@ -972,6 +974,30 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                 <tr><td><code>::part(suggestion-item-active)</code></td><td>The currently focused / hovered suggestion item</td></tr>
                 <tr><td><code>::part(suggestion-content)</code></td><td>The content container inside each suggestion item</td></tr>
                 <tr><td><code>::part(suggestion-image)</code></td><td>Images and icons rendered inside rich suggestion items</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Slots Section -->
+        <section id="slots">
+          <h2>Slots</h2>
+          <p class="section-desc">
+            <code>&lt;rich-input&gt;</code> exposes named slots for custom leading and trailing elements:
+          </p>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Slot Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>leading</code></td><td>Custom leading icon or control. Contains the default search magnifying glass SVG (<code>::part(icon)</code>) as fallback content.</td></tr>
+                <tr><td><code>trailing</code></td><td>Custom content rendered after the clear button.</td></tr>
+                <tr><td><em>(default)</em></td><td>Unnamed slot where <code>&lt;datalist&gt;</code> configuration elements are placed (visually hidden).</td></tr>
               </tbody>
             </table>
           </div>
@@ -1283,9 +1309,61 @@ rich-input::part(suggestion-image) {
           </div>
         </section>
 
-        <!-- Example 5: Dynamic Datalists -->
+        <!-- Example 5: Custom Leading Icon & Slots -->
+        <section id="example-custom-icon">
+          <h2>5. Custom Leading Icon &amp; Slots</h2>
+          <p class="section-desc">
+            Pass a custom icon via <code>slot="leading"</code>. The default search magnifying glass SVG is provided as fallback content inside the slot, so supplying a slotted element automatically replaces it without requiring any CSS overrides.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Music Note Icon via slot="leading"</span>
+              <span class="card-meta">HTML Slots</span>
+            </div>
+            <p>
+              In this example, a custom music note SVG replaces the default search icon, and genre values are highlighted via <code>::highlight(genre)</code>:
+            </p>
+
+            <rich-input value='genre:"Deep House"' placeholder="Search musical genres (e.g. type 'genre:')...">
+              <svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 18V5l12-2v13"></path>
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="18" cy="16" r="3"></circle>
+              </svg>
+              <datalist id="genre" label="Music Genre">
+                <option value="Acid House"></option>
+                <option value="Ambient"></option>
+                <option value="Chicago House"></option>
+                <option value="Deep House"></option>
+                <option value="Dub Techno"></option>
+                <option value="Electro"></option>
+              </datalist>
+            </rich-input>
+
+            <pre><code>&lt;rich-input value='genre:"Deep House"' placeholder="Search musical genres (e.g. type 'genre:')..."&gt;
+  &lt;!-- Custom leading icon replaces the default search magnifying glass --&gt;
+  &lt;svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+    &lt;path d="M9 18V5l12-2v13"&gt;&lt;/path&gt;
+    &lt;circle cx="6" cy="18" r="3"&gt;&lt;/circle&gt;
+    &lt;circle cx="18" cy="16" r="3"&gt;&lt;/circle&gt;
+  &lt;/svg&gt;
+
+  &lt;datalist id="genre" label="Music Genre"&gt;
+    &lt;option value="Acid House"&gt;&lt;/option&gt;
+    &lt;option value="Ambient"&gt;&lt;/option&gt;
+    &lt;option value="Chicago House"&gt;&lt;/option&gt;
+    &lt;option value="Deep House"&gt;&lt;/option&gt;
+    &lt;option value="Dub Techno"&gt;&lt;/option&gt;
+    &lt;option value="Electro"&gt;&lt;/option&gt;
+  &lt;/datalist&gt;
+&lt;/rich-input&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- Example 6: Dynamic Datalists -->
         <section id="example-dynamic">
-          <h2>5. Dynamic Datalists</h2>
+          <h2>6. Dynamic Datalists</h2>
           <p class="section-desc">
             Add or update <code>&lt;datalist&gt;</code> elements dynamically at runtime. The component uses a MutationObserver and slotchange event to immediately update available keywords and suggestions.
           </p>

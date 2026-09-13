@@ -56,13 +56,25 @@ TEMPLATE.innerHTML = `
     cursor: not-allowed;
   }
 
-  .search-icon {
+  slot[name="leading"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    margin-right: 0.5rem;
+    color: var(--ri-icon-color, var(--rs-icon-color, #9ca3af));
+  }
+
+  .search-icon {
     width: 1.125rem;
     height: 1.125rem;
-    color: var(--ri-icon-color, var(--rs-icon-color, #9ca3af));
-    margin-right: 0.5rem;
+    color: inherit;
     pointer-events: none;
+  }
+
+  ::slotted([slot="trailing"]) {
+    flex-shrink: 0;
+    margin-left: 0.375rem;
   }
 
   .search-input {
@@ -213,10 +225,11 @@ TEMPLATE.innerHTML = `
 
 <div part="wrapper" class="wrapper">
   <div part="control" class="control">
-    <slot name="leading"></slot>
-    <svg part="icon" class="search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
-    </svg>
+    <slot name="leading">
+      <svg part="icon" class="search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+      </svg>
+    </slot>
     <input
       part="input"
       class="search-input"

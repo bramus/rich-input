@@ -36,7 +36,7 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 
 - `<rich-input>`: The host custom element wrapping the control, datalists, and suggestions popover.
 - `::part(control)`: The outer input container enclosing the icon, input, and clear button.
-- `::part(icon)`: The leading search magnifying glass SVG icon.
+- `::part(icon)`: The default leading search magnifying glass SVG icon (fallback in `slot="leading"`).
 - `::part(input)`: The native `<input type="text">` where users type.
 - `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
 - `::part(clear-button)`: The clear button (visible when text is present).
@@ -173,6 +173,45 @@ rich-input::part(suggestion-image) {
 
 ---
 
+## Custom Leading Icon & Slots
+
+`<rich-input>` provides named slots to customize elements inside the control:
+
+- **`slot="leading"`**: Replace the leading icon. The default magnifying glass SVG is provided as fallback content inside the slot, so passing a custom element into `slot="leading"` automatically replaces it without needing CSS overrides.
+- **`slot="trailing"`**: Add controls or elements after the clear button (e.g. submit button, voice input, keyboard shortcut badge).
+
+### Passing a Custom Leading Icon
+
+Provide your own SVG or image with `slot="leading"`:
+
+```html
+<rich-input placeholder="Search music catalog...">
+  <!-- Custom leading music icon -->
+  <svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M9 18V5l12-2v13"></path>
+    <circle cx="6" cy="18" r="3"></circle>
+    <circle cx="18" cy="16" r="3"></circle>
+  </svg>
+
+  <datalist id="genre" label="Genre">
+    <option value="House"></option>
+    <option value="Techno"></option>
+  </datalist>
+</rich-input>
+```
+
+When an element with `slot="leading"` is supplied, the default search magnifying glass icon is automatically suppressed. If no slotted element is provided, the default magnifying glass icon renders as fallback.
+
+### Available Slots
+
+| Slot Name | Description |
+|---|---|
+| `leading` | Custom leading icon or content. Defaults to the search magnifying glass icon (`::part(icon)`). |
+| `trailing` | Custom content rendered after the clear button. |
+| *(default)* | Unnamed slot where `<datalist>` configuration elements are placed (visually hidden). |
+
+---
+
 ## The OpaqueRange API
 
 The [OpaqueRange API](https://chromestatus.com/feature/6297362687066112) is a web platform standard introduced in Chromium 152 (Google Chrome, Microsoft Edge) that enables range-based operations over the text content of form controls (`<input>` and `<textarea>`).
@@ -228,6 +267,12 @@ Values corresponding to configured keywords are registered into the global `CSS.
   color: oklch(0.3 0.12 190);
 }
 
+/* Style genre filters */
+::highlight(genre) {
+  background-color: oklch(0.93 0.1 145);
+  color: oklch(0.3 0.14 145);
+}
+
 /* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
 ::highlight(rich-input-keyword) {
   color: #64748b;
@@ -276,7 +321,7 @@ rich-input::part(suggestion-item-active) {
 |---|---|
 | `::part(control)` | The wrapper container enclosing the search icon, input, and clear button |
 | `::part(input)` | The internal native `<input type="text">` |
-| `::part(icon)` | The leading search icon SVG |
+| `::part(icon)` | The default leading search icon SVG (fallback in `slot="leading"`) |
 | `::part(clear-button)` | The clear button (visible when text is present) |
 | `::part(popover)` | The autocomplete popover container |
 | `::part(suggestions-header)` | The header bar at the top of the popover |
