@@ -149,6 +149,15 @@ rich-search.theme-terminal::part(suggestion-item-active) {
   background: #1e293b;
 }
 
+/* Suggestion Image Styling via ::part */
+rich-search::part(suggestion-image) {
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  object-fit: cover;
+  outline: 1px solid #ccc;
+}
+
 /* Container */
 .container {
   max-width: 1320px;

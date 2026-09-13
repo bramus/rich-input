@@ -52,6 +52,7 @@
             <li><a href="#features">Features</a></li>
             <li><a href="#installation">Installation</a></li>
             <li><a href="#configuration">Datalist Configuration</a></li>
+            <li><a href="#rich-options">Rich Option Markup</a></li>
             <li><a href="#opaquerange-api">The OpaqueRange API</a></li>
             <li><a href="#custom-highlights">Custom Highlights Styling</a></li>
             <li><a href="#parts-styling">Shadow Parts (::part)</a></li>
@@ -61,7 +62,8 @@
             <li><a href="#example-music">2. Music Catalog Search</a></li>
             <li><a href="#example-form">3. Form Integration</a></li>
             <li><a href="#example-themes">4. Shadow Parts Theming</a></li>
-            <li><a href="#example-dynamic">5. Dynamic Datalists</a></li>
+            <li><a href="#example-rich-styling">5. Rich Option &amp; Image Styling</a></li>
+            <li><a href="#example-dynamic">6. Dynamic Datalists</a></li>
           </ul>
         </nav>
       </aside>
@@ -83,12 +85,30 @@
 
             <rich-search placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
               <datalist id="label" label="Record Label">
-                <option value="Defected"></option>
-                <option value="Keinemusik"></option>
-                <option value="Kranky"></option>
-                <option value="Ninja Tune"></option>
-                <option value="We Play House Recordings"></option>
-                <option value="XL Recordings"></option>
+                <option value="Defected">
+                  <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                  Defected
+                </option>
+                <option value="Keinemusik">
+                  <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                  Keinemusik
+                </option>
+                <option value="Kranky">
+                  <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                  Kranky
+                </option>
+                <option value="Ninja Tune">
+                  <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                  Ninja Tune
+                </option>
+                <option value="We Play House Recordings">
+                  <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                  We Play House Recordings
+                </option>
+                <option value="XL Recordings">
+                  <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                  XL Recordings
+                </option>
               </datalist>
               <datalist id="year" label="Year" data-type="number">
                 <option value="2026"></option>
@@ -97,11 +117,26 @@
                 <option value="1999"></option>
               </datalist>
               <datalist id="artist" label="Artist">
-                <option value="Aphex Twin"></option>
-                <option value="Daft Punk"></option>
-                <option value="Four Tet"></option>
-                <option value="Larry Heard"></option>
-                <option value="Moodymann"></option>
+                <option value="Aphex Twin">
+                  <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                  Aphex Twin
+                </option>
+                <option value="Daft Punk">
+                  <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                  Daft Punk
+                </option>
+                <option value="Four Tet">
+                  <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                  Four Tet
+                </option>
+                <option value="Larry Heard">
+                  <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                  Larry Heard
+                </option>
+                <option value="Moodymann">
+                  <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                  Moodymann
+                </option>
               </datalist>
               <datalist id="style" label="Style">
                 <option value="Deep House"></option>
@@ -113,17 +148,56 @@
 
             <pre><code>&lt;rich-search placeholder="Search..."&gt;
   &lt;datalist id="label" label="Record Label"&gt;
-    &lt;option value="We Play House Recordings"&gt;&lt;/option&gt;
-    &lt;option value="Keinemusik"&gt;&lt;/option&gt;
-    &lt;option value="Kranky"&gt;&lt;/option&gt;
+    &lt;option value="Defected"&gt;
+      &lt;img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo"&gt;
+      Defected
+    &lt;/option&gt;
+    &lt;option value="Keinemusik"&gt;
+      &lt;img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo"&gt;
+      Keinemusik
+    &lt;/option&gt;
+    &lt;option value="Kranky"&gt;
+      &lt;img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo"&gt;
+      Kranky
+    &lt;/option&gt;
+    &lt;option value="Ninja Tune"&gt;
+      &lt;img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo"&gt;
+      Ninja Tune
+    &lt;/option&gt;
+    &lt;option value="We Play House Recordings"&gt;
+      &lt;img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo"&gt;
+      We Play House Recordings
+    &lt;/option&gt;
+    &lt;option value="XL Recordings"&gt;
+      &lt;img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo"&gt;
+      XL Recordings
+    &lt;/option&gt;
   &lt;/datalist&gt;
   &lt;datalist id="year" label="Year" data-type="number"&gt;
     &lt;option value="2026"&gt;&lt;/option&gt;
     &lt;option value="2025"&gt;&lt;/option&gt;
   &lt;/datalist&gt;
   &lt;datalist id="artist" label="Artist"&gt;
-    &lt;option value="Aphex Twin"&gt;&lt;/option&gt;
-    &lt;option value="Four Tet"&gt;&lt;/option&gt;
+    &lt;option value="Aphex Twin"&gt;
+      &lt;img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin"&gt;
+      Aphex Twin
+    &lt;/option&gt;
+    &lt;option value="Daft Punk"&gt;
+      &lt;img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk"&gt;
+      Daft Punk
+    &lt;/option&gt;
+    &lt;option value="Four Tet"&gt;
+      &lt;img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet"&gt;
+      Four Tet
+    &lt;/option&gt;
+    &lt;option value="Larry Heard"&gt;
+      &lt;img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard"&gt;
+      Larry Heard
+    &lt;/option&gt;
+    &lt;option value="Moodymann"&gt;
+      &lt;img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann"&gt;
+      Moodymann
+    &lt;/option&gt;
   &lt;/datalist&gt;
   &lt;datalist id="style" label="Style"&gt;
     &lt;option value="Deep House"&gt;&lt;/option&gt;
@@ -203,7 +277,9 @@
     &lt;option value="Defected"&gt;&lt;/option&gt;
     &lt;option value="Keinemusik"&gt;&lt;/option&gt;
     &lt;option value="Kranky"&gt;&lt;/option&gt;
+    &lt;option value="Ninja Tune"&gt;&lt;/option&gt;
     &lt;option value="We Play House Recordings"&gt;&lt;/option&gt;
+    &lt;option value="XL Recordings"&gt;&lt;/option&gt;
   &lt;/datalist&gt;
 
   &lt;!-- Number keyword --&gt;
@@ -243,9 +319,108 @@
                     <td><code>label</code> or text on <code>&lt;option&gt;</code></td>
                     <td>Optional descriptive label (e.g. <code>&lt;option value="2026" label="Current Year"&gt;</code>).</td>
                   </tr>
+                  <tr>
+                    <td><code>&lt;option&gt;</code> children</td>
+                    <td>Optional custom HTML markup (e.g. logos, avatars, icons) rendered directly inside the suggestion item.</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+        <!-- Rich Option Markup Section -->
+        <section id="rich-options">
+          <h2>Rich Option Markup</h2>
+          <p class="section-desc">
+            <code>&lt;rich-search&gt;</code> supports embedding custom HTML markup inside <code>&lt;datalist&gt;</code> options. For example, for record labels or artists, you can prepend an image with the label’s logo.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Example: Prepending a Record Label Logo</span>
+              <span class="card-meta">HTML Markup</span>
+            </div>
+            <p>
+              Embed markup directly inside the <code>&lt;option&gt;</code> element:
+            </p>
+            <pre><code>&lt;rich-search placeholder="Search..."&gt;
+  &lt;datalist id="label" label="Record Label"&gt;
+    &lt;option value="Defected"&gt;
+      &lt;img
+        src="assets/defected.jpg"
+        height="50" width="50"
+        alt="Defected Logo"&gt;
+      Defected
+    &lt;/option&gt;
+    &lt;option value="Keinemusik"&gt;
+      &lt;img
+        src="assets/keinemusik.jpg"
+        height="50" width="50"
+        alt="Keinemusik Logo"&gt;
+      Keinemusik
+    &lt;/option&gt;
+    &lt;option value="Kranky"&gt;
+      &lt;img
+        src="assets/kranky.jpg"
+        height="50" width="50"
+        alt="Kranky Logo"&gt;
+      Kranky
+    &lt;/option&gt;
+    &lt;option value="Ninja Tune"&gt;
+      &lt;img
+        src="assets/ninja-tune.jpg"
+        height="50" width="50"
+        alt="Ninja Tune Logo"&gt;
+      Ninja Tune
+    &lt;/option&gt;
+    &lt;option value="We Play House Recordings"&gt;
+      &lt;img
+        src="assets/we-play-house-recordings.jpg"
+        height="50" width="50"
+        alt="We Play House Recordings Logo"&gt;
+      We Play House Recordings
+    &lt;/option&gt;
+    &lt;option value="XL Recordings"&gt;
+      &lt;img
+        src="assets/xl-recordings.jpg"
+        height="50" width="50"
+        alt="XL Recordings Logo"&gt;
+      XL Recordings
+    &lt;/option&gt;
+  &lt;/datalist&gt;
+&lt;/rich-search&gt;</code></pre>
+            <p>
+              When suggestions appear, the custom HTML markup is rendered directly inside the suggestion list. When selected, the clean <code>value</code> (<code>"We Play House Recordings"</code>) is inserted into the input:
+            </p>
+            <rich-search placeholder="Try typing 'label:' to preview rich options...">
+              <datalist id="label" label="Record Label">
+                <option value="Defected">
+                  <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                  Defected
+                </option>
+                <option value="Keinemusik">
+                  <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                  Keinemusik
+                </option>
+                <option value="Kranky">
+                  <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                  Kranky
+                </option>
+                <option value="Ninja Tune">
+                  <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                  Ninja Tune
+                </option>
+                <option value="We Play House Recordings">
+                  <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                  We Play House Recordings
+                </option>
+                <option value="XL Recordings">
+                  <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                  XL Recordings
+                </option>
+              </datalist>
+            </rich-search>
           </div>
         </section>
 
@@ -806,7 +981,8 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                 <tr><td><code>::part(suggestions-list)</code></td><td>The <code>&lt;ul&gt;</code> container holding suggestion items</td></tr>
                 <tr><td><code>::part(suggestion-item)</code></td><td>Each individual suggestion <code>&lt;li&gt;</code> item</td></tr>
                 <tr><td><code>::part(suggestion-item-active)</code></td><td>The currently focused / hovered suggestion item</td></tr>
-                
+                <tr><td><code>::part(suggestion-content)</code></td><td>The content container inside each suggestion item</td></tr>
+                <tr><td><code>::part(suggestion-image)</code></td><td>Images and icons rendered inside rich suggestion items</td></tr>
               </tbody>
             </table>
           </div>
@@ -845,12 +1021,30 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
             <div style="margin: 1.25rem 0;">
               <rich-search id="playground-search" placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
                 <datalist id="label" label="Record Label">
-                  <option value="Defected"></option>
-                  <option value="Keinemusik"></option>
-                  <option value="Kranky"></option>
-                  <option value="Ninja Tune"></option>
-                  <option value="We Play House Recordings"></option>
-                  <option value="XL Recordings"></option>
+                  <option value="Defected">
+                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                    Defected
+                  </option>
+                  <option value="Keinemusik">
+                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                    Keinemusik
+                  </option>
+                  <option value="Kranky">
+                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                    Kranky
+                  </option>
+                  <option value="Ninja Tune">
+                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                    Ninja Tune
+                  </option>
+                  <option value="We Play House Recordings">
+                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                    We Play House Recordings
+                  </option>
+                  <option value="XL Recordings">
+                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                    XL Recordings
+                  </option>
                 </datalist>
                 <datalist id="year" label="Year" data-type="number">
                   <option value="2026"></option>
@@ -859,11 +1053,26 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                   <option value="1999"></option>
                 </datalist>
                 <datalist id="artist" label="Artist">
-                  <option value="Aphex Twin"></option>
-                  <option value="Daft Punk"></option>
-                  <option value="Four Tet"></option>
-                  <option value="Larry Heard"></option>
-                  <option value="Moodymann"></option>
+                  <option value="Aphex Twin">
+                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                    Aphex Twin
+                  </option>
+                  <option value="Daft Punk">
+                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                    Daft Punk
+                  </option>
+                  <option value="Four Tet">
+                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                    Four Tet
+                  </option>
+                  <option value="Larry Heard">
+                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                    Larry Heard
+                  </option>
+                  <option value="Moodymann">
+                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                    Moodymann
+                  </option>
                 </datalist>
                 <datalist id="style" label="Style">
                   <option value="Deep House"></option>
@@ -901,10 +1110,30 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
           <div class="card">
             <rich-search value='label:"We Play House Recordings" year:2026 style:"Deep House"'>
               <datalist id="label" label="Record Label">
-                <option value="We Play House Recordings"></option>
-                <option value="Keinemusik"></option>
-                <option value="Kranky"></option>
-                <option value="Ninja Tune"></option>
+                <option value="Defected">
+                  <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                  Defected
+                </option>
+                <option value="Keinemusik">
+                  <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                  Keinemusik
+                </option>
+                <option value="Kranky">
+                  <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                  Kranky
+                </option>
+                <option value="Ninja Tune">
+                  <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                  Ninja Tune
+                </option>
+                <option value="We Play House Recordings">
+                  <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                  We Play House Recordings
+                </option>
+                <option value="XL Recordings">
+                  <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                  XL Recordings
+                </option>
               </datalist>
               <datalist id="year" label="Year" data-type="number">
                 <option value="2026"></option>
@@ -912,9 +1141,26 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                 <option value="2024"></option>
               </datalist>
               <datalist id="artist" label="Artist">
-                <option value="San Soda"></option>
-                <option value="FCL"></option>
-                <option value="Red D"></option>
+                <option value="Aphex Twin">
+                  <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                  Aphex Twin
+                </option>
+                <option value="Daft Punk">
+                  <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                  Daft Punk
+                </option>
+                <option value="Four Tet">
+                  <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                  Four Tet
+                </option>
+                <option value="Larry Heard">
+                  <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                  Larry Heard
+                </option>
+                <option value="Moodymann">
+                  <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                  Moodymann
+                </option>
               </datalist>
               <datalist id="style" label="Style">
                 <option value="Deep House"></option>
@@ -938,9 +1184,26 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                 <label for="form-search" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Search Filter:</label>
                 <rich-search id="form-search" name="q" placeholder="Type query and submit form..." required>
                   <datalist id="artist" label="Artist">
-                    <option value="Aphex Twin"></option>
-                    <option value="Daft Punk"></option>
-                    <option value="Larry Heard"></option>
+                    <option value="Aphex Twin">
+                      <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                      Aphex Twin
+                    </option>
+                    <option value="Daft Punk">
+                      <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                      Daft Punk
+                    </option>
+                    <option value="Four Tet">
+                      <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                      Four Tet
+                    </option>
+                    <option value="Larry Heard">
+                      <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                      Larry Heard
+                    </option>
+                    <option value="Moodymann">
+                      <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                      Moodymann
+                    </option>
                   </datalist>
                   <datalist id="style" label="Style">
                     <option value="Deep House"></option>
@@ -974,8 +1237,30 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
               </div>
               <rich-search class="theme-pill" placeholder="Minimalist pill styling via ::part(control)...">
                 <datalist id="label" label="Record Label">
-                  <option value="Keinemusik"></option>
-                  <option value="Ninja Tune"></option>
+                  <option value="Defected">
+                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                    Defected
+                  </option>
+                  <option value="Keinemusik">
+                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                    Keinemusik
+                  </option>
+                  <option value="Kranky">
+                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                    Kranky
+                  </option>
+                  <option value="Ninja Tune">
+                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                    Ninja Tune
+                  </option>
+                  <option value="We Play House Recordings">
+                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                    We Play House Recordings
+                  </option>
+                  <option value="XL Recordings">
+                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                    XL Recordings
+                  </option>
                 </datalist>
               </rich-search>
               <pre><code>rich-search.theme-pill::part(control) {
@@ -1007,9 +1292,83 @@ rich-search.theme-terminal::part(input) {
           </div>
         </section>
 
-        <!-- Example 5: Dynamic Datalists -->
+        <!-- Example 5: Rich Option & Image Styling (::part) -->
+        <section id="example-rich-styling">
+          <h2>5. Rich Option &amp; Image Styling (::part)</h2>
+          <p class="section-desc">
+            When options contain images (such as logos, icons, or avatars), the component exposes them via <code>::part(suggestion-image)</code> for external CSS styling.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Circular Logo Avatar via ::part(suggestion-image)</span>
+              <span class="card-meta">CSS Shadow Parts</span>
+            </div>
+            <p>
+              In this example, the record label logos are styled via <code>::part(suggestion-image)</code> as circular avatars:
+            </p>
+
+            <rich-search placeholder="Type 'label:' to preview the circular logos...">
+              <datalist id="label" label="Record Label">
+                <option value="Defected">
+                  <img
+                    src="assets/defected.jpg"
+                    height="50" width="50"
+                    alt="Defected Logo">
+                  Defected
+                </option>
+                <option value="Keinemusik">
+                  <img
+                    src="assets/keinemusik.jpg"
+                    height="50" width="50"
+                    alt="Keinemusik Logo">
+                  Keinemusik
+                </option>
+                <option value="Kranky">
+                  <img
+                    src="assets/kranky.jpg"
+                    height="50" width="50"
+                    alt="Kranky Logo">
+                  Kranky
+                </option>
+                <option value="Ninja Tune">
+                  <img
+                    src="assets/ninja-tune.jpg"
+                    height="50" width="50"
+                    alt="Ninja Tune Logo">
+                  Ninja Tune
+                </option>
+                <option value="We Play House Recordings">
+                  <img
+                    src="assets/we-play-house-recordings.jpg"
+                    height="50" width="50"
+                    alt="We Play House Recordings Logo">
+                  We Play House Recordings
+                </option>
+                <option value="XL Recordings">
+                  <img
+                    src="assets/xl-recordings.jpg"
+                    height="50" width="50"
+                    alt="XL Recordings Logo">
+                  XL Recordings
+                </option>
+              </datalist>
+            </rich-search>
+
+            <pre><code>/* Style suggestion logos as circular avatar icons */
+rich-search::part(suggestion-image) {
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  object-fit: cover;
+  outline: 1px solid #ccc;
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Example 6: Dynamic Datalists -->
         <section id="example-dynamic">
-          <h2>5. Dynamic Datalists</h2>
+          <h2>6. Dynamic Datalists</h2>
           <p class="section-desc">
             Add or update <code>&lt;datalist&gt;</code> elements dynamically at runtime. The component uses a MutationObserver and slotchange event to immediately update available keywords and suggestions.
           </p>

@@ -173,6 +173,7 @@ TEMPLATE.innerHTML = `
     line-height: 1.4;
     transition: background-color 0.1s ease;
     user-select: none;
+    color: var(--rs-item-title-color, #0f172a);
   }
 
   .suggestion-item:hover,
@@ -202,6 +203,13 @@ TEMPLATE.innerHTML = `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .suggestion-image {
+    object-fit: cover;
+    flex-shrink: 0;
+    pointer-events: none;
+    vertical-align: middle;
   }
 
   /* Visually hide datalists in slot */
@@ -538,10 +546,18 @@ export class RichSearch extends HTMLElement {
       const optElements = dl.querySelectorAll('option');
 
       for (const opt of optElements) {
-        const value = opt.hasAttribute('value') ? opt.getAttribute('value') : opt.textContent.trim();
-        const optLabel = opt.getAttribute('label') || opt.textContent.trim() || value;
+        const textContent = opt.textContent.trim();
+        const value = opt.hasAttribute('value') ? opt.getAttribute('value') : textContent;
+        const optLabel = opt.getAttribute('label') || textContent || value;
+        const imgEl = opt.querySelector('img');
         if (value) {
-          options.push({ value, label: optLabel });
+          options.push({
+            value,
+            label: optLabel,
+            text: textContent || value,
+            element: opt,
+            image: imgEl ? imgEl.cloneNode(true) : null,
+          });
         }
       }
 
@@ -799,7 +815,7 @@ export class RichSearch extends HTMLElement {
   }
 
   _renderSuggestions() {
-    this._suggestionsList.innerHTML = '';
+    this._suggestionsList.replaceChildren();
 
     this._activeSuggestions.forEach((sug, idx) => {
       const li = document.createElement('li');
@@ -808,6 +824,14 @@ export class RichSearch extends HTMLElement {
       li.setAttribute('role', 'option');
       li.setAttribute('aria-selected', idx === this._selectedIndex ? 'true' : 'false');
       li.setAttribute('part', `suggestion-item${idx === this._selectedIndex ? ' suggestion-item-active' : ''}`);
+
+      if (sug.image) {
+        const img = sug.image.cloneNode(true);
+        img.className = 'suggestion-image';
+        const currentPart = img.getAttribute('part');
+        img.setAttribute('part', currentPart ? `${currentPart} suggestion-image` : 'suggestion-image');
+        li.appendChild(img);
+      }
 
       const content = document.createElement('div');
       content.className = 'suggestion-content';

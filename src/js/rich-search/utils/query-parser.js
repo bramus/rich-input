@@ -276,13 +276,15 @@ export function getSuggestions(context, configuredKeywords) {
     for (const opt of kwConfig.options) {
       const valLower = (opt.value || '').toLowerCase();
       const lblLower = (opt.label || '').toLowerCase();
-      const matches = !prefix || valLower.includes(prefix) || lblLower.includes(prefix);
+      const txtLower = (opt.text || '').toLowerCase();
+      const matches = !prefix || valLower.includes(prefix) || lblLower.includes(prefix) || txtLower.includes(prefix);
 
       if (matches) {
         // Needs quotes if option contains spaces, or if already quoted, or if contains colons
         const needsQuotes = context.quoted || opt.value.includes(' ') || opt.value.includes(':');
         const quoteChar = context.quoteChar || '"';
         const formatted = needsQuotes ? `${quoteChar}${opt.value}${quoteChar}` : opt.value;
+        const displayText = opt.text || opt.value;
 
         suggestions.push({
           type: 'value',
@@ -290,10 +292,12 @@ export function getSuggestions(context, configuredKeywords) {
           keywordLabel: kwConfig.label || kwConfig.id,
           value: opt.value,
           label: opt.label || opt.value,
-          display: opt.value,
+          display: displayText,
           insertText: formatted,
-          description: (opt.label && opt.label !== opt.value) ? opt.label : '',
+          description: (opt.label && opt.label !== opt.value && opt.label !== displayText) ? opt.label : '',
           dataType: kwConfig.dataType || 'string',
+          element: opt.element,
+          image: opt.image,
         });
       }
     }

@@ -18,6 +18,7 @@ The `<rich-search>` component acts like a standard `<input type="text">` so user
 - **Caret Geometry via OpaqueRange**: Positions autocomplete dropdown popovers directly beneath the user's cursor using `input.createValueRange(caret, caret).getBoundingClientRect()`.
 - **Native In-Input Highlighting via CSS Custom Highlight API**: Highlights keyword values inside the `<input>` control using standard CSS rules like `::highlight(label)` or `::highlight(year)` without brittle mirror-div overlays.
 - **Declarative Configuration via `<datalist>`**: Configure keywords and options purely in HTML by nesting standard `<datalist>` elements with `<option>` tags inside `<rich-search>`.
+- **Rich Option Markup**: Embed custom HTML markup (such as logos, images, icons, and avatars) directly inside `<option>` elements for rich, visual suggestion popovers.
 - **Form Associated**: Implements `static formAssociated = true` and `ElementInternals` to participate seamlessly in `<form>` submission, `FormData`, and form reset lifecycles.
 - **Shadow Parts Theming (`::part`)**: Full CSS customizability using `::part(input)`, `::part(control)`, `::part(popover)`, `::part(suggestion-item)`, etc.
 - **Accessible (W3C Combobox Pattern)**: ARIA 1.2 compliant combobox with keyboard navigation (`ArrowUp`, `ArrowDown`, `Enter`, `Tab`, `Escape`), `aria-expanded`, and `aria-activedescendant`.
@@ -112,8 +113,57 @@ Configuration is defined by standard HTML `<datalist>` elements placed inside th
 | `<datalist data-type="...">` | `string` | Optional data type (`"string"` or `"number"`). |
 | `<option value="...">` | `string` | The suggested value. If the value contains spaces, quotes are automatically added when inserted (e.g. `"We Play House Recordings"`). |
 | `<option label="...">` | `string` | Optional descriptive label shown alongside the value. |
+| `<option>` children | `Node` | Optional image (`<img>`) prepended to the suggested value. |
 
 Datalists can be added, updated, or removed dynamically at runtime; `<rich-search>` observes changes via `slotchange` and `MutationObserver`.
+
+---
+
+## Rich Option Markup
+
+`<rich-search>` supports rich HTML markup inside `<option>` elements. For example, for record labels or artists, you can prepend a logo image:
+
+```html
+<rich-search placeholder="Search...">
+  <datalist id="label" label="Record Label">
+    <option value="Defected">
+      <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+      Defected
+    </option>
+    <option value="Keinemusik">
+      <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+      Keinemusik
+    </option>
+    <option value="Kranky">
+      <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+      Kranky
+    </option>
+    <option value="Ninja Tune">
+      <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+      Ninja Tune
+    </option>
+    <option value="We Play House Recordings">
+      <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+      We Play House Recordings
+    </option>
+    <option value="XL Recordings">
+      <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+      XL Recordings
+    </option>
+  </datalist>
+</rich-search>
+```
+
+When suggesting values for `label:`, `<rich-search>` sniffs the image inside the `<option>`, renders it alongside the option's text content, and exposes `::part(suggestion-image)` for external CSS styling (e.g. as a `1em` circular icon):
+
+```css
+rich-search::part(suggestion-image) {
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  object-fit: cover;
+}
+```
 
 ---
 
@@ -229,6 +279,8 @@ rich-search::part(suggestion-item-active) {
 | `::part(suggestion-item-active)` | The currently selected / hovered suggestion item |
 | `::part(suggestion-keyword)` | Keyword name element in suggestion items |
 | `::part(suggestion-value)` | Value element in suggestion items |
+| `::part(suggestion-content)` | The content container inside each suggestion item |
+| `::part(suggestion-image)` | Image or icon element rendered inside rich suggestion items |
 
 ---
 
