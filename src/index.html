@@ -319,10 +319,507 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 
         <!-- Parts Styling Section -->
         <section id="parts-styling">
-          <h2>Shadow Parts (::part)</h2>
+          <h2>Shadow Parts (::part) &amp; Anatomy</h2>
           <p class="section-desc">
-            All internal elements of <code>&lt;rich-search&gt;</code> are exposed for external styling through <code>::part()</code>:
+            All internal elements of <code>&lt;rich-search&gt;</code> are exposed for external styling through <code>::part()</code> and CSS Custom Highlight pseudo-elements:
           </p>
+
+          <div class="card" style="padding: 1rem; overflow: hidden; margin-bottom: 1.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 620" width="100%" height="100%">
+  <defs>
+    <style>
+      :root {
+        --canvas-bg: #f8fafc;
+        --card-bg: #ffffff;
+        --border-color: #cbd5e1;
+        --control-bg: #ffffff;
+        --text-color: #0f172a;
+        --text-muted: #64748b;
+        --text-hint: #94a3b8;
+        --popover-bg: #ffffff;
+        --active-item-bg: #eff6ff;
+
+        /* Annotation Colors */
+        --c-host: #059669;       /* Emerald */
+        --c-control: #2563eb;    /* Royal Blue */
+        --c-icon: #0d9488;       /* Teal */
+        --c-input: #6366f1;      /* Indigo */
+        --c-hl-val: #d97706;     /* Amber */
+        --c-clear: #dc2626;      /* Red */
+        --c-popover: #9333ea;    /* Purple */
+        --c-header: #475569;     /* Slate */
+        --c-list: #7c3aed;       /* Violet */
+        --c-item: #16a34a;       /* Green */
+        --c-active: #0284c7;     /* Sky */
+        --c-badge: #db2777;      /* Pink / Magenta */
+        --c-kw-text: #2563eb;    /* Blue */
+        --c-val-text: #059669;   /* Emerald */
+
+        --label-hover-bg: rgba(2, 132, 199, 0.08);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --canvas-bg: #0f172a;
+          --card-bg: #1e293b;
+          --border-color: #334155;
+          --control-bg: #1e293b;
+          --text-color: #f8fafc;
+          --text-muted: #94a3b8;
+          --text-hint: #64748b;
+          --popover-bg: #1e293b;
+          --active-item-bg: #1e3a5f;
+
+          /* Annotation Colors (Brighter for Dark Mode) */
+          --c-host: #34d399;
+          --c-control: #60a5fa;
+          --c-icon: #2dd4bf;
+          --c-input: #818cf8;
+          --c-hl-val: #fbbf24;
+          --c-clear: #f87171;
+          --c-popover: #c084fc;
+          --c-header: #94a3b8;
+          --c-list: #a78bfa;
+          --c-item: #4ade80;
+          --c-active: #38bdf8;
+          --c-badge: #f472b6;
+          --c-kw-text: #60a5fa;
+          --c-val-text: #34d399;
+
+          --label-hover-bg: rgba(255, 255, 255, 0.08);
+        }
+      }
+
+      .canvas { fill: var(--canvas-bg); }
+      .component-card { fill: var(--card-bg); stroke: var(--border-color); stroke-width: 1px; }
+      .control-bg { fill: var(--control-bg); stroke: var(--border-color); stroke-width: 1px; }
+      
+      .code-label {
+        cursor: pointer;
+      }
+
+      .label-hitbox {
+        fill: transparent;
+        pointer-events: all;
+        transition: fill 0.15s ease;
+      }
+
+      .code-label:hover .label-hitbox {
+        fill: var(--label-hover-bg);
+      }
+
+      .label-text {
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 15px;
+        font-weight: 600;
+        pointer-events: none;
+        user-select: none;
+        transition: font-weight 0.15s ease, opacity 0.2s ease;
+      }
+
+      .code-label:hover .label-text {
+        font-weight: 700;
+      }
+
+      .guide-line {
+        fill: none;
+        stroke-width: 2px;
+        stroke-dasharray: 6 5;
+        pointer-events: none;
+      }
+
+      .guide-box {
+        fill: none;
+        stroke-width: 2.5px;
+        stroke-dasharray: 7 6;
+        pointer-events: none;
+      }
+
+      .guide-dot {
+        stroke-width: 2px;
+        pointer-events: none;
+      }
+
+      .ui-text {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      .mono-text {
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      }
+
+      /* Transitions */
+      .code-label,
+      .label-hitbox,
+      .label-text,
+      .guide-line,
+      .guide-box,
+      .guide-dot,
+      .comp-part {
+        transition: opacity 0.2s ease, stroke-width 0.2s ease;
+      }
+
+      /*
+       * =====================================================================
+       * HOVER INTERACTION
+       * Hovering one of the labels dims all other labels/lines/components
+       * =====================================================================
+       */
+
+      /* 1. When ANY code-label is hovered, dim all other labels, lines, boxes, and comp-parts */
+      svg:has(.code-label:hover) .code-label:not(:hover) {
+        opacity: 0.18;
+      }
+
+      svg:has(.code-label:hover) .guide-line,
+      svg:has(.code-label:hover) .guide-box,
+      svg:has(.code-label:hover) .guide-dot {
+        opacity: 0.05;
+      }
+
+      svg:has(.code-label:hover) .comp-part {
+        opacity: 0.25;
+      }
+
+      /* 2. Specific label hover: keep matching guide line, box, dot, and element at 100% */
+      svg:has(.lbl-host:hover) .target-host,
+      svg:has(.lbl-control:hover) .target-control,
+      svg:has(.lbl-icon:hover) .target-icon,
+      svg:has(.lbl-input:hover) .target-input,
+      svg:has(.lbl-hl-val:hover) .target-hl-val,
+      svg:has(.lbl-clear:hover) .target-clear,
+      svg:has(.lbl-popover:hover) .target-popover,
+      svg:has(.lbl-header:hover) .target-header,
+      svg:has(.lbl-list:hover) .target-list,
+      svg:has(.lbl-active:hover) .target-active,
+      svg:has(.lbl-item:hover) .target-item,
+      svg:has(.lbl-badge:hover) .target-badge,
+      svg:has(.lbl-kw:hover) .target-kw,
+      svg:has(.lbl-val:hover) .target-val {
+        opacity: 1 !important;
+      }
+
+      /* When host label is hovered, keep entire component at 100% */
+      svg:has(.lbl-host:hover) .comp-part {
+        opacity: 1 !important;
+      }
+
+      /* When list label is hovered, keep list items active */
+      svg:has(.lbl-list:hover) .target-active,
+      svg:has(.lbl-list:hover) .target-badge,
+      svg:has(.lbl-list:hover) .target-kw,
+      svg:has(.lbl-list:hover) .target-item,
+      svg:has(.lbl-list:hover) .target-val {
+        opacity: 1 !important;
+      }
+
+      /* When active item is hovered, keep its badge and keyword highlighted too */
+      svg:has(.lbl-active:hover) .target-badge,
+      svg:has(.lbl-active:hover) .target-kw {
+        opacity: 1 !important;
+      }
+
+      /* Thicken active guide line when hovered */
+      svg:has(.lbl-host:hover) .target-host.guide-line,
+      svg:has(.lbl-control:hover) .target-control.guide-line,
+      svg:has(.lbl-icon:hover) .target-icon.guide-line,
+      svg:has(.lbl-input:hover) .target-input.guide-line,
+      svg:has(.lbl-hl-val:hover) .target-hl-val.guide-line,
+      svg:has(.lbl-clear:hover) .target-clear.guide-line,
+      svg:has(.lbl-popover:hover) .target-popover.guide-line,
+      svg:has(.lbl-header:hover) .target-header.guide-line,
+      svg:has(.lbl-list:hover) .target-list.guide-line,
+      svg:has(.lbl-active:hover) .target-active.guide-line,
+      svg:has(.lbl-item:hover) .target-item.guide-line,
+      svg:has(.lbl-badge:hover) .target-badge.guide-line,
+      svg:has(.lbl-kw:hover) .target-kw.guide-line,
+      svg:has(.lbl-val:hover) .target-val.guide-line {
+        stroke-width: 2px;
+      }
+
+      /* Thicken active guide box when hovered */
+      svg:has(.lbl-host:hover) .target-host.guide-box,
+      svg:has(.lbl-control:hover) .target-control.guide-box,
+      svg:has(.lbl-icon:hover) .target-icon.guide-box,
+      svg:has(.lbl-input:hover) .target-input.guide-box,
+      svg:has(.lbl-hl-val:hover) .target-hl-val.guide-box,
+      svg:has(.lbl-clear:hover) .target-clear.guide-box,
+      svg:has(.lbl-popover:hover) .target-popover.guide-box,
+      svg:has(.lbl-header:hover) .target-header.guide-box,
+      svg:has(.lbl-list:hover) .target-list.guide-box,
+      svg:has(.lbl-active:hover) .target-active.guide-box,
+      svg:has(.lbl-item:hover) .target-item.guide-box,
+      svg:has(.lbl-badge:hover) .target-badge.guide-box,
+      svg:has(.lbl-kw:hover) .target-kw.guide-box,
+      svg:has(.lbl-val:hover) .target-val.guide-box {
+        stroke-width: 2px;
+      }
+
+      .code-label:hover {
+        opacity: 1 !important;
+      }
+    </style>
+    
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect class="canvas" width="1340" height="620" rx="16"/>
+
+  <!-- ===================================================================== -->
+  <!-- CENTER COMPONENT RENDERING (Un-nested Component Parts) -->
+  <!-- ===================================================================== -->
+  <g id="component-preview">
+    <!-- Input Control: ::part(control) -->
+    <rect class="control-bg comp-part target-control" x="410" y="50" width="520" height="52" rx="10" filter="url(#shadow)"/>
+
+    <!-- Search Icon: ::part(icon) -->
+    <g class="comp-part target-icon" transform="translate(426, 66)">
+      <circle cx="8" cy="8" r="6" fill="none" stroke="var(--text-muted)" stroke-width="2"/>
+      <line x1="12.5" y1="12.5" x2="18" y2="18" stroke="var(--text-muted)" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Input Text Area (label: & caret): ::part(input) -->
+    <g class="comp-part target-input">
+      <text class="mono-text" x="458" y="82" font-size="15" fill="var(--text-muted)" font-weight="600">label:</text>
+      <text class="mono-text" x="756" y="82" font-size="15" fill="var(--text-color)"> m</text>
+      <line x1="778" y1="65" x2="778" y2="87" stroke="var(--c-active)" stroke-width="2.5"/>
+    </g>
+
+    <!-- Highlight Pill for "We Play House Recordings": ::highlight(label) -->
+    <g class="comp-part target-hl-val">
+      <rect x="506" y="62" width="242" height="28" rx="5" fill="rgba(37, 99, 235, 0.14)"/>
+      <line x1="512" y1="87" x2="742" y2="87" stroke="var(--c-control)" stroke-width="2" stroke-linecap="round"/>
+      <text class="mono-text" x="512" y="82" font-size="15" fill="var(--c-control)" font-weight="600">"We Play House Recordings"</text>
+    </g>
+
+    <!-- Clear Button: ::part(clear-button) -->
+    <g class="comp-part target-clear">
+      <circle cx="902" cy="76" r="13" fill="rgba(148, 163, 184, 0.2)"/>
+      <path d="M897 71 L907 81 M907 71 L897 81" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <!-- Suggestions Popover Background Card: ::part(popover) -->
+    <rect class="component-card comp-part target-popover" x="470" y="118" width="460" height="422" rx="10" filter="url(#shadow)"/>
+
+    <!-- Popover Header: ::part(suggestions-header) -->
+    <g class="comp-part target-header">
+      <path d="M470 128 a10 10 0 0 1 10 -10 h440 a10 10 0 0 1 10 10 v34 h-460 z" fill="rgba(148, 163, 184, 0.1)"/>
+      <line x1="470" y1="162" x2="930" y2="162" stroke="var(--border-color)" stroke-width="1"/>
+      <text class="ui-text" x="486" y="145" font-size="12" font-weight="700" letter-spacing="0.06em" fill="var(--text-muted)">SUGGESTIONS</text>
+      <text class="ui-text" x="760" y="145" font-size="11" fill="var(--text-hint)">↑↓ navigate · ↵ select</text>
+    </g>
+
+    <!-- Item 1 (Active/Highlighted): ::part(suggestion-item-active) -->
+    <rect class="comp-part target-active" x="478" y="172" width="444" height="66" rx="8" fill="var(--active-item-bg)"/>
+    <text class="ui-text comp-part target-active" x="602" y="205" font-size="13" fill="var(--text-muted)">Mix</text>
+
+    <!-- Item 1 Badge: ::part(suggestion-badge) -->
+    <g class="comp-part target-badge">
+      <rect x="490" y="188" width="56" height="24" rx="4" fill="rgba(37, 99, 235, 0.15)"/>
+      <text class="ui-text" x="501" y="205" font-size="11" font-weight="700" fill="var(--c-control)">FIELD</text>
+    </g>
+
+    <!-- Item 1 Title: ::part(suggestion-keyword) -->
+    <g class="comp-part target-kw">
+      <text class="mono-text" x="558" y="206" font-size="16" font-weight="700" fill="var(--text-color)">mix:</text>
+    </g>
+
+    <!-- Item 2: ::part(suggestion-item) -->
+    <g class="comp-part target-item">
+      <rect x="478" y="244" width="444" height="66" rx="8" fill="none"/>
+      <rect x="490" y="260" width="56" height="24" rx="4" fill="rgba(37, 99, 235, 0.15)"/>
+      <text class="ui-text" x="501" y="277" font-size="11" font-weight="700" fill="var(--c-control)">FIELD</text>
+      <text class="mono-text" x="558" y="278" font-size="16" font-weight="700" fill="var(--text-color)">mixid:</text>
+      <text class="ui-text" x="620" y="277" font-size="13" fill="var(--text-muted)">Mix ID (number)</text>
+    </g>
+
+    <!-- Item 3 Badge (Category): RECORD LABEL -->
+    <g class="comp-part">
+      <rect x="478" y="316" width="444" height="66" rx="8" fill="none"/>
+      <rect x="490" y="332" width="104" height="24" rx="4" fill="rgba(217, 119, 6, 0.15)"/>
+      <text class="ui-text" x="498" y="349" font-size="11" font-weight="700" fill="var(--c-hl-val)">RECORD LABEL</text>
+    </g>
+    
+    <!-- Item 3 Suggestion Value: ::part(suggestion-value) -->
+    <g class="comp-part target-val">
+      <text class="mono-text" x="606" y="350" font-size="16" font-weight="700" fill="var(--text-color)">Keinemusik</text>
+    </g>
+
+    <!-- Item 4 (Value Suggestion) -->
+    <g class="comp-part">
+      <rect x="478" y="388" width="444" height="66" rx="8" fill="none"/>
+      <rect x="490" y="404" width="104" height="24" rx="4" fill="rgba(217, 119, 6, 0.15)"/>
+      <text class="ui-text" x="498" y="421" font-size="11" font-weight="700" fill="var(--c-hl-val)">RECORD LABEL</text>
+      <text class="mono-text" x="606" y="422" font-size="16" font-weight="700" fill="var(--text-color)">Kranky</text>
+    </g>
+
+    <!-- Item 5 (Value Suggestion) -->
+    <g class="comp-part">
+      <rect x="478" y="460" width="444" height="66" rx="8" fill="none"/>
+      <rect x="490" y="476" width="104" height="24" rx="4" fill="rgba(217, 119, 6, 0.15)"/>
+      <text class="ui-text" x="498" y="493" font-size="11" font-weight="700" fill="var(--c-hl-val)">RECORD LABEL</text>
+      <text class="mono-text" x="606" y="494" font-size="16" font-weight="700" fill="var(--text-color)">Ninja Tune</text>
+    </g>
+  </g>
+
+
+  <!-- ===================================================================== -->
+  <!-- ANNOTATION GUIDES (LINES, BOXES, DOTS) -->
+  <!-- ===================================================================== -->
+
+  <!-- 1. Host Target -->
+  <path class="guide-line target-host" d="M200 49 L395 49" stroke="var(--c-host)"/>
+  <rect class="guide-box target-host" x="398" y="38" width="544" height="514" rx="16" stroke="var(--c-host)"/>
+  <circle class="guide-dot target-host" cx="395" cy="49" r="4" fill="var(--c-host)"/>
+
+  <!-- 2. Control Target -->
+  <path class="guide-line target-control" d="M210 101 L402 101" stroke="var(--c-control)"/>
+  <rect class="guide-box target-control" x="406" y="46" width="528" height="60" rx="12" stroke="var(--c-control)"/>
+  <circle class="guide-dot target-control" cx="402" cy="101" r="4" fill="var(--c-control)"/>
+
+  <!-- 3. Icon Target -->
+  <path class="guide-line target-icon" d="M190 155 L408 155 L436 90" stroke="var(--c-icon)"/>
+  <circle class="guide-box target-icon" cx="435" cy="75" r="18" stroke="var(--c-icon)"/>
+  <circle class="guide-dot target-icon" cx="436" cy="90" r="4" fill="var(--c-icon)"/>
+
+  <!-- 4. Input Target -->
+  <path class="guide-line target-input" d="M200 209 L450 209 L454 100" stroke="var(--c-input)"/>
+  <rect class="guide-box target-input" x="454" y="58" width="395" height="36" rx="6" stroke="var(--c-input)"/>
+  <circle class="guide-dot target-input" cx="454" cy="100" r="4" fill="var(--c-input)"/>
+
+  <!-- 5. Highlight Label Target -->
+  <path class="guide-line target-hl-val" d="M240 263 L520 263 L520 96" stroke="var(--c-hl-val)"/>
+  <rect class="guide-box target-hl-val" x="503" y="60" width="248" height="32" rx="7" stroke="var(--c-hl-val)"/>
+  <circle class="guide-dot target-hl-val" cx="520" cy="96" r="4" fill="var(--c-hl-val)"/>
+
+  <!-- 6. Suggestions Header Target -->
+  <path class="guide-line target-header" d="M310 331 L465 331 L465 140 L470 140" stroke="var(--c-header)"/>
+  <rect class="guide-box target-header" x="468" y="116" width="464" height="48" rx="8" stroke="var(--c-header)"/>
+  <circle class="guide-dot target-header" cx="465" cy="140" r="4" fill="var(--c-header)"/>
+
+  <!-- 7. Suggestion Badge Target -->
+  <path class="guide-line target-badge" d="M300 399 L480 399 L486 200" stroke="var(--c-badge)"/>
+  <rect class="guide-box target-badge" x="486" y="184" width="64" height="32" rx="6" stroke="var(--c-badge)"/>
+  <circle class="guide-dot target-badge" cx="486" cy="200" r="4" fill="var(--c-badge)"/>
+
+  <!-- 8. Suggestion Keyword Target -->
+  <path class="guide-line target-kw" d="M320 467 L564 467 L564 220" stroke="var(--c-kw-text)"/>
+  <rect class="guide-box target-kw" x="554" y="188" width="46" height="28" rx="6" stroke="var(--c-kw-text)"/>
+  <circle class="guide-dot target-kw" cx="564" cy="220" r="4" fill="var(--c-kw-text)"/>
+
+  <!-- 9. Clear Button Target -->
+  <path class="guide-line target-clear" d="M1005 73 L925 73" stroke="var(--c-clear)"/>
+  <circle class="guide-box target-clear" cx="902" cy="76" r="20" stroke="var(--c-clear)"/>
+  <circle class="guide-dot target-clear" cx="925" cy="73" r="4" fill="var(--c-clear)"/>
+
+  <!-- 10. Popover Target -->
+  <path class="guide-line target-popover" d="M1005 145 L938 145" stroke="var(--c-popover)"/>
+  <rect class="guide-box target-popover" x="464" y="112" width="472" height="434" rx="14" stroke="var(--c-popover)"/>
+  <circle class="guide-dot target-popover" cx="938" cy="145" r="4" fill="var(--c-popover)"/>
+
+  <!-- 11. Suggestions List Target -->
+  <path class="guide-line target-list" d="M1005 213 L934 213" stroke="var(--c-list)"/>
+  <rect class="guide-box target-list" x="474" y="166" width="452" height="368" rx="8" stroke="var(--c-list)"/>
+  <circle class="guide-dot target-list" cx="934" cy="213" r="4" fill="var(--c-list)"/>
+
+  <!-- 12. Suggestion Item Active Target -->
+  <path class="guide-line target-active" d="M1005 281 L960 281 L960 205 L928 205" stroke="var(--c-active)"/>
+  <rect class="guide-box target-active" x="474" y="168" width="452" height="74" rx="10" stroke="var(--c-active)"/>
+  <circle class="guide-dot target-active" cx="928" cy="205" r="4" fill="var(--c-active)"/>
+
+  <!-- 13. Suggestion Item Target -->
+  <path class="guide-line target-item" d="M1005 349 L960 349 L960 277 L928 277" stroke="var(--c-item)"/>
+  <rect class="guide-box target-item" x="474" y="240" width="452" height="74" rx="10" stroke="var(--c-item)"/>
+  <circle class="guide-dot target-item" cx="928" cy="277" r="4" fill="var(--c-item)"/>
+
+  <!-- 14. Suggestion Value Target -->
+  <path class="guide-line target-val" d="M1005 417 L720 417 L720 362" stroke="var(--c-val-text)"/>
+  <rect class="guide-box target-val" x="602" y="332" width="112" height="28" rx="6" stroke="var(--c-val-text)"/>
+  <circle class="guide-dot target-val" cx="720" cy="362" r="4" fill="var(--c-val-text)"/>
+
+
+  <!-- ===================================================================== -->
+  <!-- CODE LABELS (LEFT SIDE) -->
+  <!-- ===================================================================== -->
+  <g class="code-label lbl-host">
+    <rect class="label-hitbox" x="30" y="34" width="170" height="30" rx="6"/>
+    <text class="label-text" x="40" y="54" fill="var(--c-host)">&lt;rich-search&gt;</text>
+  </g>
+
+  <g class="code-label lbl-control">
+    <rect class="label-hitbox" x="30" y="86" width="180" height="30" rx="6"/>
+    <text class="label-text" x="40" y="106" fill="var(--c-control)">::part(control)</text>
+  </g>
+
+  <g class="code-label lbl-icon">
+    <rect class="label-hitbox" x="30" y="140" width="160" height="30" rx="6"/>
+    <text class="label-text" x="40" y="160" fill="var(--c-icon)">::part(icon)</text>
+  </g>
+
+  <g class="code-label lbl-input">
+    <rect class="label-hitbox" x="30" y="194" width="170" height="30" rx="6"/>
+    <text class="label-text" x="40" y="214" fill="var(--c-input)">::part(input)</text>
+  </g>
+
+  <g class="code-label lbl-hl-val">
+    <rect class="label-hitbox" x="30" y="248" width="210" height="30" rx="6"/>
+    <text class="label-text" x="40" y="268" fill="var(--c-hl-val)">::highlight(label)</text>
+  </g>
+
+  <g class="code-label lbl-header">
+    <rect class="label-hitbox" x="30" y="316" width="280" height="30" rx="6"/>
+    <text class="label-text" x="40" y="336" fill="var(--c-header)">::part(suggestions-header)</text>
+  </g>
+
+  <g class="code-label lbl-badge">
+    <rect class="label-hitbox" x="30" y="384" width="270" height="30" rx="6"/>
+    <text class="label-text" x="40" y="404" fill="var(--c-badge)">::part(suggestion-badge)</text>
+  </g>
+
+  <g class="code-label lbl-kw">
+    <rect class="label-hitbox" x="30" y="452" width="290" height="30" rx="6"/>
+    <text class="label-text" x="40" y="472" fill="var(--c-kw-text)">::part(suggestion-keyword)</text>
+  </g>
+
+
+  <!-- ===================================================================== -->
+  <!-- CODE LABELS (RIGHT SIDE) -->
+  <!-- ===================================================================== -->
+  <g class="code-label lbl-clear">
+    <rect class="label-hitbox" x="1005" y="58" width="225" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="78" fill="var(--c-clear)">::part(clear-button)</text>
+  </g>
+
+  <g class="code-label lbl-popover">
+    <rect class="label-hitbox" x="1005" y="130" width="185" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="150" fill="var(--c-popover)">::part(popover)</text>
+  </g>
+
+  <g class="code-label lbl-list">
+    <rect class="label-hitbox" x="1005" y="198" width="260" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="218" fill="var(--c-list)">::part(suggestions-list)</text>
+  </g>
+
+  <g class="code-label lbl-active">
+    <rect class="label-hitbox" x="1005" y="266" width="320" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="286" fill="var(--c-active)">::part(suggestion-item-active)</text>
+  </g>
+
+  <g class="code-label lbl-item">
+    <rect class="label-hitbox" x="1005" y="334" width="265" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="354" fill="var(--c-item)">::part(suggestion-item)</text>
+  </g>
+
+  <g class="code-label lbl-val">
+    <rect class="label-hitbox" x="1005" y="402" width="270" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="422" fill="var(--c-val-text)">::part(suggestion-value)</text>
+  </g>
+</svg>
+
+          </div>
 
           <div class="data-table-wrapper">
             <table class="data-table">

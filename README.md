@@ -25,6 +25,31 @@ The `<rich-search>` component acts like a standard `<input type="text">` so user
 
 ---
 
+## Component Anatomy & Shadow Parts
+
+The visual below illustrates the internal Shadow DOM elements, exposed CSS Shadow Parts (`::part`), and CSS Custom Highlight pseudo-elements (`::highlight`), showing how they relate to one another:
+
+<p align="center">
+  <img src="assets/rich-search-parts.svg" alt="<rich-search> Component Anatomy, Shadow Parts, and Highlight Pseudos" width="100%">
+</p>
+
+- `<rich-search>`: The host custom element wrapping the control, datalists, and suggestions popover.
+- `::part(control)`: The outer input container enclosing the icon, input, and clear button.
+- `::part(icon)`: The leading search magnifying glass SVG icon.
+- `::part(input)`: The native `<input type="text">` where users type.
+- `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
+- `::part(clear-button)`: The clear button (visible when text is present).
+- `::part(popover)`: The autocomplete dropdown popover container anchored to the caret via `OpaqueRange`.
+- `::part(suggestions-header)`: The header bar at the top of the suggestions popover.
+- `::part(suggestions-list)`: The `<ul>` container holding autocomplete suggestion items.
+- `::part(suggestion-item)`: Each suggestion `<li>` row.
+- `::part(suggestion-item-active)`: The currently selected / keyboard-focused suggestion row.
+- `::part(suggestion-badge)`: The badge tag indicating the field type or keyword name (e.g. `FIELD`, `RECORD LABEL`).
+- `::part(suggestion-keyword)`: The keyword label text inside a keyword suggestion.
+- `::part(suggestion-value)`: The value label text inside a value suggestion.
+
+---
+
 ## Quick Start
 
 ### 1. Installation
