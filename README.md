@@ -1,11 +1,11 @@
 # rich-input
 
-> A rich input field `<rich-input>` with keyword-based autocomplete and live syntax highlighting powered by the **OpaqueRange API** and **CSS Custom Highlight API**.
+> A rich input field `<rich-input>` with keyword-based autocomplete and in-input highlighting powered by `<datalist>`, the **OpaqueRange API**, and the **CSS Custom Highlight API**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Custom Elements](https://img.shields.io/badge/Web_Components-Custom_Elements_v1-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements)
 
-The `<rich-input>` component is a rich input field that acts like a standard `<input type="text">` so users can type ordinary text or search terms, but enhances it with contextual autocomplete and in-input syntax highlighting for structured `keyword:value` entries (such as `label:"We Play House Recordings" year:2026 playlist:"WPH Classics"`).
+The `<rich-input>` component is a rich input field that acts like a standard `<input type="text">` so users can type ordinary text or search terms, but enhances it with contextual autocomplete and in-input highlighting for structured `keyword:value` entries (such as `label:"We Play House Recordings" year:2026 playlist:"WPH Classics"`).
 
 ---
 
