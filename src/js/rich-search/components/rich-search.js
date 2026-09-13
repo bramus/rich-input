@@ -150,13 +150,6 @@ TEMPLATE.innerHTML = `
     color: var(--rs-header-color, #64748b);
   }
 
-  .popover-hint {
-    font-size: 0.7rem;
-    font-weight: normal;
-    text-transform: none;
-    color: var(--rs-hint-color, #94a3b8);
-  }
-
   .suggestions-list {
     list-style: none;
     margin: 0;
@@ -252,7 +245,6 @@ TEMPLATE.innerHTML = `
   >
     <div part="suggestions-header" class="popover-header">
       <span part="suggestions-title" class="popover-title">Suggestions</span>
-      <span part="suggestions-hint" class="popover-hint">↑↓ navigate · ↵ select · esc close</span>
     </div>
     <ul part="suggestions-list" class="suggestions-list" role="presentation"></ul>
   </div>
