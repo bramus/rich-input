@@ -176,8 +176,8 @@
               <p>Autocompletes both filter keywords (e.g. typing <code>a</code> suggests <code>artist:</code>, typing <code>s</code> suggests <code>style:</code>) and values (e.g. typing <code>label:"K</code> suggests <code>Keinemusik</code> and <code>Kranky</code>).</p>
             </div>
             <div class="feature-item">
-              <h3>📍 OpaqueRange Caret Positioning</h3>
-              <p>Anchors the autocomplete dropdown directly beneath the caret coordinates measured natively inside the <code>&lt;input&gt;</code> using <code>createValueRange(caret, caret).getBoundingClientRect()</code>.</p>
+              <h3>📍 OpaqueRange Positioning</h3>
+              <p>Anchors the autocomplete dropdown directly to the start of the current <code>OpaqueRange</code> (e.g. at the opening quotation mark of a value) using <code>range.getBoundingClientRect()</code>.</p>
             </div>
             <div class="feature-item">
               <h3>🎨 CSS Custom Highlight API</h3>
@@ -395,17 +395,15 @@
               When a user types inside <code>&lt;rich-search&gt;</code>:
             </p>
             <ol style="margin: 1rem 0 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
-              <li><strong>Caret Positioning:</strong> The component calls <code>input.createValueRange(caretPos, caretPos)</code> to create an <code>OpaqueRange</code> and queries <code>range.getBoundingClientRect()</code>. The suggestion popover is positioned at those exact pixel coordinates.</li>
+              <li><strong>Range Positioning:</strong> The component queries <code>range.getBoundingClientRect()</code> on the active value <code>OpaqueRange</code>. The suggestion popover is anchored at the start of the range (such as the opening quotation mark) rather than shifting with the cursor.</li>
               <li><strong>Live Highlighting:</strong> For every recognized keyword token (e.g. <code>label:"We Play House Recordings"</code>), the component creates a value range with <code>input.createValueRange(start, end)</code> and adds it to <code>new Highlight(range)</code>.</li>
               <li><strong>Resource Cleanup:</strong> When text mutations occur, previously created ranges are cleanly disconnected using <code>range.disconnect()</code>.</li>
             </ol>
 
-            <pre><code>// 1. Measuring caret position for the dropdown popover
-const caretRange = input.createValueRange(caretPos, caretPos);
-const rect = caretRange.getBoundingClientRect();
+            <pre><code>// 1. Measuring the start of the active range for the dropdown popover
+const rect = valueRange.getBoundingClientRect();
 popover.style.left = `${rect.left}px`;
-popover.style.top = `${rect.bottom + 4}px`;
-caretRange.disconnect();
+popover.style.top = `${rect.bottom + 6}px`;
 
 // 2. Highlighting keyword values with the Custom Highlight API
 const valueRange = input.createValueRange(valStart, valEnd);

@@ -4,21 +4,29 @@
  */
 
 /**
- * Gets caret coordinates relative to viewport.
+ * Gets caret or range coordinates relative to viewport.
+ * Accepts either an OpaqueRange instance or a character offset number.
  * @param {HTMLInputElement} input
- * @param {number} caretPos
+ * @param {number|OpaqueRange} [target] Caret position number or OpaqueRange
  * @returns {{ left: number, top: number, bottom: number, height: number, isCaret: boolean }}
  */
-export function getCaretCoordinates(input, caretPos) {
+export function getCaretCoordinates(input, target) {
   const inputRect = input.getBoundingClientRect();
   let rect = null;
-  let range = null;
+  let tempRange = null;
 
-  if (typeof input.createValueRange === 'function' && input.value.length > 0) {
+  if (target && typeof target.getBoundingClientRect === 'function') {
     try {
-      const pos = Math.max(0, Math.min(caretPos || 0, input.value.length));
-      range = input.createValueRange(pos, pos);
-      const r = range.getBoundingClientRect();
+      const r = target.getBoundingClientRect();
+      if (r.height > 0 || r.width > 0 || r.left > 0) {
+        rect = r;
+      }
+    } catch (e) {}
+  } else if (typeof input.createValueRange === 'function' && input.value.length > 0) {
+    try {
+      const pos = Math.max(0, Math.min(typeof target === 'number' ? target : 0, input.value.length));
+      tempRange = input.createValueRange(pos, pos);
+      const r = tempRange.getBoundingClientRect();
       if (r.height > 0 || r.width > 0 || r.left > 0) {
         rect = r;
       }
@@ -26,9 +34,9 @@ export function getCaretCoordinates(input, caretPos) {
   }
 
   // Clean up temporary measurement range
-  if (range) {
+  if (tempRange) {
     try {
-      range.disconnect();
+      tempRange.disconnect();
     } catch (e) {}
   }
 
@@ -54,6 +62,11 @@ export function getCaretCoordinates(input, caretPos) {
     isCaret: false,
   };
 }
+
+/**
+ * Alias for getCaretCoordinates that clearly conveys range support.
+ */
+export const getRangeCoordinates = getCaretCoordinates;
 
 /**
  * Positions popover at caret or input element.

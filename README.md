@@ -15,7 +15,7 @@ The `<rich-search>` component acts like a standard `<input type="text">` so user
 - **Dual Contextual Autocomplete**:
   - **Keywords**: Typing at the start of a token (e.g. typing `a`) suggests configured keywords like `artist:` and `style:`.
   - **Values**: Typing within a keyword value (e.g. `label:"K` or `label:K`) suggests matching options like `"Keinemusik"` and `"Kranky"`.
-- **Caret Geometry via OpaqueRange**: Positions autocomplete dropdown popovers directly beneath the user's cursor using `input.createValueRange(caret, caret).getBoundingClientRect()`.
+- **Range-Based Positioning via OpaqueRange**: Positions autocomplete dropdown popovers anchored to the start of the active `OpaqueRange` (e.g. at the opening quotation mark of a value) using `range.getBoundingClientRect()`, rather than shifting with the cursor.
 - **Native In-Input Highlighting via CSS Custom Highlight API**: Highlights keyword values inside the `<input>` control using standard CSS rules like `::highlight(label)` or `::highlight(year)` without brittle mirror-div overlays.
 - **Declarative Configuration via `<datalist>`**: Configure keywords and options purely in HTML by nesting standard `<datalist>` elements with `<option>` tags inside `<rich-search>`.
 - **Rich Option Markup**: Embed custom HTML markup (such as logos, images, icons, and avatars) directly inside `<option>` elements for rich, visual suggestion popovers.
@@ -40,7 +40,7 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(input)`: The native `<input type="text">` where users type.
 - `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
 - `::part(clear-button)`: The clear button (visible when text is present).
-- `::part(popover)`: The autocomplete dropdown popover container anchored to the caret via `OpaqueRange`.
+- `::part(popover)`: The autocomplete dropdown popover container anchored to the start of the active range via `OpaqueRange`.
 - `::part(suggestions-header)`: The header bar at the top of the suggestions popover.
 - `::part(suggestions-list)`: The `<ul>` container holding autocomplete suggestion items.
 - `::part(suggestion-item)`: Each suggestion `<li>` row.

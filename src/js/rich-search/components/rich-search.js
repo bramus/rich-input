@@ -529,6 +529,10 @@ export class RichSearch extends HTMLElement {
     return Array.from(this._configuredKeywords.values());
   }
 
+  getCurrentOpaqueRange() {
+    return this._getCurrentOpaqueRange();
+  }
+
   // --- Datalist Configuration Discovery ---
   _loadDatalists() {
     const datalists = this.querySelectorAll('datalist');
@@ -624,7 +628,7 @@ export class RichSearch extends HTMLElement {
         const start = highlightQuotes ? token.valueStart : token.innerStart;
         const end = highlightQuotes ? token.valueEnd : token.innerEnd;
 
-        if (end > start && end <= text.length) {
+        if (end >= start && end <= text.length) {
           try {
             const valRange = this._input.createValueRange(start, end);
             this._ownedRanges.push(valRange);
@@ -745,10 +749,52 @@ export class RichSearch extends HTMLElement {
     }
   }
 
+  _getCurrentOpaqueRange() {
+    if (!this._context || !isOpaqueRangeSupported) return null;
+
+    const { mode, token, caretPos } = this._context;
+
+    // 1. If in value mode, find the value's OpaqueRange in active keyword highlights
+    if (mode === 'value' && token) {
+      const kwData = this._activeKeywordHighlightMap.get(token.keywordLower);
+      if (kwData?.valueRanges?.length) {
+        const matched = kwData.valueRanges.find(r =>
+          r.startOffset === token.valueStart ||
+          (r.startOffset <= caretPos && r.endOffset >= token.valueStart)
+        );
+        if (matched) return matched;
+      }
+    }
+
+    // 2. If in keyword mode editing an existing keyword token, find keyword's OpaqueRange
+    if (mode === 'keyword' && token && token.type === 'keyword') {
+      const kwData = this._activeKeywordHighlightMap.get(token.keywordLower);
+      if (kwData?.keywordRanges?.length) {
+        const targetStart = token.keywordStart ?? token.start;
+        const matched = kwData.keywordRanges.find(r =>
+          r.startOffset === targetStart ||
+          (r.startOffset <= caretPos && r.endOffset >= targetStart)
+        );
+        if (matched) return matched;
+      }
+    }
+
+    // 3. Fallback to any owned range matching token.valueStart or token.start
+    if (token) {
+      const targetStart = mode === 'value' ? token.valueStart : (token.keywordStart ?? token.start);
+      const matched = this._ownedRanges.find(r => r.startOffset === targetStart);
+      if (matched) return matched;
+    }
+
+    return null;
+  }
+
   _onGlobalResizeOrScroll() {
     if (this._isPopoverOpen() && this._context) {
-      const caretCoords = getCaretCoordinates(this._input, this._context.caretPos);
-      positionPopover(this._popover, caretCoords, this._input);
+      const currentRange = this._getCurrentOpaqueRange();
+      const anchor = currentRange || (this._context.replaceStart !== undefined ? this._context.replaceStart : this._context.caretPos);
+      const anchorCoords = getCaretCoordinates(this._input, anchor);
+      positionPopover(this._popover, anchorCoords, this._input);
     }
   }
 
@@ -797,9 +843,11 @@ export class RichSearch extends HTMLElement {
       } catch (e) {}
     }
 
-    // Position using OpaqueRange caret coordinates
-    const caretCoords = getCaretCoordinates(this._input, context.caretPos);
-    positionPopover(this._popover, caretCoords, this._input);
+    // Position popover at the start of the current OpaqueRange
+    const currentRange = this._getCurrentOpaqueRange();
+    const anchor = currentRange || (context.replaceStart !== undefined ? context.replaceStart : context.caretPos);
+    const anchorCoords = getCaretCoordinates(this._input, anchor);
+    positionPopover(this._popover, anchorCoords, this._input);
   }
 
   hideSuggestions() {
