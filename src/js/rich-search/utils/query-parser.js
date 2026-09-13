@@ -290,9 +290,9 @@ export function getSuggestions(context, configuredKeywords) {
           keywordLabel: kwConfig.label || kwConfig.id,
           value: opt.value,
           label: opt.label || opt.value,
-          display: opt.label || opt.value,
+          display: opt.value,
           insertText: formatted,
-          description: opt.label !== opt.value ? opt.value : kwConfig.label || kwConfig.id,
+          description: (opt.label && opt.label !== opt.value) ? opt.label : '',
           dataType: kwConfig.dataType || 'string',
         });
       }

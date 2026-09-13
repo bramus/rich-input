@@ -821,7 +821,7 @@ export class RichSearch extends HTMLElement {
       const desc = document.createElement('span');
       desc.className = 'suggestion-desc';
       desc.setAttribute('part', 'suggestion-label');
-      desc.textContent = sug.description !== sug.display ? sug.description : '';
+      desc.textContent = (sug.description && sug.description !== sug.display) ? sug.description : '';
 
       content.appendChild(title);
       if (desc.textContent) content.appendChild(desc);
