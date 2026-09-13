@@ -646,7 +646,7 @@ export class RichInput extends HTMLElement {
           }
         }
 
-        // 2. Keyword prefix range (for ::highlight(rich-input-keyword) and ::highlight(rich-search-keyword))
+        // 2. Keyword prefix range (for ::highlight(rich-input-keyword))
         if (token.keywordEnd > token.keywordStart && token.keywordEnd <= text.length) {
           try {
             const kwRange = this._input.createValueRange(token.keywordStart, token.keywordEnd);
@@ -992,12 +992,6 @@ export class RichInput extends HTMLElement {
       composed: true,
       detail: selectDetail,
     }));
-    this.dispatchEvent(new CustomEvent('rich-search-select', {
-      bubbles: true,
-      composed: true,
-      detail: selectDetail,
-    }));
-
     // If a keyword was selected (e.g. `mix:`), immediately show value suggestions
     if (suggestion.type === 'keyword') {
       this.updateSuggestions('keyword-selected');
@@ -1006,6 +1000,4 @@ export class RichInput extends HTMLElement {
     }
   }
 }
-
-export class RichSearch extends RichInput {}
 

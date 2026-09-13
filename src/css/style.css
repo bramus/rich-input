@@ -43,8 +43,7 @@ body {
  * Applied to <rich-input> before the Custom Element is defined in the browser.
  * ==========================================================================
  */
-rich-input:not(:defined),
-rich-search:not(:defined) {
+rich-input:not(:defined) {
   display: block;
   font-family: var(--font-sans);
   background-color: var(--bg-surface);
@@ -86,8 +85,7 @@ rich-search:not(:defined) {
   color: oklch(0.3 0.14 145);
 }
 
-::highlight(rich-input-keyword),
-::highlight(rich-search-keyword) {
+::highlight(rich-input-keyword) {
   color: #64748b;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
 }
@@ -100,8 +98,7 @@ rich-search:not(:defined) {
  */
 
 /* Theme 1: Pill / Modern Minimal */
-rich-input.theme-pill::part(control),
-rich-search.theme-pill::part(control) {
+rich-input.theme-pill::part(control) {
   border-radius: 9999px;
   padding: 0 1.25rem;
   background: #ffffff;
@@ -109,66 +106,56 @@ rich-search.theme-pill::part(control) {
   box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
 }
 
-rich-input.theme-pill::part(input),
-rich-search.theme-pill::part(input) {
+rich-input.theme-pill::part(input) {
   font-weight: 500;
 }
 
-rich-input.theme-pill::part(popover),
-rich-search.theme-pill::part(popover) {
+rich-input.theme-pill::part(popover) {
   border-radius: 16px;
   border: 2px solid #bfdbfe;
   box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.15);
 }
 
 /* Theme 2: Terminal / Cyber */
-rich-input.theme-terminal::part(control),
-rich-search.theme-terminal::part(control) {
+rich-input.theme-terminal::part(control) {
   background: #0f172a;
   border: 1px solid #22c55e;
   border-radius: 4px;
   box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
 }
 
-rich-input.theme-terminal::part(icon),
-rich-search.theme-terminal::part(icon) {
+rich-input.theme-terminal::part(icon) {
   color: #22c55e;
 }
 
-rich-input.theme-terminal::part(input),
-rich-search.theme-terminal::part(input) {
+rich-input.theme-terminal::part(input) {
   font-family: var(--font-mono);
   color: #4ade80;
 }
 
-rich-input.theme-terminal::part(input)::placeholder,
-rich-search.theme-terminal::part(input)::placeholder {
+rich-input.theme-terminal::part(input)::placeholder {
   color: #166534;
 }
 
-rich-input.theme-terminal::part(popover),
-rich-search.theme-terminal::part(popover) {
+rich-input.theme-terminal::part(popover) {
   background: #0f172a;
   border: 1px solid #22c55e;
   color: #4ade80;
   border-radius: 4px;
 }
 
-rich-input.theme-terminal::part(suggestions-header),
-rich-search.theme-terminal::part(suggestions-header) {
+rich-input.theme-terminal::part(suggestions-header) {
   background: #1e293b;
   color: #22c55e;
   border-color: #334155;
 }
 
-rich-input.theme-terminal::part(suggestion-item-active),
-rich-search.theme-terminal::part(suggestion-item-active) {
+rich-input.theme-terminal::part(suggestion-item-active) {
   background: #1e293b;
 }
 
 /* Suggestion Image Styling via ::part */
-rich-input::part(suggestion-image),
-rich-search::part(suggestion-image) {
+rich-input::part(suggestion-image) {
   width: 2.5em;
   height: 2.5em;
   border-radius: 50%;

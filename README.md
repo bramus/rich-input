@@ -280,7 +280,7 @@ Values corresponding to configured keywords are registered into the global `CSS.
 }
 ```
 
-> **Note:** Supported CSS properties on `::highlight()` include `color`, `background-color`, `text-decoration`, `text-shadow`, `-webkit-text-stroke-color`, `-webkit-text-stroke-width`, and `-webkit-text-fill-color`. For backwards compatibility, `::highlight(rich-search-keyword)` is also registered.
+> **Note:** Supported CSS properties on `::highlight()` include `color`, `background-color`, `text-decoration`, `text-shadow`, `-webkit-text-stroke-color`, `-webkit-text-stroke-width`, and `-webkit-text-fill-color`.
 
 ---
 
@@ -370,7 +370,7 @@ rich-input::part(suggestion-item-active) {
 - `input`: Dispatched when the search value changes (bubbles, composed).
 - `change`: Dispatched on blur or when a search change is committed.
 - `search`: Dispatched when the user presses `Enter` with suggestions closed.
-- `rich-input-select`: Dispatched when an autocomplete suggestion is selected (also dispatched as `rich-search-select` for backwards compatibility).
+- `rich-input-select`: Dispatched when an autocomplete suggestion is selected.
   - `event.detail`: `{ type, keyword, value, label, query }`
 
 ---

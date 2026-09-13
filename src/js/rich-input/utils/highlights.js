@@ -77,27 +77,23 @@ class HighlightRegistryManager {
       }
     }
 
-    // 2. Set generic highlights (register both rich-input-* and legacy rich-search-*)
+    // 2. Set generic highlights
     if (allKeywordRanges.length > 0) {
       try {
         const kwHl = new Highlight(...allKeywordRanges);
         CSS.highlights.set('rich-input-keyword', kwHl);
-        CSS.highlights.set('rich-search-keyword', kwHl);
       } catch (e) {}
     } else {
       CSS.highlights.delete('rich-input-keyword');
-      CSS.highlights.delete('rich-search-keyword');
     }
 
     if (allValueRanges.length > 0) {
       try {
         const valHl = new Highlight(...allValueRanges);
         CSS.highlights.set('rich-input-value', valHl);
-        CSS.highlights.set('rich-search-value', valHl);
       } catch (e) {}
     } else {
       CSS.highlights.delete('rich-input-value');
-      CSS.highlights.delete('rich-search-value');
     }
   }
 }

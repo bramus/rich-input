@@ -100,7 +100,6 @@ export class RichInputDemoApp {
 
     this.playground.addEventListener('input', updateInspector);
     this.playground.addEventListener('rich-input-select', updateInspector);
-    this.playground.addEventListener('rich-search-select', updateInspector);
     this.playground.addEventListener('keyup', updateInspector);
     this.playground.addEventListener('click', updateInspector);
 
@@ -112,7 +111,7 @@ export class RichInputDemoApp {
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const query = btn.getAttribute('data-preset');
-        const target = btn.closest('.card')?.querySelector('rich-input, rich-search') || this.demoSearch || this.playground;
+        const target = btn.closest('.card')?.querySelector('rich-input') || this.demoSearch || this.playground;
         if (target) {
           target.value = query;
           target.focus();
@@ -129,7 +128,7 @@ export class RichInputDemoApp {
       e.preventDefault();
       const formData = new FormData(this.demoForm);
       const query = formData.get('q');
-      const searchEl = this.demoForm.querySelector('rich-input, rich-search');
+      const searchEl = this.demoForm.querySelector('rich-input');
       const parsed = searchEl ? searchEl.getParsedQuery() : null;
 
       this.formResult.hidden = false;
@@ -150,7 +149,7 @@ export class RichInputDemoApp {
         return;
       }
 
-      const targets = document.querySelectorAll('rich-input, rich-search');
+      const targets = document.querySelectorAll('rich-input');
       if (targets.length === 0) return;
 
       const createBpmDatalist = () => {
@@ -211,8 +210,6 @@ export class RichInputDemoApp {
     sections.forEach((sec) => observer.observe(sec));
   }
 }
-
-export const RichSearchDemoApp = RichInputDemoApp;
 
 // Auto-instantiate on DOM load
 if (typeof document !== 'undefined') {
