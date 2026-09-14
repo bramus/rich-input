@@ -86,6 +86,7 @@ Nest `<datalist>` elements inside `<rich-input>` to configure keywords and autoc
     <option value="Kranky"></option>
     <option value="Madhouse Records"></option>
     <option value="Ninja Tune"></option>
+    <option value="Warp Records"></option>
     <option value="We Play House Recordings"></option>
     <option value="XL Recordings"></option>
   </datalist>
@@ -148,6 +149,10 @@ Datalists can be added, updated, or removed dynamically at runtime; `<rich-input
     <option value="Ninja Tune">
       <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
       Ninja Tune
+    </option>
+    <option value="Warp Records">
+      <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+      Warp Records
     </option>
     <option value="We Play House Recordings">
       <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
@@ -245,7 +250,7 @@ In browsers without `OpaqueRange` that support the CSS Custom Highlight API (suc
 Values corresponding to configured keywords are registered into the global `CSS.highlights` registry and styled using standard CSS `::highlight(keyword)` pseudo-elements in your stylesheet:
 
 ```css
-/* Style the value set in label:"XL Recordings" */
+/* Style the value set in label:"Warp Records" */
 ::highlight(label) {
   background-color: oklch(0.92 0.08 240);
   color: oklch(0.28 0.14 240);
@@ -282,7 +287,7 @@ In browsers using the `[contenteditable]` fallback inside Shadow DOM (such as Sa
 For self-contained widgets or instance-specific style overrides, `<rich-input>` also supports an optional embedded `<style>` block as a direct child, which is automatically injected into the shadow root:
 
 ```html
-<rich-input value='artist:"Aphex Twin" label:"XL Recordings"'>
+<rich-input value='artist:"Aphex Twin" label:"Warp Records"'>
   <style>
     ::highlight(label) {
       background-color: #dbeafe;

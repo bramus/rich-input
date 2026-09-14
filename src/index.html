@@ -100,7 +100,7 @@
               <span class="card-title">Live Demonstration</span>
             </div>
 
-            <rich-input id="demo-search" value='ambient artist:"Aphex Twin" label:"XL Recordings"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+            <rich-input id="demo-search" value='ambient artist:"Aphex Twin" label:"Warp Records"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
               <datalist id="label" label="Record Label">
                 <option value="Defected">
                   <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -121,6 +121,10 @@
                 <option value="Ninja Tune">
                   <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
                   Ninja Tune
+                </option>
+                <option value="Warp Records">
+                  <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                  Warp Records
                 </option>
                 <option value="We Play House Recordings">
                   <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
@@ -179,7 +183,7 @@
               <button type="button" class="btn" data-preset='artist:"Four Tet" year:2024 style:"Ambient"'>
                 🎧 Artist &amp; Style Search
               </button>
-              <button type="button" class="btn" data-preset='ambient artist:"Aphex Twin" label:"XL Recordings"'>
+              <button type="button" class="btn" data-preset='ambient artist:"Aphex Twin" label:"Warp Records"'>
                 🌌 Free Text + Keywords
               </button>
             </div>
@@ -258,6 +262,7 @@
     &lt;option value="Kranky"&gt;&lt;/option&gt;
     &lt;option value="Madhouse Records"&gt;&lt;/option&gt;
     &lt;option value="Ninja Tune"&gt;&lt;/option&gt;
+    &lt;option value="Warp Records"&gt;&lt;/option&gt;
     &lt;option value="We Play House Recordings"&gt;&lt;/option&gt;
     &lt;option value="XL Recordings"&gt;&lt;/option&gt;
   &lt;/datalist&gt;
@@ -361,6 +366,13 @@
         alt="Ninja Tune Logo"&gt;
       Ninja Tune
     &lt;/option&gt;
+    &lt;option value="Warp Records"&gt;
+      &lt;img
+        src="assets/warp-records.png"
+        height="50" width="50"
+        alt="Warp Records Logo"&gt;
+      Warp Records
+    &lt;/option&gt;
     &lt;option value="We Play House Recordings"&gt;
       &lt;img
         src="assets/we-play-house-recordings.jpg"
@@ -401,6 +413,10 @@
                 <option value="Ninja Tune">
                   <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
                   Ninja Tune
+                </option>
+                <option value="Warp Records">
+                  <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                  Warp Records
                 </option>
                 <option value="We Play House Recordings">
                   <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
@@ -459,7 +475,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
           </p>
 
           <div class="card">
-            <pre><code>/* Style the value set in label:"XL Recordings" */
+            <pre><code>/* Style the value set in label:"Warp Records" */
 ::highlight(label) {
   background-color: oklch(0.92 0.08 240);
   color: oklch(0.28 0.14 240);
@@ -1077,6 +1093,10 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                     <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
                     Ninja Tune
                   </option>
+                  <option value="Warp Records">
+                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                    Warp Records
+                  </option>
                   <option value="We Play House Recordings">
                     <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
                     We Play House Recordings
@@ -1226,6 +1246,10 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                     <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
                     Ninja Tune
                   </option>
+                  <option value="Warp Records">
+                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                    Warp Records
+                  </option>
                   <option value="We Play House Recordings">
                     <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
                     We Play House Recordings
@@ -1317,6 +1341,13 @@ rich-input.theme-terminal::part(input) {
                     height="50" width="50"
                     alt="Ninja Tune Logo">
                   Ninja Tune
+                </option>
+                <option value="Warp Records">
+                  <img
+                    src="assets/warp-records.png"
+                    height="50" width="50"
+                    alt="Warp Records Logo">
+                  Warp Records
                 </option>
                 <option value="We Play House Recordings">
                   <img
