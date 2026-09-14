@@ -764,7 +764,7 @@ export class RichInput extends HTMLElement {
         const start = highlightQuotes ? token.valueStart : token.innerStart;
         const end = highlightQuotes ? token.valueEnd : token.innerEnd;
 
-        if (end >= start && end <= text.length) {
+        if (end > start && end <= text.length) {
           try {
             const valRange = this._input.createValueRange(start, end);
             this._ownedRanges.push(valRange);

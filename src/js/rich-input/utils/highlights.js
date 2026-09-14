@@ -13,6 +13,17 @@ export const isHighlightSupported =
   typeof CSS !== 'undefined' &&
   'highlights' in CSS;
 
+function isRangeCollapsed(range) {
+  if (!range) return true;
+  if (range.collapsed === true) return true;
+  if (typeof range.startOffset === 'number' && typeof range.endOffset === 'number') {
+    if (range.startOffset === range.endOffset && range.startContainer === range.endContainer) {
+      return true;
+    }
+  }
+  return false;
+}
+
 class HighlightRegistryManager {
   constructor() {
     this.instances = new Set();
@@ -77,6 +88,7 @@ class HighlightRegistryManager {
         hl.clear();
         for (const r of ranges) {
           try {
+            if (isRangeCollapsed(r)) continue;
             hl.add(r);
           } catch (e) {}
         }
@@ -95,6 +107,7 @@ class HighlightRegistryManager {
       kwHl.clear();
       for (const r of allKeywordRanges) {
         try {
+          if (isRangeCollapsed(r)) continue;
           kwHl.add(r);
         } catch (e) {}
       }
@@ -111,6 +124,7 @@ class HighlightRegistryManager {
       valHl.clear();
       for (const r of allValueRanges) {
         try {
+          if (isRangeCollapsed(r)) continue;
           valHl.add(r);
         } catch (e) {}
       }
