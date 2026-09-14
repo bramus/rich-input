@@ -15,14 +15,14 @@ The `<rich-input>` component is a rich input field that acts like a standard `<i
 - **Dual Contextual Autocomplete**:
   - **Keywords**: Typing at the start of a token (e.g. typing `a`) suggests configured keywords like `artist:` and `style:`.
   - **Values**: Typing within a keyword value (e.g. `label:"K` or `label:K`) suggests matching options like `"Keinemusik"` and `"Kranky"`.
-- **Range-Based Positioning via OpaqueRange**: Positions autocomplete dropdown popovers anchored to the start of the active `OpaqueRange` (e.g. at the opening quotation mark of a value) using `range.getBoundingClientRect()`, rather than shifting with the cursor.
+- **Range-Based Positioning via OpaqueRange**: Positions autocomplete dropdown popovers anchored to the start of the active `OpaqueRange` (e.g. at the opening quotation mark of a value) using `range.getBoundingClientRect()`, rather than shifting with the cursor (with a hidden mirror-div fallback in unsupported browsers).
 - **Native In-Input Highlighting via CSS Custom Highlight API**: Highlights keyword values inside the `<input>` control using standard CSS rules like `::highlight(label)` or `::highlight(year)` without brittle mirror-div overlays.
 - **Declarative Configuration via `<datalist>`**: Configure keywords and options purely in HTML by nesting standard `<datalist>` elements with `<option>` tags inside `<rich-input>`.
 - **Rich Option Markup**: Embed custom HTML markup (such as logos, images, icons, and avatars) directly inside `<option>` elements for rich, visual suggestion popovers.
 - **Form Associated**: Implements `static formAssociated = true` and `ElementInternals` to participate seamlessly in `<form>` submission, `FormData`, and form reset lifecycles.
 - **Shadow Parts Theming (`::part`)**: Full CSS customizability using `::part(input)`, `::part(control)`, `::part(popover)`, `::part(suggestion-item)`, etc.
 - **Accessible (W3C Combobox Pattern)**: ARIA 1.2 compliant combobox with keyboard navigation (`ArrowUp`, `ArrowDown`, `Enter`, `Tab`, `Escape`), `aria-expanded`, and `aria-activedescendant`.
-- **Graceful Fallback**: Automatically feature-detects `createValueRange` and gracefully falls back to control-aligned popovers in environments without OpaqueRange.
+- **Graceful Fallback**: Automatically feature-detects `createValueRange`. In browsers without `OpaqueRange` support, it uses a hidden mirror-div text measurement fallback to determine the popover's left position.
 
 ---
 
@@ -40,7 +40,7 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(input)`: The native `<input type="text">` where users type.
 - `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
 - `::part(clear-button)`: The clear button (visible when text is present).
-- `::part(popover)`: The autocomplete dropdown popover container anchored to the start of the active range via `OpaqueRange`.
+- `::part(popover)`: The autocomplete dropdown popover container anchored to the start of the active range via `OpaqueRange` (or mirror-div fallback).
 - `::part(suggestions-header)`: The header bar at the top of the suggestions popover.
 - `::part(suggestions-list)`: The `<ul>` container holding autocomplete suggestion items.
 - `::part(suggestion-item)`: Each suggestion `<li>` row.
@@ -233,7 +233,7 @@ const highlight = new Highlight(valueRange);
 CSS.highlights.set('label', highlight);
 ```
 
-`<rich-input>` automatically checks `typeof HTMLInputElement.prototype.createValueRange === 'function'`. On supported browsers, caret tracking and `::highlight()` are applied natively. On browsers without `createValueRange`, `<rich-input>` falls back to input-relative popover positioning.
+`<rich-input>` automatically checks `typeof HTMLInputElement.prototype.createValueRange === 'function'`. On supported browsers, caret tracking and `::highlight()` are applied natively via `OpaqueRange`. On browsers without `createValueRange`, `<rich-input>` falls back to measuring the input's partial text using a hidden mirror `<div>` to determine the popover's left anchor position.
 
 ---
 

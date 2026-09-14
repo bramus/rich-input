@@ -6,7 +6,7 @@
 import { RichInput } from './components/rich-input.js';
 import { parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion } from './utils/query-parser.js';
 import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from './utils/highlights.js';
-import { getCaretCoordinates, getRangeCoordinates, positionPopover } from './utils/positioning.js';
+import { getCaretCoordinates, getRangeCoordinates, positionPopover, getCaretLeftWithMirrorDiv } from './utils/positioning.js';
 
 if (typeof customElements !== 'undefined') {
   if (!customElements.get('rich-input')) {
@@ -27,6 +27,7 @@ export {
   getCaretCoordinates,
   getRangeCoordinates,
   positionPopover,
+  getCaretLeftWithMirrorDiv,
 };
 
 export default RichInput;

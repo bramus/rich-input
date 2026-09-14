@@ -200,7 +200,7 @@
             </div>
             <div class="feature-item">
               <h3>📍 OpaqueRange Positioning</h3>
-              <p>Anchors the autocomplete dropdown directly to the start of the current <code>OpaqueRange</code> (e.g. at the opening quotation mark of a value) using <code>range.getBoundingClientRect()</code>.</p>
+              <p>Anchors the autocomplete dropdown directly to the start of the current <code>OpaqueRange</code> (e.g. at the opening quotation mark of a value) using <code>range.getBoundingClientRect()</code> (with a hidden mirror-div fallback for browsers without <code>OpaqueRange</code> support).</p>
             </div>
             <div class="feature-item">
               <h3>🎨 CSS Custom Highlight API</h3>
@@ -430,7 +430,7 @@
               When a user types inside <code>&lt;rich-input&gt;</code>:
             </p>
             <ol style="margin: 1rem 0 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
-              <li><strong>Range Positioning:</strong> The component queries <code>range.getBoundingClientRect()</code> on the active value <code>OpaqueRange</code>. The suggestion popover is anchored at the start of the range (such as the opening quotation mark) rather than shifting with the cursor.</li>
+              <li><strong>Range Positioning:</strong> The component queries <code>range.getBoundingClientRect()</code> on the active value <code>OpaqueRange</code>. The suggestion popover is anchored at the start of the range (such as the opening quotation mark) rather than shifting with the cursor. In browsers without <code>OpaqueRange</code> support, it seamlessly falls back to calculating the left position via a hidden mirror <code>&lt;div&gt;</code>.</li>
               <li><strong>Live Highlighting:</strong> For every recognized keyword token (e.g. <code>label:"We Play House Recordings"</code>), the component creates a value range with <code>input.createValueRange(start, end)</code> and adds it to <code>new Highlight(range)</code>.</li>
               <li><strong>Resource Cleanup:</strong> When text mutations occur, previously created ranges are cleanly disconnected using <code>range.disconnect()</code>.</li>
             </ol>
@@ -444,6 +444,10 @@ popover.style.top = `${rect.bottom + 6}px`;
 const valueRange = input.createValueRange(valStart, valEnd);
 const labelHighlight = new Highlight(valueRange);
 CSS.highlights.set('label', labelHighlight);</code></pre>
+
+            <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: #f8fafc; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.9rem; color: #334155;">
+              <strong>Cross-browser fallback:</strong> In browsers without <code>OpaqueRange</code> support, <code>&lt;rich-input&gt;</code> falls back to measuring the input's partial text using a hidden mirror <code>&lt;div&gt;</code> to accurately calculate the left anchor position for the suggestion popover.
+            </div>
           </div>
         </section>
 

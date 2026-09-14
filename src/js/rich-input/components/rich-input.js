@@ -290,6 +290,7 @@ export class RichInput extends HTMLElement {
     this.shadowRoot.appendChild(TEMPLATE.content.cloneNode(true));
 
     this._input = this.shadowRoot.querySelector('.search-input');
+
     this._popover = this.shadowRoot.querySelector('.popover');
     this._popoverTitle = this.shadowRoot.querySelector('.popover-title');
     this._suggestionsList = this.shadowRoot.querySelector('.suggestions-list');
@@ -592,6 +593,11 @@ export class RichInput extends HTMLElement {
     this.updateHighlights();
   }
 
+  // --- Public Properties ---
+  get inputElement() {
+    return this._input;
+  }
+
   // --- Highlighting with OpaqueRange & Custom Highlight API ---
   _disconnectOwnedRanges() {
     for (const r of this._ownedRanges) {
@@ -851,7 +857,7 @@ export class RichInput extends HTMLElement {
       } catch (e) {}
     }
 
-    // Position popover at the start of the current OpaqueRange
+    // Position popover at the start of the current OpaqueRange (or via mirror-div fallback when OpaqueRange is unsupported)
     const currentRange = this._getCurrentOpaqueRange();
     const anchor = currentRange || (context.replaceStart !== undefined ? context.replaceStart : context.caretPos);
     const anchorCoords = getCaretCoordinates(this._input, anchor);

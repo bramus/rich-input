@@ -40,8 +40,8 @@ export class RichInputDemoApp {
     } else {
       this.apiBanner.className = 'api-banner unsupported';
       this.apiBanner.innerHTML = `
-        <span class="api-banner-badge">Notice</span>
-        <span><strong>OpaqueRange API:</strong> Not detected in this browser engine. The component is gracefully falling back to standard element-relative positioning. Use Chromium 152+ (Chrome/Edge) to experience native caret anchoring and input text highlighting.</span>
+        <span class="api-banner-badge">Fallback</span>
+        <span><strong>OpaqueRange API:</strong> Not detected in this browser engine. The component is gracefully falling back to a hidden mirror-div text measurement trick to position the popover. In-input syntax highlighting requires the OpaqueRange API (available in Chromium 152+).</span>
       `;
     }
   }
@@ -93,7 +93,7 @@ export class RichInputDemoApp {
         this.caretInfo.innerHTML = `
           <span><strong>Caret index:</strong> ${caretPos}</span> · 
           <span><strong>Viewport rect:</strong> X: ${Math.round(coords.left)}, Y: ${Math.round(coords.bottom)}</span> · 
-          <span><strong>OpaqueRange anchor:</strong> ${coords.isCaret ? '✓ Active' : 'Fallback'}</span>
+          <span><strong>OpaqueRange anchor:</strong> ${coords.isCaret ? '✓ Active' : 'Fallback (Mirror div)'}</span>
         `;
       }
     };
