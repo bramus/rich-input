@@ -446,7 +446,7 @@ const labelHighlight = new Highlight(valueRange);
 CSS.highlights.set('label', labelHighlight);</code></pre>
 
             <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: #f8fafc; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.9rem; color: #334155;">
-              <strong>Cross-browser fallback:</strong> In browsers without <code>OpaqueRange</code> support, <code>&lt;rich-input&gt;</code> falls back to measuring the input's partial text using a hidden mirror <code>&lt;div&gt;</code> to accurately calculate the left anchor position for the suggestion popover.
+              <strong>Cross-browser fallback:</strong> In browsers with no <code>OpaqueRange</code> support but with CSS Custom Highlight API support (such as Safari 17.2+ and Firefox 141+), <code>&lt;rich-input&gt;</code> automatically falls back to an adapted <code>[contenteditable]</code> element inside its shadow DOM to provide in-input <code>::highlight()</code> syntax highlighting, while using a hidden mirror <code>&lt;div&gt;</code> to position the suggestions popover.
             </div>
           </div>
         </section>
@@ -455,11 +455,11 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
         <section id="custom-highlights">
           <h2>Custom Highlights Styling</h2>
           <p class="section-desc">
-            Values for each configured keyword can be styled using standard CSS <code>::highlight(keyword)</code> pseudo-elements:
+            Values for each configured keyword can be styled using standard CSS <code>::highlight(keyword)</code> pseudo-elements in your stylesheet:
           </p>
 
           <div class="card">
-            <pre><code>/* Style the value set in label:"We Play House Recordings" */
+            <pre><code>/* Style the value set in label:"XL Recordings" */
 ::highlight(label) {
   background-color: oklch(0.92 0.08 240);
   color: oklch(0.28 0.14 240);
@@ -472,17 +472,26 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
   color: oklch(0.35 0.14 85);
 }
 
-/* Style genre filters */
-::highlight(genre) {
-  background-color: oklch(0.93 0.1 145);
-  color: oklch(0.3 0.14 145);
+/* Style artist names */
+::highlight(artist) {
+  background-color: oklch(0.92 0.1 320);
+  color: oklch(0.32 0.14 320);
 }
 
-/* Generic prefix highlight for any keyword identifier */
+/* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
 ::highlight(rich-input-keyword) {
   color: #64748b;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
 }</code></pre>
           </div>
+
+          <p class="section-desc" style="margin-top: 1.5rem;">
+            <strong>Cross-engine compatibility:</strong> In browsers where the component falls back to a <code>[contenteditable]</code> element inside its Shadow DOM (such as Safari and Firefox), <code>&lt;rich-input&gt;</code> automatically syncs document-level <code>::highlight()</code> rules into its shadow stylesheet to ensure highlights apply across shadow boundaries without extra markup.
+          </p>
+
+          <p class="section-desc">
+            Alternatively, for self-contained components or instance-specific styles, <code>&lt;rich-input&gt;</code> also accepts an optional embedded <code>&lt;style&gt;</code> block as a direct child, which is automatically injected into the shadow root.
+          </p>
         </section>
 
         <!-- Parts Styling Section -->

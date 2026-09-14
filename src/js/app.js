@@ -2,7 +2,7 @@
  * <rich-input> Demo Application Controller
  */
 
-import { RichInput, isOpaqueRangeSupported, isHighlightSupported, getCaretCoordinates } from './rich-input/index.js';
+import { RichInput, isOpaqueRangeSupported, isHighlightSupported, isContentEditableFallbackActive, getCaretCoordinates } from './rich-input/index.js';
 
 export class RichInputDemoApp {
   constructor() {
@@ -35,13 +35,19 @@ export class RichInputDemoApp {
       this.apiBanner.className = 'api-banner supported';
       this.apiBanner.innerHTML = `
         <span class="api-banner-badge">Active</span>
-        <span><strong>OpaqueRange API & CSS Custom Highlight API:</strong> Supported in this browser. Native caret coordinates and <code>::highlight()</code> syntax highlighting are fully operational.</span>
+        <span><strong>OpaqueRange API & CSS Custom Highlight API:</strong> Supported in this browser. Native caret coordinates and <code>::highlight()</code> syntax highlighting on <code>&lt;input&gt;</code> are fully operational.</span>
+      `;
+    } else if (isHighlightSupported) {
+      this.apiBanner.className = 'api-banner fallback';
+      this.apiBanner.innerHTML = `
+        <span class="api-banner-badge">Fallback</span>
+        <span><strong>OpaqueRange API not available:</strong> The component falls back to an adapted <code>[contenteditable]</code> element for in-input <code>::highlight()</code> syntax highlighting, and a mirror-div text measurement fallback to position the popover.</span>
       `;
     } else {
       this.apiBanner.className = 'api-banner unsupported';
       this.apiBanner.innerHTML = `
-        <span class="api-banner-badge">Fallback</span>
-        <span><strong>OpaqueRange API:</strong> Not detected in this browser engine. The component is gracefully falling back to a hidden mirror-div text measurement trick to position the popover. In-input syntax highlighting requires the OpaqueRange API (available in Chromium 152+).</span>
+        <span class="api-banner-badge">Notice</span>
+        <span><strong>OpaqueRange API & CSS Custom Highlight API not available:</strong> The component falls back to a hidden mirror-div text measurement trick to position the popover. No highlighting is done.</span>
       `;
     }
   }
@@ -51,7 +57,7 @@ export class RichInputDemoApp {
 
     const updateInspector = () => {
       const parsed = this.playground.getParsedQuery();
-      const input = this.playground.shadowRoot.querySelector('input');
+      const input = this.playground.inputElement || this.playground.shadowRoot.querySelector('.search-input');
       const caretPos = input ? input.selectionStart : 0;
       const coords = input ? getCaretCoordinates(input, caretPos) : { left: 0, top: 0, bottom: 0 };
 
@@ -93,7 +99,7 @@ export class RichInputDemoApp {
         this.caretInfo.innerHTML = `
           <span><strong>Caret index:</strong> ${caretPos}</span> · 
           <span><strong>Viewport rect:</strong> X: ${Math.round(coords.left)}, Y: ${Math.round(coords.bottom)}</span> · 
-          <span><strong>OpaqueRange anchor:</strong> ${coords.isCaret ? '✓ Active' : 'Fallback (Mirror div)'}</span>
+          <span><strong>Highlight engine:</strong> ${isOpaqueRangeSupported ? 'OpaqueRange (native)' : (isHighlightSupported ? 'contenteditable + Custom Highlights' : 'Mirror div')}</span>
         `;
       }
     };

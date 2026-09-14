@@ -6,6 +6,7 @@
 import { parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion } from '../utils/query-parser.js';
 import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from '../utils/highlights.js';
 import { getCaretCoordinates, positionPopover } from '../utils/positioning.js';
+import { setupContentEditableAdapter, isContentEditableFallbackActive } from '../utils/contenteditable-adapter.js';
 
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
@@ -89,10 +90,39 @@ TEMPLATE.innerHTML = `
     line-height: 1.5;
     padding: 0.625rem 0;
     color: var(--ri-input-color, var(--rs-input-color, #111827));
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    box-sizing: border-box;
+  }
+
+  .search-input::-webkit-scrollbar {
+    display: none;
   }
 
   .search-input::placeholder {
     color: var(--ri-placeholder-color, var(--rs-placeholder-color, #9ca3af));
+  }
+
+  /* Contenteditable empty placeholder fallback */
+  .search-input:empty::before {
+    content: attr(data-placeholder);
+    color: var(--ri-placeholder-color, var(--rs-placeholder-color, #9ca3af));
+    pointer-events: none;
+    display: inline-block;
+  }
+
+  /* Generic prefix highlight for keywords */
+  ::highlight(rich-input-keyword) {
+    color: var(--ri-keyword-color, #64748b);
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Visually hide datalists and custom style tags in slot */
+  ::slotted(datalist),
+  ::slotted(style) {
+    display: none !important;
   }
 
   .clear-button {
@@ -266,6 +296,45 @@ TEMPLATE.innerHTML = `
 </div>
 `;
 
+function extractHighlightRules(rules) {
+  let css = '';
+  for (const rule of rules) {
+    try {
+      if (rule.cssRules && rule.cssRules.length > 0) {
+        css += extractHighlightRules(rule.cssRules);
+      } else if (rule.cssText && rule.cssText.includes('::highlight')) {
+        css += rule.cssText + '\n';
+      }
+    } catch (e) {}
+  }
+  return css;
+}
+
+function syncDocumentHighlightStyles(shadowRoot) {
+  if (typeof document === 'undefined' || !shadowRoot || !isContentEditableFallbackActive) return;
+  try {
+    let highlightCss = '';
+    for (const sheet of document.styleSheets) {
+      try {
+        if (sheet.cssRules) {
+          highlightCss += extractHighlightRules(sheet.cssRules);
+        }
+      } catch (e) {}
+    }
+    if (highlightCss) {
+      let styleEl = shadowRoot.getElementById('ri-synced-highlight-styles');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'ri-synced-highlight-styles';
+        shadowRoot.appendChild(styleEl);
+      }
+      if (styleEl.textContent !== highlightCss) {
+        styleEl.textContent = highlightCss;
+      }
+    }
+  } catch (e) {}
+}
+
 export class RichInput extends HTMLElement {
   static formAssociated = true;
 
@@ -289,7 +358,25 @@ export class RichInput extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.shadowRoot.appendChild(TEMPLATE.content.cloneNode(true));
 
-    this._input = this.shadowRoot.querySelector('.search-input');
+    // In browsers lacking OpaqueRange but supporting CSS Custom Highlights (Safari 17.2+, Firefox 141+),
+    // swap in a [contenteditable] element to expose standard DOM Text nodes for Custom Highlights.
+    const useContentEditable = isContentEditableFallbackActive;
+    if (useContentEditable) {
+      const existingInput = this.shadowRoot.querySelector('.search-input');
+      const editableDiv = document.createElement('div');
+      editableDiv.className = 'search-input';
+      editableDiv.setAttribute('part', 'input');
+      editableDiv.setAttribute('role', 'combobox');
+      editableDiv.setAttribute('aria-autocomplete', 'list');
+      editableDiv.setAttribute('aria-expanded', 'false');
+      editableDiv.setAttribute('aria-haspopup', 'listbox');
+      editableDiv.setAttribute('spellcheck', 'false');
+      editableDiv.setAttribute('tabindex', '0');
+      existingInput.replaceWith(editableDiv);
+      this._input = setupContentEditableAdapter(editableDiv, this);
+    } else {
+      this._input = this.shadowRoot.querySelector('.search-input');
+    }
 
     this._popover = this.shadowRoot.querySelector('.popover');
     this._popoverTitle = this.shadowRoot.querySelector('.popover-title');
@@ -318,15 +405,18 @@ export class RichInput extends HTMLElement {
   }
 
   connectedCallback() {
+    this._syncInjectedStyles();
+    syncDocumentHighlightStyles(this.shadowRoot);
     highlightManager.register(this);
 
     // Parse initial datalists
     this._loadDatalists();
 
-    // Listen to changes on light DOM datalists
+    // Listen to changes on light DOM datalists and style tags
     this._slot.addEventListener('slotchange', this._onSlotChange);
     this._mutationObserver = new MutationObserver(() => {
       this._loadDatalists();
+      this._syncInjectedStyles();
       this.updateHighlights();
     });
     this._mutationObserver.observe(this, { childList: true, subtree: true, attributes: true, characterData: true });
@@ -588,8 +678,34 @@ export class RichInput extends HTMLElement {
     this._configuredKeywords = newMap;
   }
 
+  // --- Injected <style> Synchronization ---
+  _syncInjectedStyles() {
+    const styleEls = this.querySelectorAll('style');
+    let customCss = '';
+    for (const styleEl of styleEls) {
+      if (styleEl.textContent) {
+        customCss += styleEl.textContent + '\n';
+      }
+    }
+
+    let targetStyle = this.shadowRoot.getElementById('ri-injected-styles');
+    if (customCss.trim()) {
+      if (!targetStyle) {
+        targetStyle = document.createElement('style');
+        targetStyle.id = 'ri-injected-styles';
+        this.shadowRoot.appendChild(targetStyle);
+      }
+      if (targetStyle.textContent !== customCss) {
+        targetStyle.textContent = customCss;
+      }
+    } else if (targetStyle) {
+      targetStyle.remove();
+    }
+  }
+
   _onSlotChange() {
     this._loadDatalists();
+    this._syncInjectedStyles();
     this.updateHighlights();
   }
 
@@ -612,9 +728,15 @@ export class RichInput extends HTMLElement {
   updateHighlights() {
     this._disconnectOwnedRanges();
 
-    if (!isOpaqueRangeSupported || !isHighlightSupported) {
+    if (!isHighlightSupported) {
       return;
     }
+    if (!isOpaqueRangeSupported && typeof this._input?.createValueRange !== 'function') {
+      return;
+    }
+
+    this._syncInjectedStyles();
+    syncDocumentHighlightStyles(this.shadowRoot);
 
     const text = this._input.value;
     if (!text) {
@@ -745,7 +867,10 @@ export class RichInput extends HTMLElement {
     }, 150);
   }
 
-  _onClick() {
+  _onClick(e) {
+    if (e && typeof e.clientX === 'number' && typeof this._input?.updateCaretFromPoint === 'function') {
+      this._input.updateCaretFromPoint(e.clientX, e.clientY);
+    }
     this.updateSuggestions('click');
   }
 
@@ -764,7 +889,8 @@ export class RichInput extends HTMLElement {
   }
 
   _getCurrentOpaqueRange() {
-    if (!this._context || !isOpaqueRangeSupported) return null;
+    if (!this._context) return null;
+    if (!isOpaqueRangeSupported && typeof this._input?.createValueRange !== 'function') return null;
 
     const { mode, token, caretPos } = this._context;
 

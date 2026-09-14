@@ -22,7 +22,7 @@ The `<rich-input>` component is a rich input field that acts like a standard `<i
 - **Form Associated**: Implements `static formAssociated = true` and `ElementInternals` to participate seamlessly in `<form>` submission, `FormData`, and form reset lifecycles.
 - **Shadow Parts Theming (`::part`)**: Full CSS customizability using `::part(input)`, `::part(control)`, `::part(popover)`, `::part(suggestion-item)`, etc.
 - **Accessible (W3C Combobox Pattern)**: ARIA 1.2 compliant combobox with keyboard navigation (`ArrowUp`, `ArrowDown`, `Enter`, `Tab`, `Escape`), `aria-expanded`, and `aria-activedescendant`.
-- **Graceful Fallback**: Automatically feature-detects `createValueRange`. In browsers without `OpaqueRange` support, it uses a hidden mirror-div text measurement fallback to determine the popover's left position.
+- **Graceful Fallback**: Automatically feature-detects browser capabilities. In browsers with no `OpaqueRange` support but with CSS Custom Highlight API support (e.g. Safari 17.2+, Firefox 141+), it falls back to an adapted `[contenteditable]` element to provide in-input syntax highlighting via standard DOM `Range`s. In environments without `OpaqueRange`, dropdown popovers are positioned using a hidden mirror-div measurement fallback.
 
 ---
 
@@ -233,16 +233,18 @@ const highlight = new Highlight(valueRange);
 CSS.highlights.set('label', highlight);
 ```
 
-`<rich-input>` automatically checks `typeof HTMLInputElement.prototype.createValueRange === 'function'`. On supported browsers, caret tracking and `::highlight()` are applied natively via `OpaqueRange`. On browsers without `createValueRange`, `<rich-input>` falls back to measuring the input's partial text using a hidden mirror `<div>` to determine the popover's left anchor position.
+`<rich-input>` automatically checks `typeof HTMLInputElement.prototype.createValueRange === 'function'`. On supported browsers (Chromium 152+), caret tracking and `::highlight()` are applied natively via `OpaqueRange`.
+
+In browsers without `OpaqueRange` that support the CSS Custom Highlight API (such as Safari 17.2+ and Firefox 141+), `<rich-input>` automatically falls back to an adapted single-line `[contenteditable]` element inside its shadow DOM. This exposes standard DOM `Text` nodes so standard `Range` objects can be created and passed to `CSS.highlights`, delivering on-the-fly `::highlight()` syntax highlighting across browsers. In environments lacking range positioning, popover dropdowns are positioned using a hidden mirror `<div>` text measurement fallback.
 
 ---
 
 ## Styling Highlights with the CSS Custom Highlight API
 
-Values corresponding to configured keywords are registered into the global `CSS.highlights` registry. Style them directly using `::highlight(keyword)`:
+Values corresponding to configured keywords are registered into the global `CSS.highlights` registry and styled using standard CSS `::highlight(keyword)` pseudo-elements in your stylesheet:
 
 ```css
-/* Style the value set in label:"We Play House Recordings" */
+/* Style the value set in label:"XL Recordings" */
 ::highlight(label) {
   background-color: oklch(0.92 0.08 240);
   color: oklch(0.28 0.14 240);
@@ -261,23 +263,27 @@ Values corresponding to configured keywords are registered into the global `CSS.
   color: oklch(0.32 0.14 320);
 }
 
-/* Style musical style filters */
-::highlight(style) {
-  background-color: oklch(0.93 0.08 190);
-  color: oklch(0.3 0.12 190);
-}
-
-/* Style genre filters */
-::highlight(genre) {
-  background-color: oklch(0.93 0.1 145);
-  color: oklch(0.3 0.14 145);
-}
-
 /* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
 ::highlight(rich-input-keyword) {
   color: #64748b;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
 }
+```
+
+In browsers using the `[contenteditable]` fallback inside Shadow DOM (such as Safari and Firefox), `<rich-input>` automatically syncs document-level `::highlight()` rules into its shadow stylesheet so that highlighting works across shadow boundaries without extra markup.
+
+For self-contained widgets or instance-specific style overrides, `<rich-input>` also supports an optional embedded `<style>` block as a direct child, which is automatically injected into the shadow root:
+
+```html
+<rich-input value='artist:"Aphex Twin" label:"XL Recordings"'>
+  <style>
+    ::highlight(label) {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+  </style>
+  <datalist id="label" label="Record Label">...</datalist>
+</rich-input>
 ```
 
 > **Note:** Supported CSS properties on `::highlight()` include `color`, `background-color`, `text-decoration`, `text-shadow`, `-webkit-text-stroke-color`, `-webkit-text-stroke-width`, and `-webkit-text-fill-color`.

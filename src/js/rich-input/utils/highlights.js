@@ -35,7 +35,7 @@ class HighlightRegistryManager {
   }
 
   syncAll() {
-    if (!isHighlightSupported || !isOpaqueRangeSupported) return;
+    if (!isHighlightSupported) return;
 
     // Aggregate ranges across all active instances
     const rangesByKeyword = new Map();
@@ -65,35 +65,55 @@ class HighlightRegistryManager {
 
     // 1. Set/update individual keyword highlights (e.g. ::highlight(label))
     for (const kw of this.registeredKeywords) {
-      const ranges = rangesByKeyword.get(kw);
-      if (ranges && ranges.length > 0) {
+      const ranges = rangesByKeyword.get(kw) || [];
+      let hl = CSS.highlights.get(kw);
+      if (!hl) {
         try {
-          CSS.highlights.set(kw, new Highlight(...ranges));
-        } catch (e) {
-          console.warn(`[rich-input] Failed to register highlight for "${kw}":`, e);
+          hl = new Highlight();
+          CSS.highlights.set(kw, hl);
+        } catch (e) {}
+      }
+      if (hl) {
+        hl.clear();
+        for (const r of ranges) {
+          try {
+            hl.add(r);
+          } catch (e) {}
         }
-      } else {
-        CSS.highlights.delete(kw);
       }
     }
 
     // 2. Set generic highlights
-    if (allKeywordRanges.length > 0) {
+    let kwHl = CSS.highlights.get('rich-input-keyword');
+    if (!kwHl) {
       try {
-        const kwHl = new Highlight(...allKeywordRanges);
+        kwHl = new Highlight();
         CSS.highlights.set('rich-input-keyword', kwHl);
       } catch (e) {}
-    } else {
-      CSS.highlights.delete('rich-input-keyword');
+    }
+    if (kwHl) {
+      kwHl.clear();
+      for (const r of allKeywordRanges) {
+        try {
+          kwHl.add(r);
+        } catch (e) {}
+      }
     }
 
-    if (allValueRanges.length > 0) {
+    let valHl = CSS.highlights.get('rich-input-value');
+    if (!valHl) {
       try {
-        const valHl = new Highlight(...allValueRanges);
+        valHl = new Highlight();
         CSS.highlights.set('rich-input-value', valHl);
       } catch (e) {}
-    } else {
-      CSS.highlights.delete('rich-input-value');
+    }
+    if (valHl) {
+      valHl.clear();
+      for (const r of allValueRanges) {
+        try {
+          valHl.add(r);
+        } catch (e) {}
+      }
     }
   }
 }
