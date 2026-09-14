@@ -181,8 +181,8 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords) {
   // 1. Caret is within a keyword token
   if (activeToken.type === 'keyword') {
     if (caretPos <= activeToken.colonIndex) {
-      // User is editing the keyword name
-      const query = inputStr.slice(activeToken.start, caretPos);
+      // User is editing the keyword name (filter based on full keyword name, not caret position)
+      const query = activeToken.keyword;
       return {
         mode: 'keyword',
         query,
@@ -193,17 +193,16 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords) {
         tokens,
       };
     } else {
-      // User is editing the keyword value
+      // User is editing the keyword value (filter based on full value string, not caret position)
       const isQuoted = activeToken.quoted;
-      const innerStart = activeToken.innerStart;
-      const innerEnd = activeToken.innerEnd;
-      const valuePrefix = inputStr.slice(innerStart, Math.min(caretPos, innerEnd));
+      const value = activeToken.innerValue;
 
       return {
         mode: 'value',
         keyword: activeToken.keyword,
         keywordLower: activeToken.keywordLower,
-        valuePrefix,
+        valuePrefix: value,
+        query: value,
         quoted: isQuoted,
         quoteChar: activeToken.quoteChar || '"',
         isClosed: activeToken.isClosed,
@@ -216,9 +215,9 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords) {
     }
   }
 
-  // 2. Caret is within a plain text token
+  // 2. Caret is within a plain text token (filter based on full word, not caret position)
   if (activeToken.type === 'text') {
-    const query = inputStr.slice(activeToken.start, caretPos);
+    const query = activeToken.raw;
     return {
       mode: 'keyword',
       query,
