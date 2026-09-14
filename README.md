@@ -37,8 +37,9 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `<rich-input>`: The host custom element wrapping the control, datalists, and suggestions popover.
 - `::part(control)`: The outer input container enclosing the icon, input, and clear button.
 - `::part(icon)`: The default leading search magnifying glass SVG icon (fallback in `slot="leading"`).
-- `::part(input)`: The native `<input type="text">` where users type.
 - `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
+- `::highlight(rich-input-keyword)`: Target pseudo-element for styling keyword prefixes (e.g. `label:`, `year:`).
+- `::highlight(rich-input-invalid)`: Target pseudo-element for marking invalid keyword values (not in datalist) with a squiggly underline.
 - `::part(clear-button)`: The clear button (visible when text is present).
 - `::part(popover)`: The autocomplete dropdown popover container anchored to the start of the active range via `OpaqueRange` (or mirror-div fallback).
 - `::part(suggestions-header)`: The header bar at the top of the suggestions popover.
@@ -267,6 +268,12 @@ Values corresponding to configured keywords are registered into the global `CSS.
 ::highlight(rich-input-keyword) {
   color: #64748b;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* Invalid value highlight (squiggly underline for values not present in datalist) */
+::highlight(rich-input-invalid) {
+  text-decoration: underline wavy #ef4444;
+  text-decoration-skip-ink: none;
 }
 ```
 

@@ -3,7 +3,7 @@
  * Keyword-based autocomplete input field powered by OpaqueRange and Custom Highlight API.
  */
 
-import { parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion } from '../utils/query-parser.js';
+import { parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from '../utils/query-parser.js';
 import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from '../utils/highlights.js';
 import { getCaretCoordinates, positionPopover } from '../utils/positioning.js';
 import { setupContentEditableAdapter, isContentEditableFallbackActive } from '../utils/contenteditable-adapter.js';
@@ -117,6 +117,19 @@ TEMPLATE.innerHTML = `
   ::highlight(rich-input-keyword) {
     color: var(--ri-keyword-color, #64748b);
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Squiggly line underneath invalid keyword values */
+  ::highlight(rich-input-invalid) {
+    text-decoration: underline wavy var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
+    -webkit-text-decoration: underline wavy var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
+    text-decoration-line: underline;
+    -webkit-text-decoration-line: underline;
+    text-decoration-style: wavy;
+    -webkit-text-decoration-style: wavy;
+    text-decoration-color: var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
+    -webkit-text-decoration-color: var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
+    text-decoration-skip-ink: none;
   }
 
   /* Visually hide datalists and custom style tags in slot */
@@ -389,7 +402,10 @@ export class RichInput extends HTMLElement {
     this._selectedIndex = -1;
     this._context = null;
     this._ownedRanges = [];
+    this._invalidRanges = [];
     this._activeKeywordHighlightMap = new Map();
+    this._isFocused = false;
+    this._lastCaretPosition = -1;
 
     // Bound listeners for easy cleanup
     this._onInput = this._onInput.bind(this);
@@ -398,6 +414,7 @@ export class RichInput extends HTMLElement {
     this._onFocus = this._onFocus.bind(this);
     this._onBlur = this._onBlur.bind(this);
     this._onClick = this._onClick.bind(this);
+    this._onSelectionChange = this._onSelectionChange.bind(this);
     this._onClearClick = this._onClearClick.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
     this._onGlobalClick = this._onGlobalClick.bind(this);
@@ -408,6 +425,14 @@ export class RichInput extends HTMLElement {
     this._syncInjectedStyles();
     syncDocumentHighlightStyles(this.shadowRoot);
     highlightManager.register(this);
+
+    // Track initial focus state
+    this._isFocused = Boolean(
+      this.shadowRoot?.activeElement === this._input ||
+      document.activeElement === this ||
+      document.activeElement === this._input ||
+      this.matches?.(':focus-within')
+    );
 
     // Parse initial datalists
     this._loadDatalists();
@@ -432,6 +457,7 @@ export class RichInput extends HTMLElement {
 
     // Global events
     document.addEventListener('click', this._onGlobalClick);
+    document.addEventListener('selectionchange', this._onSelectionChange);
     window.addEventListener('resize', this._onGlobalResizeOrScroll);
     window.addEventListener('scroll', this._onGlobalResizeOrScroll, { passive: true });
 
@@ -471,6 +497,7 @@ export class RichInput extends HTMLElement {
     this._clearBtn.removeEventListener('click', this._onClearClick);
 
     document.removeEventListener('click', this._onGlobalClick);
+    document.removeEventListener('selectionchange', this._onSelectionChange);
     window.removeEventListener('resize', this._onGlobalResizeOrScroll);
     window.removeEventListener('scroll', this._onGlobalResizeOrScroll);
 
@@ -603,10 +630,12 @@ export class RichInput extends HTMLElement {
 
   // --- Public Methods ---
   focus(options) {
+    this._isFocused = true;
     this._input.focus(options);
   }
 
   blur() {
+    this._isFocused = false;
     this._input.blur();
   }
 
@@ -722,6 +751,7 @@ export class RichInput extends HTMLElement {
       } catch (e) {}
     }
     this._ownedRanges = [];
+    this._invalidRanges = [];
     this._activeKeywordHighlightMap.clear();
   }
 
@@ -747,9 +777,17 @@ export class RichInput extends HTMLElement {
     const tokens = parseSearchTokens(text);
     const highlightQuotes = this.getAttribute('highlight-quotes') !== 'exclude';
 
+    const isFocused = this._isFocused;
+
+    const caretStart = typeof this._input.selectionStart === 'number' ? this._input.selectionStart : null;
+    const caretEnd = typeof this._input.selectionEnd === 'number' ? this._input.selectionEnd : null;
+    const selMin = caretStart !== null ? Math.min(caretStart, caretEnd ?? caretStart) : -1;
+    const selMax = caretEnd !== null ? Math.max(caretStart ?? caretEnd, caretEnd) : -1;
+
     for (const token of tokens) {
       if (token.type === 'keyword' && this._configuredKeywords.has(token.keywordLower)) {
         const kw = token.keywordLower;
+        const kwConfig = this._configuredKeywords.get(kw);
 
         if (!this._activeKeywordHighlightMap.has(kw)) {
           this._activeKeywordHighlightMap.set(kw, {
@@ -782,6 +820,25 @@ export class RichInput extends HTMLElement {
             bucket.keywordRanges.push(kwRange);
           } catch (e) {}
         }
+
+        // 3. Validation: Check if value is part of the datalist
+        // Don't mark as invalid if:
+        // - Value is empty (user hasn't entered a value yet)
+        // - Input is focused and user is currently editing this token (caret is on/within this token)
+        const isEditingToken = isFocused && selMin !== -1 && selMax >= token.start && selMin <= token.end;
+        const hasValue = Boolean(token.innerValue && token.innerValue.trim().length > 0);
+
+        if (hasValue && !isEditingToken && !isDatalistValue(kwConfig, token.innerValue)) {
+          if (end > start && end <= text.length) {
+            try {
+              const invRange = this._input.createValueRange(start, end);
+              this._ownedRanges.push(invRange);
+              this._invalidRanges.push(invRange);
+            } catch (e) {
+              console.warn('[rich-input] Invalid range creation error:', e);
+            }
+          }
+        }
       }
     }
 
@@ -792,8 +849,13 @@ export class RichInput extends HTMLElement {
     return this._activeKeywordHighlightMap;
   }
 
+  getActiveInvalidRanges() {
+    return this._invalidRanges;
+  }
+
   // --- Suggestions Popover Handling ---
   _onInput(e) {
+    this._lastCaretPosition = this._input.selectionStart;
     this._updateClearButton();
     this.updateHighlights();
     this.updateSuggestions('input');
@@ -847,12 +909,17 @@ export class RichInput extends HTMLElement {
   }
 
   _onKeyUp(e) {
+    this._lastCaretPosition = this._input.selectionStart;
     if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+      this.updateHighlights();
       this.updateSuggestions('caret');
     }
   }
 
   _onFocus() {
+    this._isFocused = true;
+    this._lastCaretPosition = this._input.selectionStart;
+    this.updateHighlights();
     // Optionally open suggestions if context matches
     if (this._input.value.length > 0) {
       this.updateSuggestions('focus');
@@ -860,6 +927,9 @@ export class RichInput extends HTMLElement {
   }
 
   _onBlur() {
+    this._isFocused = false;
+    this._lastCaretPosition = -1;
+    this.updateHighlights();
     // Delay closing so click events on popover items can fire
     setTimeout(() => {
       this.hideSuggestions();
@@ -868,10 +938,23 @@ export class RichInput extends HTMLElement {
   }
 
   _onClick(e) {
+    this._isFocused = true;
     if (e && typeof e.clientX === 'number' && typeof this._input?.updateCaretFromPoint === 'function') {
       this._input.updateCaretFromPoint(e.clientX, e.clientY);
     }
+    this._lastCaretPosition = this._input.selectionStart;
+    this.updateHighlights();
     this.updateSuggestions('click');
+  }
+
+  _onSelectionChange() {
+    if (!this._isFocused) return;
+
+    const caret = this._input.selectionStart;
+    if (this._lastCaretPosition !== caret) {
+      this._lastCaretPosition = caret;
+      this.updateHighlights();
+    }
   }
 
   _onClearClick() {

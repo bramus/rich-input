@@ -52,6 +52,7 @@ class HighlightRegistryManager {
     const rangesByKeyword = new Map();
     const allKeywordRanges = [];
     const allValueRanges = [];
+    const allInvalidRanges = [];
 
     for (const inst of this.instances) {
       const instanceRanges = inst.getActiveHighlightRanges();
@@ -70,6 +71,13 @@ class HighlightRegistryManager {
 
         if (data.keywordRanges && data.keywordRanges.length > 0) {
           allKeywordRanges.push(...data.keywordRanges);
+        }
+      }
+
+      if (typeof inst.getActiveInvalidRanges === 'function') {
+        const invRanges = inst.getActiveInvalidRanges();
+        if (invRanges && invRanges.length > 0) {
+          allInvalidRanges.push(...invRanges);
         }
       }
     }
@@ -126,6 +134,27 @@ class HighlightRegistryManager {
         try {
           if (isRangeCollapsed(r)) continue;
           valHl.add(r);
+        } catch (e) {}
+      }
+    }
+
+    // 3. Set invalid highlights (rich-input-invalid)
+    let invHl = CSS.highlights.get('rich-input-invalid');
+    if (!invHl) {
+      try {
+        invHl = new Highlight();
+        CSS.highlights.set('rich-input-invalid', invHl);
+      } catch (e) {}
+    }
+    if (invHl) {
+      try {
+        invHl.priority = 10;
+      } catch (e) {}
+      invHl.clear();
+      for (const r of allInvalidRanges) {
+        try {
+          if (isRangeCollapsed(r)) continue;
+          invHl.add(r);
         } catch (e) {}
       }
     }

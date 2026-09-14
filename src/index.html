@@ -482,6 +482,12 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 ::highlight(rich-input-keyword) {
   color: #64748b;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* Invalid value highlight (squiggly underline for values not present in datalist) */
+::highlight(rich-input-invalid) {
+  text-decoration: underline wavy #ef4444;
+  text-decoration-skip-ink: none;
 }</code></pre>
           </div>
 

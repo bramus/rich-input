@@ -342,3 +342,25 @@ export function applySuggestion(inputStr, suggestion, context) {
   const newCaret = before.length + insertText.length;
   return { newValue, newCaret };
 }
+
+/**
+ * Checks whether a given value matches any option in the keyword configuration.
+ * @param {Object} kwConfig
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function isDatalistValue(kwConfig, value) {
+  if (!kwConfig || !Array.isArray(kwConfig.options) || kwConfig.options.length === 0) {
+    return true;
+  }
+  const val = (value ?? '').trim().toLowerCase();
+  if (!val) {
+    return true;
+  }
+  return kwConfig.options.some((opt) => {
+    const optVal = (opt.value ?? '').trim().toLowerCase();
+    const optLabel = (opt.label ?? '').trim().toLowerCase();
+    const optText = (opt.text ?? '').trim().toLowerCase();
+    return optVal === val || optLabel === val || optText === val;
+  });
+}

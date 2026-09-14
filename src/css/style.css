@@ -90,6 +90,18 @@ rich-input:not(:defined) {
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
+::highlight(rich-input-invalid) {
+  text-decoration: underline wavy #ef4444;
+  -webkit-text-decoration: underline wavy #ef4444;
+  text-decoration-line: underline;
+  -webkit-text-decoration-line: underline;
+  text-decoration-style: wavy;
+  -webkit-text-decoration-style: wavy;
+  text-decoration-color: #ef4444;
+  -webkit-text-decoration-color: #ef4444;
+  text-decoration-skip-ink: none;
+}
+
 /*
  * ==========================================================================
  * ::PART() STYLING THEMES
