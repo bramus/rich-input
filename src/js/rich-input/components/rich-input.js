@@ -839,6 +839,23 @@ export class RichInput extends HTMLElement {
             }
           }
         }
+      } else if (token.type === 'keyword') {
+        // Unrecognized key:value pair (keyword is not in configured datalists)
+        const isEditingToken = isFocused && selMin !== -1 && selMax >= token.start && selMin <= token.end;
+
+        if (!isEditingToken) {
+          const start = token.start;
+          const end = token.end;
+          if (end > start && end <= text.length) {
+            try {
+              const invRange = this._input.createValueRange(start, end);
+              this._ownedRanges.push(invRange);
+              this._invalidRanges.push(invRange);
+            } catch (e) {
+              console.warn('[rich-input] Invalid range creation error:', e);
+            }
+          }
+        }
       }
     }
 
