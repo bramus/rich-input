@@ -503,9 +503,9 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 
           <div class="card" style="padding: 1rem; overflow: hidden; margin-bottom: 1.5rem;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 480" width="100%" height="100%">
-              <defs>
-                <style>
-                  :root {
+              <style>
+                @scope {
+                  :scope {
                     --canvas-bg: #f8fafc;
                     --card-bg: #ffffff;
                     --border-color: #cbd5e1;
@@ -535,7 +535,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                   }
             
                   @media (prefers-color-scheme: dark) {
-                    :root {
+                    :scope {
                       --canvas-bg: #0f172a;
                       --card-bg: #1e293b;
                       --border-color: #334155;
@@ -652,116 +652,117 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                   }
             
                   /* When hovering the SVG, lines and labels go down to opacity 0.5 */
-                  svg:hover .code-label,
-                  svg:hover .guide-line,
-                  svg:hover .guide-box,
-                  svg:hover .guide-dot {
+                  :scope:hover .code-label,
+                  :scope:hover .guide-line,
+                  :scope:hover .guide-box,
+                  :scope:hover .guide-dot {
                     opacity: 0.4;
                   }
             
                   /* When a specific code-label is hovered, dim all other labels, lines, boxes, and comp-parts */
-                  svg:has(.code-label:hover) .code-label:not(:hover) {
+                  :scope:has(.code-label:hover) .code-label:not(:hover) {
                     opacity: 0.18;
                   }
             
-                  svg:has(.code-label:hover) .guide-line,
-                  svg:has(.code-label:hover) .guide-box,
-                  svg:has(.code-label:hover) .guide-dot {
+                  :scope:has(.code-label:hover) .guide-line,
+                  :scope:has(.code-label:hover) .guide-box,
+                  :scope:has(.code-label:hover) .guide-dot {
                     opacity: 0.05;
                   }
             
-                  svg:has(.code-label:hover) .comp-part {
+                  :scope:has(.code-label:hover) .comp-part {
                     opacity: 0.25;
                   }
             
                   /* Specific label hover: keep matching guide line, box, dot, and element at 100% */
-                  svg:has(.lbl-host:hover) .target-host,
-                  svg:has(.lbl-control:hover) .target-control,
-                  svg:has(.lbl-icon:hover) .target-icon,
-                  svg:has(.lbl-input:hover) .target-input,
-                  svg:has(.lbl-hl-val:hover) .target-hl-val,
-                  svg:has(.lbl-clear:hover) .target-clear,
-                  svg:has(.lbl-popover:hover) .target-popover,
-                  svg:has(.lbl-header:hover) .target-header,
-                  svg:has(.lbl-list:hover) .target-list,
-                  svg:has(.lbl-item:hover) .target-item,
-                  svg:has(.lbl-active:hover) .target-active,
-                  svg:has(.lbl-image:hover) .target-image,
-                  svg:has(.lbl-val:hover) .target-val {
+                  :scope:has(.lbl-host:hover) .target-host,
+                  :scope:has(.lbl-control:hover) .target-control,
+                  :scope:has(.lbl-icon:hover) .target-icon,
+                  :scope:has(.lbl-input:hover) .target-input,
+                  :scope:has(.lbl-hl-val:hover) .target-hl-val,
+                  :scope:has(.lbl-clear:hover) .target-clear,
+                  :scope:has(.lbl-popover:hover) .target-popover,
+                  :scope:has(.lbl-header:hover) .target-header,
+                  :scope:has(.lbl-list:hover) .target-list,
+                  :scope:has(.lbl-item:hover) .target-item,
+                  :scope:has(.lbl-active:hover) .target-active,
+                  :scope:has(.lbl-image:hover) .target-image,
+                  :scope:has(.lbl-val:hover) .target-val {
                     opacity: 1 !important;
                   }
             
                   /* When host label is hovered, keep entire component at 100% */
-                  svg:has(.lbl-host:hover) .comp-part {
+                  :scope:has(.lbl-host:hover) .comp-part {
                     opacity: 1 !important;
                   }
             
                   /* Contained parts: when hovering a container, contained parts in the preview also remain at opacity 1 */
                   /* Control contains icon, input (including highlight hou), and clear button */
-                  svg:has(.lbl-control:hover) #component-preview .target-icon,
-                  svg:has(.lbl-control:hover) #component-preview .target-input,
-                  svg:has(.lbl-control:hover) #component-preview .target-hl-val,
-                  svg:has(.lbl-control:hover) #component-preview .target-clear {
+                  :scope:has(.lbl-control:hover) #component-preview .target-icon,
+                  :scope:has(.lbl-control:hover) #component-preview .target-input,
+                  :scope:has(.lbl-control:hover) #component-preview .target-hl-val,
+                  :scope:has(.lbl-control:hover) #component-preview .target-clear {
                     opacity: 1 !important;
                   }
             
                   /* Input contains highlight label (hou text and background pill) */
-                  svg:has(.lbl-input:hover) #component-preview .target-hl-val {
+                  :scope:has(.lbl-input:hover) #component-preview .target-hl-val {
                     opacity: 1 !important;
                   }
             
                   /* Popover contains header, list, and all suggestion items */
-                  svg:has(.lbl-popover:hover) #component-preview .target-header,
-                  svg:has(.lbl-popover:hover) #component-preview .target-item,
-                  svg:has(.lbl-popover:hover) #component-preview .target-active {
+                  :scope:has(.lbl-popover:hover) #component-preview .target-header,
+                  :scope:has(.lbl-popover:hover) #component-preview .target-item,
+                  :scope:has(.lbl-popover:hover) #component-preview .target-active {
                     opacity: 1 !important;
                   }
             
                   /* Suggestions list contains all suggestion items */
-                  svg:has(.lbl-list:hover) #component-preview .target-item,
-                  svg:has(.lbl-list:hover) #component-preview .target-active {
+                  :scope:has(.lbl-list:hover) #component-preview .target-item,
+                  :scope:has(.lbl-list:hover) #component-preview .target-active {
                     opacity: 1 !important;
                   }
             
                   /* Thicken active guide line when hovered */
-                  svg:has(.lbl-host:hover) .target-host.guide-line,
-                  svg:has(.lbl-control:hover) .target-control.guide-line,
-                  svg:has(.lbl-icon:hover) .target-icon.guide-line,
-                  svg:has(.lbl-input:hover) .target-input.guide-line,
-                  svg:has(.lbl-hl-val:hover) .target-hl-val.guide-line,
-                  svg:has(.lbl-clear:hover) .target-clear.guide-line,
-                  svg:has(.lbl-popover:hover) .target-popover.guide-line,
-                  svg:has(.lbl-header:hover) .target-header.guide-line,
-                  svg:has(.lbl-list:hover) .target-list.guide-line,
-                  svg:has(.lbl-item:hover) .target-item.guide-line,
-                  svg:has(.lbl-active:hover) .target-active.guide-line,
-                  svg:has(.lbl-image:hover) .target-image.guide-line,
-                  svg:has(.lbl-val:hover) .target-val.guide-line {
+                  :scope:has(.lbl-host:hover) .target-host.guide-line,
+                  :scope:has(.lbl-control:hover) .target-control.guide-line,
+                  :scope:has(.lbl-icon:hover) .target-icon.guide-line,
+                  :scope:has(.lbl-input:hover) .target-input.guide-line,
+                  :scope:has(.lbl-hl-val:hover) .target-hl-val.guide-line,
+                  :scope:has(.lbl-clear:hover) .target-clear.guide-line,
+                  :scope:has(.lbl-popover:hover) .target-popover.guide-line,
+                  :scope:has(.lbl-header:hover) .target-header.guide-line,
+                  :scope:has(.lbl-list:hover) .target-list.guide-line,
+                  :scope:has(.lbl-item:hover) .target-item.guide-line,
+                  :scope:has(.lbl-active:hover) .target-active.guide-line,
+                  :scope:has(.lbl-image:hover) .target-image.guide-line,
+                  :scope:has(.lbl-val:hover) .target-val.guide-line {
                     stroke-width: 2px;
                   }
             
                   /* Thicken active guide box when hovered */
-                  svg:has(.lbl-host:hover) .target-host.guide-box,
-                  svg:has(.lbl-control:hover) .target-control.guide-box,
-                  svg:has(.lbl-icon:hover) .target-icon.guide-box,
-                  svg:has(.lbl-input:hover) .target-input.guide-box,
-                  svg:has(.lbl-hl-val:hover) .target-hl-val.guide-box,
-                  svg:has(.lbl-clear:hover) .target-clear.guide-box,
-                  svg:has(.lbl-popover:hover) .target-popover.guide-box,
-                  svg:has(.lbl-header:hover) .target-header.guide-box,
-                  svg:has(.lbl-list:hover) .target-list.guide-box,
-                  svg:has(.lbl-item:hover) .target-item.guide-box,
-                  svg:has(.lbl-active:hover) .target-active.guide-box,
-                  svg:has(.lbl-image:hover) .target-image.guide-box,
-                  svg:has(.lbl-val:hover) .target-val.guide-box {
+                  :scope:has(.lbl-host:hover) .target-host.guide-box,
+                  :scope:has(.lbl-control:hover) .target-control.guide-box,
+                  :scope:has(.lbl-icon:hover) .target-icon.guide-box,
+                  :scope:has(.lbl-input:hover) .target-input.guide-box,
+                  :scope:has(.lbl-hl-val:hover) .target-hl-val.guide-box,
+                  :scope:has(.lbl-clear:hover) .target-clear.guide-box,
+                  :scope:has(.lbl-popover:hover) .target-popover.guide-box,
+                  :scope:has(.lbl-header:hover) .target-header.guide-box,
+                  :scope:has(.lbl-list:hover) .target-list.guide-box,
+                  :scope:has(.lbl-item:hover) .target-item.guide-box,
+                  :scope:has(.lbl-active:hover) .target-active.guide-box,
+                  :scope:has(.lbl-image:hover) .target-image.guide-box,
+                  :scope:has(.lbl-val:hover) .target-val.guide-box {
                     stroke-width: 2px;
                   }
             
                   .code-label:hover {
                     opacity: 1 !important;
                   }
-                </style>
-                
+                }
+              </style>
+              <defs>
                 <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
                   <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.12"/>
                 </filter>
