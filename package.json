@@ -14,7 +14,8 @@
     "pub": "PUBLISH=true npm run build && npm publish ./dist",
     "start": "npx -y serve src",
     "dev": "npx -y serve src",
-    "deploy": "netlify deploy --dir=src --prod"
+    "deploy": "netlify deploy --dir=src --prod",
+    "deploy:preview": "netlify deploy --dir=src"
   },
   "keywords": [
     "rich-input",
