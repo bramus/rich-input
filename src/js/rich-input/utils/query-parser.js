@@ -168,11 +168,13 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords) {
     }
   }
 
-  // If caret is in whitespace or between tokens
+  // If caret is in whitespace or empty input (at the start of a new token)
   if (!activeToken || activeToken.type === 'whitespace') {
-    // Check if the previous token was a colon without value or if we're in open space
     return {
-      mode: 'none',
+      mode: 'keyword',
+      query: '',
+      replaceStart: caretPos,
+      replaceEnd: caretPos,
       caretPos,
       tokens,
     };
@@ -325,6 +327,9 @@ export function applySuggestion(inputStr, suggestion, context) {
     // If after text starts with colon, remove it to avoid `mix::`
     if (after.startsWith(':')) {
       after = after.slice(1);
+    } else if (context.token?.type !== 'keyword' && after.length > 0 && !/^\s/.test(after)) {
+      // Ensure space before following token so it doesn't become the value of this keyword
+      after = ' ' + after;
     }
     const newValue = before + insertText + after;
     const newCaret = before.length + insertText.length;
@@ -333,12 +338,13 @@ export function applySuggestion(inputStr, suggestion, context) {
 
   // When inserting a value (e.g. `"We Play House Recordings"`)
   // Add a trailing space if after does not already start with whitespace
-  if (after.length === 0 || !/^\s/.test(after)) {
+  const hasLeadingSpaceAfter = /^\s/.test(after);
+  if (after.length === 0 || !hasLeadingSpaceAfter) {
     insertText += ' ';
   }
 
   const newValue = before + insertText + after;
-  const newCaret = before.length + insertText.length;
+  const newCaret = before.length + insertText.length + (hasLeadingSpaceAfter ? 1 : 0);
   return { newValue, newCaret };
 }
 
