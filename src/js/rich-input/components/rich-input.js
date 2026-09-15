@@ -283,6 +283,7 @@ TEMPLATE.innerHTML = `
       aria-autocomplete="list"
       aria-expanded="false"
       aria-haspopup="listbox"
+      aria-controls="ri-listbox"
     />
     <button part="clear-button" type="button" class="clear-button" aria-label="Clear search query" hidden>
       <svg viewBox="0 0 20 20" fill="currentColor">
@@ -296,13 +297,17 @@ TEMPLATE.innerHTML = `
     part="popover suggestions"
     class="popover"
     popover="manual"
-    role="listbox"
-    aria-label="Search suggestions"
   >
     <div part="suggestions-header" class="popover-header">
-      <span part="suggestions-title" class="popover-title">Suggestions</span>
+      <span id="ri-listbox-label" part="suggestions-title" class="popover-title">Suggestions</span>
     </div>
-    <ul part="suggestions-list" class="suggestions-list" role="presentation"></ul>
+    <ul
+      id="ri-listbox"
+      part="suggestions-list"
+      class="suggestions-list"
+      role="listbox"
+      aria-labelledby="ri-listbox-label"
+    ></ul>
   </div>
 
   <slot style="display: none;"></slot>
@@ -361,6 +366,8 @@ export class RichInput extends HTMLElement {
       'autofocus',
       'required',
       'highlight-quotes',
+      'aria-label',
+      'aria-labelledby',
     ];
   }
 
@@ -383,6 +390,7 @@ export class RichInput extends HTMLElement {
       editableDiv.setAttribute('aria-autocomplete', 'list');
       editableDiv.setAttribute('aria-expanded', 'false');
       editableDiv.setAttribute('aria-haspopup', 'listbox');
+      editableDiv.setAttribute('aria-controls', 'ri-listbox');
       editableDiv.setAttribute('spellcheck', 'false');
       editableDiv.setAttribute('tabindex', '0');
       existingInput.replaceWith(editableDiv);
@@ -416,6 +424,7 @@ export class RichInput extends HTMLElement {
     this._onClick = this._onClick.bind(this);
     this._onSelectionChange = this._onSelectionChange.bind(this);
     this._onClearClick = this._onClearClick.bind(this);
+    this._onClearMouseDown = (e) => e.preventDefault();
     this._onSlotChange = this._onSlotChange.bind(this);
     this._onGlobalClick = this._onGlobalClick.bind(this);
     this._onGlobalResizeOrScroll = this._onGlobalResizeOrScroll.bind(this);
@@ -453,6 +462,7 @@ export class RichInput extends HTMLElement {
     this._input.addEventListener('focus', this._onFocus);
     this._input.addEventListener('blur', this._onBlur);
     this._input.addEventListener('click', this._onClick);
+    this._clearBtn.addEventListener('mousedown', this._onClearMouseDown);
     this._clearBtn.addEventListener('click', this._onClearClick);
 
     // Global events
@@ -475,6 +485,7 @@ export class RichInput extends HTMLElement {
       this._internals.setFormValue(this._input.value);
     }
 
+    this._syncAccessibleName();
     this._updateClearButton();
     this.updateHighlights();
   }
@@ -494,6 +505,7 @@ export class RichInput extends HTMLElement {
     this._input.removeEventListener('focus', this._onFocus);
     this._input.removeEventListener('blur', this._onBlur);
     this._input.removeEventListener('click', this._onClick);
+    this._clearBtn.removeEventListener('mousedown', this._onClearMouseDown);
     this._clearBtn.removeEventListener('click', this._onClearClick);
 
     document.removeEventListener('click', this._onGlobalClick);
@@ -518,6 +530,9 @@ export class RichInput extends HTMLElement {
       }
     } else if (name === 'placeholder') {
       this._input.placeholder = newValue || '';
+      this._syncAccessibleName();
+    } else if (name === 'aria-label' || name === 'aria-labelledby') {
+      this._syncAccessibleName();
     } else if (name === 'disabled') {
       this._input.disabled = newValue !== null;
     } else if (name === 'readonly') {
@@ -532,6 +547,25 @@ export class RichInput extends HTMLElement {
       }
     } else if (name === 'highlight-quotes') {
       this.updateHighlights();
+    }
+  }
+
+  _syncAccessibleName() {
+    if (!this._input) return;
+    if (this.hasAttribute('aria-label')) {
+      this._input.setAttribute('aria-label', this.getAttribute('aria-label'));
+    } else if (this._internals?.labels?.length > 0) {
+      const labelText = Array.from(this._internals.labels)
+        .map((l) => l.textContent.trim())
+        .filter(Boolean)
+        .join(' ');
+      if (labelText) {
+        this._input.setAttribute('aria-label', labelText);
+      }
+    } else if (this.hasAttribute('placeholder')) {
+      this._input.setAttribute('aria-label', this.getAttribute('placeholder'));
+    } else {
+      this._input.setAttribute('aria-label', 'Search');
     }
   }
 
@@ -949,6 +983,7 @@ export class RichInput extends HTMLElement {
     this.updateHighlights();
     // Delay closing so click events on popover items can fire
     setTimeout(() => {
+      if (this._isFocused) return;
       this.hideSuggestions();
       this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     }, 150);
@@ -1079,9 +1114,9 @@ export class RichInput extends HTMLElement {
     if (!this._isPopoverOpen()) {
       try {
         this._popover.showPopover();
-        this._input.setAttribute('aria-expanded', 'true');
       } catch (e) {}
     }
+    this._input.setAttribute('aria-expanded', 'true');
 
     // Position popover at the start of the current OpaqueRange (or via mirror-div fallback when OpaqueRange is unsupported)
     const currentRange = this._getCurrentOpaqueRange();
@@ -1190,9 +1225,13 @@ export class RichInput extends HTMLElement {
       const isAct = i === this._selectedIndex;
       items[i].classList.toggle('active', isAct);
       items[i].setAttribute('aria-selected', isAct ? 'true' : 'false');
+      items[i].setAttribute('part', `suggestion-item${isAct ? ' suggestion-item-active' : ''}`);
       if (isAct) {
         this._input.setAttribute('aria-activedescendant', items[i].id);
       }
+    }
+    if (this._selectedIndex === -1) {
+      this._input.removeAttribute('aria-activedescendant');
     }
   }
 
