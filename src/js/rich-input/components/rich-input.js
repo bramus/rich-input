@@ -949,8 +949,9 @@ export class RichInput extends HTMLElement {
       }
     }
 
-    // Enter when popover closed triggers search/change
+    // Enter when popover closed (or no suggestion selected) triggers search/change
     if (e.key === 'Enter') {
+      this.hideSuggestions();
       this.dispatchEvent(new CustomEvent('search', {
         bubbles: true,
         composed: true,
@@ -971,10 +972,7 @@ export class RichInput extends HTMLElement {
     this._isFocused = true;
     this._lastCaretPosition = this._input.selectionStart;
     this.updateHighlights();
-    // Optionally open suggestions if context matches
-    if (this._input.value.length > 0) {
-      this.updateSuggestions('focus');
-    }
+    this.updateSuggestions('focus');
   }
 
   _onBlur() {
@@ -1012,7 +1010,7 @@ export class RichInput extends HTMLElement {
   _onClearClick() {
     this.value = '';
     this._input.focus();
-    this.hideSuggestions();
+    this.updateSuggestions('clear');
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
   }
@@ -1107,7 +1105,13 @@ export class RichInput extends HTMLElement {
     }
 
     this._activeSuggestions = suggestions;
-    this._selectedIndex = 0; // Pre-select first item for quick Enter/Tab
+    // Pre-select first item for quick Enter/Tab when filtering or in value mode or triggered via Down Arrow,
+    // but leave unselected (-1) when showing full keyword list at the start of a new token so Enter/Tab aren't hijacked.
+    const shouldPreselect =
+      context.mode === 'value' ||
+      Boolean(context.query) ||
+      trigger === 'arrow';
+    this._selectedIndex = shouldPreselect ? 0 : -1;
     this._renderSuggestions();
 
     // Show popover
@@ -1209,7 +1213,11 @@ export class RichInput extends HTMLElement {
   _moveSelection(delta) {
     if (this._activeSuggestions.length === 0) return;
     const len = this._activeSuggestions.length;
-    this._selectedIndex = (this._selectedIndex + delta + len) % len;
+    if (this._selectedIndex === -1) {
+      this._selectedIndex = delta > 0 ? 0 : len - 1;
+    } else {
+      this._selectedIndex = (this._selectedIndex + delta + len) % len;
+    }
     this._updateActiveSuggestion();
 
     // Scroll active item into view
@@ -1263,12 +1271,9 @@ export class RichInput extends HTMLElement {
       composed: true,
       detail: selectDetail,
     }));
-    // If a keyword was selected (e.g. `mix:`), immediately show value suggestions
-    if (suggestion.type === 'keyword') {
-      this.updateSuggestions('keyword-selected');
-    } else {
-      this.hideSuggestions();
-    }
+    // Immediately show value suggestions when a keyword was selected (e.g. `mix:`),
+    // or keyword suggestions when a value was selected (since cursor is now after a space at a new token)
+    this.updateSuggestions(suggestion.type === 'keyword' ? 'keyword-selected' : 'value-selected');
   }
 }
 
