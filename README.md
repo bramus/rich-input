@@ -45,7 +45,8 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(suggestions-header)`: The header bar at the top of the suggestions popover.
 - `::part(suggestions-list)`: The `<ul>` container holding autocomplete suggestion items.
 - `::part(suggestion-item)`: Each suggestion `<li>` row.
-- `::part(suggestion-item-active)`: The currently selected / keyboard-focused suggestion row.
+- `::part(suggestion-item-active)`: The currently focused / hovered suggestion row.
+- `::part(suggestion-item-selected)`: The suggestion row matching the value currently echoed in the input.
 - `::part(suggestion-image)`: The circular logo, icon, or avatar image prepended to rich suggestions.
 - `::part(suggestion-keyword)`: The keyword label text inside a keyword suggestion.
 - `::part(suggestion-value)`: The value label text inside a value suggestion.
@@ -345,7 +346,8 @@ rich-input::part(suggestion-item-active) {
 | `::part(suggestions-header)` | The header bar at the top of the popover |
 | `::part(suggestions-list)` | The `<ul>` list element |
 | `::part(suggestion-item)` | Each suggestion `<li>` item |
-| `::part(suggestion-item-active)` | The currently selected / hovered suggestion item |
+| `::part(suggestion-item-active)` | The currently focused / hovered suggestion item |
+| `::part(suggestion-item-selected)` | The suggestion item matching the value currently echoed in the input |
 | `::part(suggestion-keyword)` | Keyword name element in suggestion items |
 | `::part(suggestion-value)` | Value element in suggestion items |
 | `::part(suggestion-content)` | The content container inside each suggestion item |

@@ -1107,7 +1107,8 @@ export class RichInput extends HTMLElement {
     }
 
     this._activeSuggestions = suggestions;
-    this._selectedIndex = 0; // Pre-select first item for quick Enter/Tab
+    const existingSelectedIdx = suggestions.findIndex((s) => this._isSuggestionSelected(s));
+    this._selectedIndex = existingSelectedIdx !== -1 ? existingSelectedIdx : 0; // Highlight matching item or first item for quick Enter/Tab
     this._renderSuggestions();
 
     // Show popover
@@ -1137,6 +1138,28 @@ export class RichInput extends HTMLElement {
     this._selectedIndex = -1;
   }
 
+  _isSuggestionSelected(sug) {
+    if (!this._context || !sug) return false;
+
+    if (sug.type === 'value' && this._context.mode === 'value' && this._context.token) {
+      const currentVal = (this._context.token.innerValue ?? '').trim().toLowerCase();
+      if (!currentVal) return false;
+      const sugVal = (sug.value ?? '').trim().toLowerCase();
+      const sugLabel = (sug.label ?? '').trim().toLowerCase();
+      const sugDisplay = (sug.display ?? '').trim().toLowerCase();
+      return currentVal === sugVal || currentVal === sugLabel || currentVal === sugDisplay;
+    }
+
+    if (sug.type === 'keyword' && this._context.mode === 'keyword' && this._context.token?.type === 'keyword') {
+      const currentKw = (this._context.token.keywordLower ?? '').trim().toLowerCase();
+      if (!currentKw) return false;
+      const sugId = (sug.id ?? '').trim().toLowerCase();
+      return currentKw === sugId;
+    }
+
+    return false;
+  }
+
   _renderSuggestions() {
     if (this._popoverTitle) {
       let title = 'Suggestions';
@@ -1152,12 +1175,17 @@ export class RichInput extends HTMLElement {
     this._suggestionsList.replaceChildren();
 
     this._activeSuggestions.forEach((sug, idx) => {
+      const isAct = idx === this._selectedIndex;
+      const isSel = this._isSuggestionSelected(sug);
       const li = document.createElement('li');
-      li.className = `suggestion-item${idx === this._selectedIndex ? ' active' : ''}`;
+      li.className = `suggestion-item${isAct ? ' active' : ''}${isSel ? ' selected' : ''}`;
       li.id = `ri-opt-${idx}`;
       li.setAttribute('role', 'option');
-      li.setAttribute('aria-selected', idx === this._selectedIndex ? 'true' : 'false');
-      li.setAttribute('part', `suggestion-item${idx === this._selectedIndex ? ' suggestion-item-active' : ''}`);
+      li.setAttribute('aria-selected', isSel ? 'true' : 'false');
+      const parts = ['suggestion-item'];
+      if (isAct) parts.push('suggestion-item-active');
+      if (isSel) parts.push('suggestion-item-selected');
+      li.setAttribute('part', parts.join(' '));
 
       if (sug.image) {
         const img = sug.image.cloneNode(true);
@@ -1223,9 +1251,14 @@ export class RichInput extends HTMLElement {
     const items = this._suggestionsList.children;
     for (let i = 0; i < items.length; i++) {
       const isAct = i === this._selectedIndex;
+      const isSel = this._isSuggestionSelected(this._activeSuggestions[i]);
       items[i].classList.toggle('active', isAct);
-      items[i].setAttribute('aria-selected', isAct ? 'true' : 'false');
-      items[i].setAttribute('part', `suggestion-item${isAct ? ' suggestion-item-active' : ''}`);
+      items[i].classList.toggle('selected', isSel);
+      items[i].setAttribute('aria-selected', isSel ? 'true' : 'false');
+      const parts = ['suggestion-item'];
+      if (isAct) parts.push('suggestion-item-active');
+      if (isSel) parts.push('suggestion-item-selected');
+      items[i].setAttribute('part', parts.join(' '));
       if (isAct) {
         this._input.setAttribute('aria-activedescendant', items[i].id);
       }
