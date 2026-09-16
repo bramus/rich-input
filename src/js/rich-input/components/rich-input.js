@@ -8,6 +8,8 @@ import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from '
 import { getCaretCoordinates, positionPopover } from '../utils/positioning.js';
 import { setupContentEditableAdapter, isContentEditableFallbackActive } from '../utils/contenteditable-adapter.js';
 
+const KEYWORD_SUGGESTION_DELAY = 300;
+
 const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
 <style>
@@ -413,6 +415,7 @@ export class RichInput extends HTMLElement {
     this._activeSuggestions = [];
     this._selectedIndex = -1;
     this._context = null;
+    this._suggestionTimeout = null;
     this._ownedRanges = [];
     this._invalidRanges = [];
     this._activeKeywordHighlightMap = new Map();
@@ -982,6 +985,10 @@ export class RichInput extends HTMLElement {
   _onBlur() {
     this._isFocused = false;
     this._lastCaretPosition = -1;
+    if (this._suggestionTimeout) {
+      clearTimeout(this._suggestionTimeout);
+      this._suggestionTimeout = null;
+    }
     this.updateHighlights();
     // Delay closing so click events on popover items can fire
     setTimeout(() => {
@@ -1089,6 +1096,11 @@ export class RichInput extends HTMLElement {
   }
 
   updateSuggestions(trigger = 'input') {
+    if (this._suggestionTimeout) {
+      clearTimeout(this._suggestionTimeout);
+      this._suggestionTimeout = null;
+    }
+
     const caretPos = this._input.selectionStart;
     const context = getCaretContext(this._input.value, caretPos, this._configuredKeywords);
 
@@ -1108,7 +1120,52 @@ export class RichInput extends HTMLElement {
       return;
     }
 
+    // Value suggestions always show immediately.
+    // Keyword suggestions show immediately when:
+    // - focusing/clearing an empty field
+    // - typing characters that match a keyword (Boolean(context.query))
+    // - explicitly triggered via the Down Arrow key
+    // In other cases (at the start of a new token after a space when the field is not empty),
+    // show after a small delay to prevent constant popups when typing regular sentences with spaces.
+    const isEmptyField = this._input.value.length === 0;
+    const shouldShowImmediately =
+      context.mode === 'value' ||
+      isEmptyField ||
+      Boolean(context.query) ||
+      trigger === 'arrow';
+
+    if (shouldShowImmediately) {
+      this._showSuggestions(suggestions, context, trigger);
+    } else {
+      if (this._isPopoverOpen()) {
+        this.hideSuggestions();
+      }
+      this._suggestionTimeout = setTimeout(() => {
+        this._suggestionTimeout = null;
+        const isFocused =
+          this._isFocused ||
+          this.shadowRoot?.activeElement === this._input ||
+          document.activeElement === this ||
+          document.activeElement === this._input ||
+          Boolean(this.matches?.(':focus-within'));
+        if (!isFocused) return;
+
+        const currentCaretPos = this._input.selectionStart;
+        const currentContext = getCaretContext(this._input.value, currentCaretPos, this._configuredKeywords);
+        this._context = currentContext;
+        const currentSuggestions = getSuggestions(currentContext, this._configuredKeywords);
+        if (currentSuggestions.length === 0) {
+          this.hideSuggestions();
+          return;
+        }
+        this._showSuggestions(currentSuggestions, currentContext, trigger);
+      }, KEYWORD_SUGGESTION_DELAY);
+    }
+  }
+
+  _showSuggestions(suggestions, context, trigger) {
     this._activeSuggestions = suggestions;
+
     // Pre-select first item for quick Enter/Tab when filtering or in value mode or triggered via Down Arrow,
     // but leave unselected (-1) when showing full keyword list at the start of a new token so Enter/Tab aren't hijacked.
     const shouldPreselect =
@@ -1135,6 +1192,10 @@ export class RichInput extends HTMLElement {
   }
 
   hideSuggestions() {
+    if (this._suggestionTimeout) {
+      clearTimeout(this._suggestionTimeout);
+      this._suggestionTimeout = null;
+    }
     if (this._isPopoverOpen()) {
       try {
         this._popover.hidePopover();

@@ -254,7 +254,7 @@ export function getSuggestions(context, configuredKeywords) {
     for (const [id, kw] of configuredKeywords.entries()) {
       const idLower = id.toLowerCase();
       const labelLower = (kw.label || '').toLowerCase();
-      const matches = !q || idLower.startsWith(q) || labelLower.startsWith(q) || idLower.includes(q);
+      const matches = !q || idLower.startsWith(q) || labelLower.startsWith(q);
 
       if (matches) {
         suggestions.push({
