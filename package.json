@@ -15,7 +15,10 @@
     "start": "npx -y serve src",
     "dev": "npx -y serve src",
     "deploy": "netlify deploy --dir=src --prod",
-    "deploy:preview": "netlify deploy --dir=src"
+    "deploy:preview": "netlify deploy --dir=src",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test tests/unit/**/*.test.js",
+    "test:e2e": "node --test tests/e2e/**/*.test.js"
   },
   "keywords": [
     "rich-input",
@@ -40,5 +43,8 @@
   "bugs": {
     "url": "https://github.com/bramus/rich-input/issues"
   },
-  "homepage": "https://github.com/bramus/rich-input#readme"
+  "homepage": "https://github.com/bramus/rich-input#readme",
+  "devDependencies": {
+    "puppeteer": "^25.11.0"
+  }
 }
