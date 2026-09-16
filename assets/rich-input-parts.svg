@@ -10,6 +10,7 @@
         --text-muted: #64748b;
         --text-hint: #94a3b8;
         --popover-bg: #ffffff;
+        --selected-item-bg: rgba(219, 39, 119, 0.07);
         --active-item-bg: #eff6ff;
 
         /* Annotation Colors */
@@ -22,6 +23,7 @@
         --c-popover: #9333ea;    /* Purple */
         --c-header: #475569;     /* Slate */
         --c-list: #7c3aed;       /* Violet */
+        --c-selected: #db2777;   /* Pink / Rose */
         --c-item: #16a34a;       /* Green */
         --c-active: #0284c7;     /* Sky */
         --c-image: #ea580c;      /* Orange */
@@ -40,6 +42,7 @@
           --text-muted: #94a3b8;
           --text-hint: #64748b;
           --popover-bg: #1e293b;
+          --selected-item-bg: rgba(244, 114, 182, 0.12);
           --active-item-bg: #1e3a5f;
 
           /* Annotation Colors (Brighter for Dark Mode) */
@@ -52,6 +55,7 @@
           --c-popover: #c084fc;
           --c-header: #94a3b8;
           --c-list: #a78bfa;
+          --c-selected: #f472b6;
           --c-item: #4ade80;
           --c-active: #38bdf8;
           --c-image: #fb923c;
@@ -180,6 +184,7 @@
       :scope:has(.lbl-popover:hover) .target-popover,
       :scope:has(.lbl-header:hover) .target-header,
       :scope:has(.lbl-list:hover) .target-list,
+      :scope:has(.lbl-selected:hover) .target-selected,
       :scope:has(.lbl-item:hover) .target-item,
       :scope:has(.lbl-active:hover) .target-active,
       :scope:has(.lbl-image:hover) .target-image,
@@ -193,7 +198,7 @@
       }
 
       /* Contained parts: when hovering a container, contained parts in the preview also remain at opacity 1 */
-      /* Control contains icon, input (including highlight hou), and clear button */
+      /* Control contains icon, input (including highlight house), and clear button */
       :scope:has(.lbl-control:hover) #component-preview .target-icon,
       :scope:has(.lbl-control:hover) #component-preview .target-input,
       :scope:has(.lbl-control:hover) #component-preview .target-hl-val,
@@ -201,19 +206,21 @@
         opacity: 1 !important;
       }
 
-      /* Input contains highlight label (hou text and background pill) */
+      /* Input contains highlight label (house text and background pill) */
       :scope:has(.lbl-input:hover) #component-preview .target-hl-val {
         opacity: 1 !important;
       }
 
       /* Popover contains header, list, and all suggestion items */
       :scope:has(.lbl-popover:hover) #component-preview .target-header,
+      :scope:has(.lbl-popover:hover) #component-preview .target-selected,
       :scope:has(.lbl-popover:hover) #component-preview .target-item,
       :scope:has(.lbl-popover:hover) #component-preview .target-active {
         opacity: 1 !important;
       }
 
       /* Suggestions list contains all suggestion items */
+      :scope:has(.lbl-list:hover) #component-preview .target-selected,
       :scope:has(.lbl-list:hover) #component-preview .target-item,
       :scope:has(.lbl-list:hover) #component-preview .target-active {
         opacity: 1 !important;
@@ -229,6 +236,7 @@
       :scope:has(.lbl-popover:hover) .target-popover.guide-line,
       :scope:has(.lbl-header:hover) .target-header.guide-line,
       :scope:has(.lbl-list:hover) .target-list.guide-line,
+      :scope:has(.lbl-selected:hover) .target-selected.guide-line,
       :scope:has(.lbl-item:hover) .target-item.guide-line,
       :scope:has(.lbl-active:hover) .target-active.guide-line,
       :scope:has(.lbl-image:hover) .target-image.guide-line,
@@ -246,6 +254,7 @@
       :scope:has(.lbl-popover:hover) .target-popover.guide-box,
       :scope:has(.lbl-header:hover) .target-header.guide-box,
       :scope:has(.lbl-list:hover) .target-list.guide-box,
+      :scope:has(.lbl-selected:hover) .target-selected.guide-box,
       :scope:has(.lbl-item:hover) .target-item.guide-box,
       :scope:has(.lbl-active:hover) .target-active.guide-box,
       :scope:has(.lbl-image:hover) .target-image.guide-box,
@@ -263,12 +272,16 @@
       <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.12"/>
     </filter>
 
+    <clipPath id="logo-clip-house">
+      <circle cx="543" cy="176" r="19"/>
+    </clipPath>
+
     <clipPath id="logo-clip-madhouse">
-      <circle cx="543" cy="180" r="19"/>
+      <circle cx="543" cy="246" r="19"/>
     </clipPath>
 
     <clipPath id="logo-clip-wph">
-      <circle cx="543" cy="254" r="19"/>
+      <circle cx="543" cy="316" r="19"/>
     </clipPath>
   </defs>
 
@@ -291,14 +304,14 @@
     <!-- Input Text Area (label: & caret): ::part(input) -->
     <g class="comp-part target-input">
       <text class="mono-text" x="458" y="82" font-size="15" fill="var(--text-muted)" font-weight="600">label:</text>
-      <line x1="540" y1="65" x2="540" y2="87" stroke="var(--c-active)" stroke-width="2.5"/>
+      <line x1="558" y1="65" x2="558" y2="87" stroke="var(--c-active)" stroke-width="2.5"/>
     </g>
 
-    <!-- Highlight Pill for "hou": ::highlight(label) -->
+    <!-- Highlight Pill for "house": ::highlight(label) -->
     <g class="comp-part target-hl-val">
-      <rect x="508" y="62" width="34" height="28" rx="5" fill="rgba(37, 99, 235, 0.14)"/>
-      <line x1="512" y1="87" x2="538" y2="87" stroke="var(--c-control)" stroke-width="2" stroke-linecap="round"/>
-      <text class="mono-text" x="512" y="82" font-size="15" fill="var(--c-control)" font-weight="600">hou</text>
+      <rect x="508" y="62" width="52" height="28" rx="5" fill="rgba(37, 99, 235, 0.14)"/>
+      <line x1="512" y1="87" x2="556" y2="87" stroke="var(--c-control)" stroke-width="2" stroke-linecap="round"/>
+      <text class="mono-text" x="512" y="82" font-size="15" fill="var(--c-control)" font-weight="600">house</text>
     </g>
 
     <!-- Clear Button: ::part(clear-button) -->
@@ -307,8 +320,8 @@
       <path d="M897 71 L907 81 M907 71 L897 81" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
     </g>
 
-    <!-- Suggestions Popover Background Card (aligned with colored box of "hou" at x=508): ::part(popover) -->
-    <rect class="component-card comp-part target-popover" x="508" y="94" width="350" height="204" rx="10" filter="url(#shadow)"/>
+    <!-- Suggestions Popover Background Card (aligned with colored box of "house" at x=508): ::part(popover) -->
+    <rect class="component-card comp-part target-popover" x="508" y="94" width="350" height="264" rx="10" filter="url(#shadow)"/>
 
     <!-- Popover Header: ::part(suggestions-header) -->
     <g class="comp-part target-header">
@@ -317,22 +330,30 @@
       <text class="ui-text" x="526" y="121" font-size="12" font-weight="700" letter-spacing="0.06em" fill="var(--text-muted)" style="text-transform: uppercase;">Record Label</text>
     </g>
 
-    <!-- Item 1: "Madhouse Records": ::part(suggestion-item) -->
-    <rect class="comp-part target-item" x="516" y="146" width="334" height="68" rx="8" fill="none"/>
-    <g class="comp-part target-image target-item">
-      <image href="data:image/jpeg;base64,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" x="524" y="161" width="38" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#logo-clip-madhouse)"/>
-      <circle cx="543" cy="180" r="19" fill="none" stroke="var(--border-color)" stroke-width="1.5"/>
+    <!-- Item 1 (Selected): "House": ::part(suggestion-item-selected) -->
+    <rect class="comp-part target-selected" x="516" y="144" width="334" height="64" rx="8" fill="var(--selected-item-bg)"/>
+    <g class="comp-part target-selected">
+      <image href="data:image/jpeg;base64,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" x="524" y="157" width="38" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#logo-clip-house)"/>
+      <circle cx="543" cy="176" r="19" fill="none" stroke="var(--border-color)" stroke-width="1.5"/>
     </g>
-    <text class="ui-text comp-part target-item" x="574" y="185" font-size="15" font-weight="600" fill="var(--text-color)">Madhouse Records</text>
+    <text class="ui-text comp-part target-selected" x="574" y="181" font-size="15" font-weight="600" fill="var(--text-color)">House</text>
 
-    <!-- Item 2 (Active/Highlighted): "We Play House Recordings": ::part(suggestion-item-active) -->
-    <rect class="comp-part target-active" x="516" y="220" width="334" height="68" rx="8" fill="var(--active-item-bg)"/>
+    <!-- Item 2: "Madhouse Records": ::part(suggestion-item) -->
+    <rect class="comp-part target-item" x="516" y="214" width="334" height="64" rx="8" fill="none"/>
+    <g class="comp-part target-image target-item">
+      <image href="data:image/jpeg;base64,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" x="524" y="227" width="38" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#logo-clip-madhouse)"/>
+      <circle cx="543" cy="246" r="19" fill="none" stroke="var(--border-color)" stroke-width="1.5"/>
+    </g>
+    <text class="ui-text comp-part target-item" x="574" y="251" font-size="15" font-weight="600" fill="var(--text-color)">Madhouse Records</text>
+
+    <!-- Item 3 (Active/Highlighted): "We Play House Recordings": ::part(suggestion-item-active) -->
+    <rect class="comp-part target-active" x="516" y="284" width="334" height="64" rx="8" fill="var(--active-item-bg)"/>
     <g class="comp-part target-active">
-      <image href="data:image/jpeg;base64,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bEs5Vri4lkYvJNM6qoaR2JJIUADAACgAd14t8OWXjLwprPhHUZJIrTXLK4sZniIEix3MbRMULAjcAxIyCM9jXhPiHwRd6ifD974e8HnT9AtvEI1LWdHJto31GM2E1qspgSQwMIZzbTeW7gt5RcLvVA/IeIPhj401HRvEUGjaEtvpupeMPDupaZpcn2d0s7SxuLJr+5aIzJGiS+TNIYI33MCWIEkrqADuf2e/2Uvgj+zHoX9k/CzQEtryZAl1qlzifUbvH/PWcgHbnny0Cxg8hBX0bXyDpXw+8ZWvhv4X6VrvhibUbjwt4n1G81VfNs5IDDc2Wpp59qjzLts/tF1ELe3I82GIIhT93uNo/DrxriInRT/Za+PLTV9O07zbdjpWkxWsUcxOZPLAe6We4EcTOVWYKBkFVALXjX9jP4EfEr44x/Hz4i6M3iXXLaytrK2s75lk02EWzOyy/Z9oEjnfg+aXQYBCg819RNaWj2psHhRrZk8sxFRsMeNu3b0244xjGK+V9X+FviMeNNR8T+HNFVdN1rxFpkmraZdPD5Fzb2jWjJqtsqu6x3ELxMJAwRpos7gXSLOhY+DvGGm6lqc2p+Godf1yfxauoW2q3BiZI9JluE2NG/mpLE9laExCILiRkOAyys1AFLwD+xj8CPhX8cLn48/DXSG8N6zfWFxYXNjZMqabILiSORpVt9p8px5YAETImCTszzX1bXzV4D8EeKdA+LWoa+unOujag2smVtQS1e5tZLi7jlT7JeW7+ZJbXW0yeRcIzw4VQ8aqsR+laACiiigD/9P9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/1P38ooooAKKKKACiiigAooooAKKKKACiiigAooooA//V/fyiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=" x="524" y="235" width="38" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#logo-clip-wph)"/>
-      <circle cx="543" cy="254" r="19" fill="none" stroke="var(--border-color)" stroke-width="1.5"/>
+      <image href="data:image/jpeg;base64,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bEs5Vri4lkYvJNM6qoaR2JJIUADAACgAd14t8OWXjLwprPhHUZJIrTXLK4sZniIEix3MbRMULAjcAxIyCM9jXhPiHwRd6ifD974e8HnT9AtvEI1LWdHJto31GM2E1qspgSQwMIZzbTeW7gt5RcLvVA/IeIPhj401HRvEUGjaEtvpupeMPDupaZpcn2d0s7SxuLJr+5aIzJGiS+TNIYI33MCWIEkrqADuf2e/2Uvgj+zHoX9k/CzQEtryZAl1qlzifUbvH/PWcgHbnny0Cxg8hBX0bXyDpXw+8ZWvhv4X6VrvhibUbjwt4n1G81VfNs5IDDc2Wpp59qjzLts/tF1ELe3I82GIIhT93uNo/DrxriInRT/Za+PLTV9O07zbdjpWkxWsUcxOZPLAe6We4EcTOVWYKBkFVALXjX9jP4EfEr44x/Hz4i6M3iXXLaytrK2s75lk02EWzOyy/Z9oEjnfg+aXQYBCg819RNaWj2psHhRrZk8sxFRsMeNu3b0244xjGK+V9X+FviMeNNR8T+HNFVdN1rxFpkmraZdPD5Fzb2jWjJqtsqu6x3ELxMJAwRpos7gXSLOhY+DvGGm6lqc2p+Godf1yfxauoW2q3BiZI9JluE2NG/mpLE9laExCILiRkOAyys1AFLwD+xj8CPhX8cLn48/DXSG8N6zfWFxYXNjZMqabILiSORpVt9p8px5YAETImCTszzX1bXzV4D8EeKdA+LWoa+unOujag2smVtQS1e5tZLi7jlT7JeW7+ZJbXW0yeRcIzw4VQ8aqsR+laACiiigD/9P9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/1P38ooooAKKKKACiiigAooooAKKKKACiiigAooooA//V/fyiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=" x="524" y="297" width="38" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#logo-clip-wph)"/>
+      <circle cx="543" cy="316" r="19" fill="none" stroke="var(--border-color)" stroke-width="1.5"/>
     </g>
     <g class="comp-part target-val target-active">
-      <text class="ui-text" x="574" y="259" font-size="15" font-weight="600" fill="var(--text-color)">We Play House Recordings</text>
+      <text class="ui-text" x="574" y="321" font-size="15" font-weight="600" fill="var(--text-color)">We Play House Recordings</text>
     </g>
   </g>
 
@@ -343,7 +364,7 @@
 
   <!-- 1. Host Target -->
   <path class="guide-line target-host" d="M200 49 L395 49" stroke="var(--c-host)"/>
-  <rect class="guide-box target-host" x="398" y="38" width="544" height="272" rx="16" stroke="var(--c-host)"/>
+  <rect class="guide-box target-host" x="398" y="38" width="544" height="330" rx="16" stroke="var(--c-host)"/>
   <circle class="guide-dot target-host" cx="395" cy="49" r="4" fill="var(--c-host)"/>
 
   <!-- 2. Control Target -->
@@ -361,10 +382,10 @@
   <rect class="guide-box target-input" x="454" y="58" width="395" height="36" rx="6" stroke="var(--c-input)"/>
   <circle class="guide-dot target-input" cx="454" cy="100" r="4" fill="var(--c-input)"/>
 
-  <!-- 5. Highlight Label Target (around "hou") -->
-  <path class="guide-line target-hl-val" d="M240 263 L525 263 L525 93" stroke="var(--c-hl-val)"/>
-  <rect class="guide-box target-hl-val" x="504" y="58" width="42" height="34" rx="7" stroke="var(--c-hl-val)"/>
-  <circle class="guide-dot target-hl-val" cx="525" cy="93" r="4" fill="var(--c-hl-val)"/>
+  <!-- 5. Highlight Label Target (around "house") -->
+  <path class="guide-line target-hl-val" d="M240 263 L534 263 L534 93" stroke="var(--c-hl-val)"/>
+  <rect class="guide-box target-hl-val" x="504" y="58" width="60" height="34" rx="7" stroke="var(--c-hl-val)"/>
+  <circle class="guide-dot target-hl-val" cx="534" cy="93" r="4" fill="var(--c-hl-val)"/>
 
   <!-- 6. Suggestions Header Target -->
   <path class="guide-line target-header" d="M310 331 L480 331 L480 116 L506 116" stroke="var(--c-header)"/>
@@ -372,39 +393,44 @@
   <circle class="guide-dot target-header" cx="506" cy="116" r="4" fill="var(--c-header)"/>
 
   <!-- 7. Suggestion Image Target -->
-  <path class="guide-line target-image" d="M300 395 L495 395 L495 180 L520 180" stroke="var(--c-image)"/>
-  <circle class="guide-box target-image" cx="543" cy="180" r="23" stroke="var(--c-image)"/>
-  <circle class="guide-dot target-image" cx="520" cy="180" r="4" fill="var(--c-image)"/>
+  <path class="guide-line target-image" d="M300 395 L495 395 L495 246 L520 246" stroke="var(--c-image)"/>
+  <circle class="guide-box target-image" cx="543" cy="246" r="23" stroke="var(--c-image)"/>
+  <circle class="guide-dot target-image" cx="520" cy="246" r="4" fill="var(--c-image)"/>
 
   <!-- 8. Clear Button Target -->
-  <path class="guide-line target-clear" d="M1005 73 L925 73" stroke="var(--c-clear)"/>
+  <path class="guide-line target-clear" d="M1005 63 L940 63 L922 76" stroke="var(--c-clear)"/>
   <circle class="guide-box target-clear" cx="902" cy="76" r="20" stroke="var(--c-clear)"/>
-  <circle class="guide-dot target-clear" cx="925" cy="73" r="4" fill="var(--c-clear)"/>
+  <circle class="guide-dot target-clear" cx="922" cy="76" r="4" fill="var(--c-clear)"/>
 
   <!-- 9. Popover Target -->
-  <path class="guide-line target-popover" d="M1005 125 L862 125" stroke="var(--c-popover)"/>
-  <rect class="guide-box target-popover" x="504" y="90" width="358" height="212" rx="14" stroke="var(--c-popover)"/>
-  <circle class="guide-dot target-popover" cx="862" cy="125" r="4" fill="var(--c-popover)"/>
+  <path class="guide-line target-popover" d="M1005 119 L862 119" stroke="var(--c-popover)"/>
+  <rect class="guide-box target-popover" x="504" y="90" width="358" height="272" rx="14" stroke="var(--c-popover)"/>
+  <circle class="guide-dot target-popover" cx="862" cy="119" r="4" fill="var(--c-popover)"/>
 
   <!-- 10. Suggestions List Target -->
-  <path class="guide-line target-list" d="M1005 180 L875 180 L875 150 L854 150" stroke="var(--c-list)"/>
-  <rect class="guide-box target-list" x="512" y="142" width="342" height="148" rx="8" stroke="var(--c-list)"/>
-  <circle class="guide-dot target-list" cx="854" cy="150" r="4" fill="var(--c-list)"/>
+  <path class="guide-line target-list" d="M1005 175 L875 175 L875 148 L854 148" stroke="var(--c-list)"/>
+  <rect class="guide-box target-list" x="512" y="140" width="342" height="212" rx="8" stroke="var(--c-list)"/>
+  <circle class="guide-dot target-list" cx="854" cy="148" r="4" fill="var(--c-list)"/>
 
-  <!-- 11. Suggestion Item Target (Item 1: Madhouse Records) -->
-  <path class="guide-line target-item" d="M1005 240 L895 240 L895 180 L852 180" stroke="var(--c-item)"/>
-  <rect class="guide-box target-item" x="514" y="144" width="338" height="72" rx="10" stroke="var(--c-item)"/>
-  <circle class="guide-dot target-item" cx="852" cy="180" r="4" fill="var(--c-item)"/>
+  <!-- 11. Suggestion Item Selected Target (Item 1: House) -->
+  <path class="guide-line target-selected" d="M1005 231 L895 231 L895 176 L852 176" stroke="var(--c-selected)"/>
+  <rect class="guide-box target-selected" x="514" y="142" width="338" height="68" rx="10" stroke="var(--c-selected)"/>
+  <circle class="guide-dot target-selected" cx="852" cy="176" r="4" fill="var(--c-selected)"/>
 
-  <!-- 12. Suggestion Item Active Target (Item 2: We Play House Recordings) -->
-  <path class="guide-line target-active" d="M1005 300 L915 300 L915 254 L852 254" stroke="var(--c-active)"/>
-  <rect class="guide-box target-active" x="514" y="218" width="338" height="72" rx="10" stroke="var(--c-active)"/>
-  <circle class="guide-dot target-active" cx="852" cy="254" r="4" fill="var(--c-active)"/>
+  <!-- 12. Suggestion Item Target (Item 2: Madhouse Records) -->
+  <path class="guide-line target-item" d="M1005 287 L910 287 L910 246 L852 246" stroke="var(--c-item)"/>
+  <rect class="guide-box target-item" x="514" y="212" width="338" height="68" rx="10" stroke="var(--c-item)"/>
+  <circle class="guide-dot target-item" cx="852" cy="246" r="4" fill="var(--c-item)"/>
 
-  <!-- 13. Suggestion Value Target ("We Play House Recordings" text) -->
-  <path class="guide-line target-val" d="M1005 360 L935 360 L935 254 L770 254" stroke="var(--c-val-text)"/>
-  <rect class="guide-box target-val" x="570" y="243" width="204" height="24" rx="6" stroke="var(--c-val-text)"/>
-  <circle class="guide-dot target-val" cx="770" cy="254" r="4" fill="var(--c-val-text)"/>
+  <!-- 13. Suggestion Item Active Target (Item 3: We Play House Recordings) -->
+  <path class="guide-line target-active" d="M1005 343 L925 343 L925 316 L852 316" stroke="var(--c-active)"/>
+  <rect class="guide-box target-active" x="514" y="282" width="338" height="68" rx="10" stroke="var(--c-active)"/>
+  <circle class="guide-dot target-active" cx="852" cy="316" r="4" fill="var(--c-active)"/>
+
+  <!-- 14. Suggestion Value Target ("We Play House Recordings" text) -->
+  <path class="guide-line target-val" d="M1005 399 L940 399 L940 316 L770 316" stroke="var(--c-val-text)"/>
+  <rect class="guide-box target-val" x="570" y="305" width="204" height="24" rx="6" stroke="var(--c-val-text)"/>
+  <circle class="guide-dot target-val" cx="770" cy="316" r="4" fill="var(--c-val-text)"/>
 
 
   <!-- ===================================================================== -->
@@ -450,32 +476,37 @@
   <!-- CODE LABELS (RIGHT SIDE) -->
   <!-- ===================================================================== -->
   <g class="code-label lbl-clear">
-    <rect class="label-hitbox" x="1005" y="58" width="225" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="78" fill="var(--c-clear)">::part(clear-button)</text>
+    <rect class="label-hitbox" x="1005" y="48" width="225" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="68" fill="var(--c-clear)">::part(clear-button)</text>
   </g>
 
   <g class="code-label lbl-popover">
-    <rect class="label-hitbox" x="1005" y="110" width="185" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="130" fill="var(--c-popover)">::part(popover)</text>
+    <rect class="label-hitbox" x="1005" y="104" width="185" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="124" fill="var(--c-popover)">::part(popover)</text>
   </g>
 
   <g class="code-label lbl-list">
-    <rect class="label-hitbox" x="1005" y="165" width="260" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="185" fill="var(--c-list)">::part(suggestions-list)</text>
+    <rect class="label-hitbox" x="1005" y="160" width="260" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="180" fill="var(--c-list)">::part(suggestions-list)</text>
+  </g>
+
+  <g class="code-label lbl-selected">
+    <rect class="label-hitbox" x="1005" y="216" width="335" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="236" fill="var(--c-selected)">::part(suggestion-item-selected)</text>
   </g>
 
   <g class="code-label lbl-item">
-    <rect class="label-hitbox" x="1005" y="225" width="265" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="245" fill="var(--c-item)">::part(suggestion-item)</text>
+    <rect class="label-hitbox" x="1005" y="272" width="265" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="292" fill="var(--c-item)">::part(suggestion-item)</text>
   </g>
 
   <g class="code-label lbl-active">
-    <rect class="label-hitbox" x="1005" y="285" width="320" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="305" fill="var(--c-active)">::part(suggestion-item-active)</text>
+    <rect class="label-hitbox" x="1005" y="328" width="320" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="348" fill="var(--c-active)">::part(suggestion-item-active)</text>
   </g>
 
   <g class="code-label lbl-val">
-    <rect class="label-hitbox" x="1005" y="345" width="270" height="30" rx="6"/>
-    <text class="label-text" x="1015" y="365" fill="var(--c-val-text)">::part(suggestion-value)</text>
+    <rect class="label-hitbox" x="1005" y="384" width="270" height="30" rx="6"/>
+    <text class="label-text" x="1015" y="404" fill="var(--c-val-text)">::part(suggestion-value)</text>
   </g>
 </svg>

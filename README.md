@@ -83,6 +83,7 @@ Nest `<datalist>` elements inside `<rich-input>` to configure keywords and autoc
 <rich-input placeholder="Search music catalog...">
   <datalist id="label" label="Record Label">
     <option value="Defected"></option>
+    <option value="House"></option>
     <option value="Keinemusik"></option>
     <option value="Kranky"></option>
     <option value="Madhouse Records"></option>
@@ -134,6 +135,10 @@ Datalists can be added, updated, or removed dynamically at runtime; `<rich-input
     <option value="Defected">
       <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
       Defected
+    </option>
+    <option value="House">
+      <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+      House
     </option>
     <option value="Keinemusik">
       <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">

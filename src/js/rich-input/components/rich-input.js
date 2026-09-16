@@ -224,6 +224,10 @@ TEMPLATE.innerHTML = `
     color: var(--ri-item-title-color, var(--rs-item-title-color, #0f172a));
   }
 
+  .suggestion-item.selected {
+    background-color: var(--ri-item-selected-bg, rgba(37, 99, 235, 0.06));
+  }
+
   .suggestion-item:hover,
   .suggestion-item.active {
     background-color: var(--ri-item-active-bg, var(--rs-item-active-bg, #f1f5f9));
