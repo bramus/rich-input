@@ -119,6 +119,7 @@ Configuration is defined by standard HTML `<datalist>` elements placed inside th
 |---|---|---|
 | `<rich-input operators="...">` | `string` | Optional space-separated list of prefix operators (e.g. `operators="- ~ +"`). Defaults to `"-"` (negative filter). |
 | `<rich-input combinators="...">` | `string` | Optional space-separated list of query combinators (e.g. `combinators="AND OR NOT"`). Defaults to `""` (empty array). |
+| `<rich-input delimiters="...">` | `string` | Optional space-separated list of delimiter pairs (e.g. `delimiters="{} () []"`). Defaults to `"()"` (parentheses). |
 | `<datalist id="...">` | `string` | **Required.** The keyword identifier used in queries (e.g. `id="artist"` produces `artist:`). Case-insensitive. |
 | `<datalist label="...">` | `string` | Human-readable label displayed in suggestion headers. Defaults to capitalized `id`. |
 | `<datalist data-type="...">` | `string` | Optional data type (`"string"` or `"number"`). |
@@ -292,6 +293,12 @@ Values corresponding to configured keywords are registered into the global `CSS.
   text-shadow: 0 0 1px rgba(124, 58, 237, 0.2);
 }
 
+/* Generic highlight for delimiters (e.g. "(" and ")") */
+::highlight(rich-input-delimiter) {
+  color: #0284c7;
+  text-shadow: 0 0 1px rgba(2, 132, 199, 0.25);
+}
+
 /* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
 ::highlight(rich-input-keyword) {
   color: #64748b;
@@ -387,6 +394,8 @@ rich-input::part(suggestion-item-active) {
 - `RichInput.operators` (`string[] | string`): Static getter and setter to configure global default operators for all instances without a local override.
 - `combinators` (`string[] | string`): Gets or sets the query combinators (e.g. `['AND', 'OR', 'NOT']` or `'AND OR NOT'`) for this instance. Defaults to `RichInput.combinators` (`[]`). Setting to `null` clears the instance override and falls back to the global configuration.
 - `RichInput.combinators` (`string[] | string`): Static getter and setter to configure global default combinators for all instances without a local override.
+- `delimiters` (`string[] | string`): Gets or sets the delimiter pairs (e.g. `['()', '{}', '[]']` or `'{} () []'`) for this instance. Defaults to `RichInput.delimiters` (`['()']`). Setting to `null` clears the instance override and falls back to the global configuration.
+- `RichInput.delimiters` (`string[] | string`): Static getter and setter to configure global default delimiter pairs for all instances without a local override.
 - `placeholder` (`string`): Gets or sets the input placeholder text.
 - `disabled` (`boolean`): Disables or enables the input control.
 - `name` (`string`): Form field name when submitted inside a `<form>`.
@@ -397,12 +406,14 @@ rich-input::part(suggestion-item-active) {
 - `getParsedQuery()`: Returns a parsed object representing the search query:
   ```json
   {
-    "raw": "label:\"We Play House Recordings\" OR -style:Acid chicago house",
-    "text": "chicago house",
+    "raw": "(label:\"We Play House Recordings\" year:2026 ) OR (year:2024 style:\"Deep House\")",
+    "text": "",
     "combinators": ["OR"],
+    "delimiters": ["(", ")", "(", ")"],
     "keywords": {
       "label": ["We Play House Recordings"],
-      "-style": ["Acid"]
+      "year": ["2026", "2024"],
+      "style": ["Deep House"]
     },
     "tokens": [...]
   }
@@ -410,6 +421,7 @@ rich-input::part(suggestion-item-active) {
 - `getKeywords()`: Returns an array of configured keyword definitions from the datalists.
 - `getOperators()` / `setOperators(operators)`: Gets or sets the operators for this instance (or globally via `RichInput.getOperators()` / `RichInput.setOperators(operators)`).
 - `getCombinators()` / `setCombinators(combinators)`: Gets or sets the combinators for this instance (or globally via `RichInput.getCombinators()` / `RichInput.setCombinators(combinators)`).
+- `getDelimiters()` / `setDelimiters(delimiters)`: Gets or sets the delimiters for this instance (or globally via `RichInput.getDelimiters()` / `RichInput.setDelimiters(delimiters)`).
 - `focus(options)`: Focuses the internal input.
 - `blur()`: Removes focus from the internal input.
 - `select()`: Selects all text inside the input.

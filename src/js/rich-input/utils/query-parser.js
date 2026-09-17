@@ -92,18 +92,98 @@ function matchOperator(str, normalizedOperators) {
   return null;
 }
 
+export const DEFAULT_DELIMITERS = ['()'];
+
+/**
+ * Normalizes delimiters input into a deduplicated array of delimiter pair strings (e.g. ['()', '{}', '[]']).
+ * @param {string|string[]|null|undefined} delimiters
+ * @returns {string[]}
+ */
+export function normalizeDelimiters(delimiters) {
+  if (delimiters === undefined) {
+    return [...DEFAULT_DELIMITERS];
+  }
+  if (delimiters === null || delimiters === '') {
+    return [];
+  }
+  const rawList = Array.isArray(delimiters)
+    ? delimiters
+    : typeof delimiters === 'string'
+      ? delimiters.split(/\s+/)
+      : [];
+
+  const flatTokens = [];
+  for (const item of rawList) {
+    if (typeof item !== 'string') continue;
+    const parts = item.trim().split(/\s+/).filter(Boolean);
+    flatTokens.push(...parts);
+  }
+
+  const result = [];
+  const seen = new Set();
+
+  for (let i = 0; i < flatTokens.length; i++) {
+    let token = flatTokens[i];
+    if (token.length === 1 && i + 1 < flatTokens.length && flatTokens[i + 1].length === 1) {
+      token = token + flatTokens[i + 1];
+      i++;
+    } else if (token.length > 2) {
+      token = token.replace(/(.)\1+/g, '$1');
+    }
+    if (token.length >= 2 && !seen.has(token)) {
+      seen.add(token);
+      result.push(token);
+    }
+  }
+
+  return result;
+}
+
+function buildDelimiterEntries(normalizedDelims) {
+  const entries = [];
+  if (!normalizedDelims || normalizedDelims.length === 0) return entries;
+  for (const pair of normalizedDelims) {
+    if (typeof pair !== 'string' || pair.length < 2) continue;
+    const open = pair[0];
+    const close = pair[pair.length - 1];
+    entries.push({ delimiter: open, role: 'open', pair });
+    if (close !== open) {
+      entries.push({ delimiter: close, role: 'close', pair });
+    }
+  }
+  return entries;
+}
+
+function matchDelimiter(str, delimEntries) {
+  if (!str || !delimEntries || delimEntries.length === 0) return null;
+  for (const entry of delimEntries) {
+    if (str.startsWith(entry.delimiter)) {
+      return entry;
+    }
+  }
+  return null;
+}
+
 /**
  * Parses raw search input into token objects.
  * @param {string} inputStr
  * @param {string|string[]} [operators=DEFAULT_OPERATORS]
  * @param {string|string[]} [combinators=DEFAULT_COMBINATORS]
+ * @param {string|string[]} [delimiters=DEFAULT_DELIMITERS]
  * @returns {Array<Object>}
  */
-export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS, combinators = DEFAULT_COMBINATORS) {
+export function parseSearchTokens(
+  inputStr,
+  operators = DEFAULT_OPERATORS,
+  combinators = DEFAULT_COMBINATORS,
+  delimiters = DEFAULT_DELIMITERS
+) {
   if (typeof inputStr !== 'string') return [];
 
   const normalizedOps = normalizeOperators(operators);
   const normalizedCombs = normalizeCombinators(combinators);
+  const normalizedDelims = normalizeDelimiters(delimiters);
+  const delimEntries = buildDelimiterEntries(normalizedDelims);
   const tokens = [];
   let i = 0;
   const len = inputStr.length;
@@ -121,6 +201,22 @@ export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS, combi
         start: wsStart,
         end: i,
       });
+      continue;
+    }
+
+    // 1b. Delimiter
+    const matchedDelim = matchDelimiter(inputStr.slice(i), delimEntries);
+    if (matchedDelim) {
+      tokens.push({
+        type: 'delimiter',
+        delimiter: matchedDelim.delimiter,
+        role: matchedDelim.role,
+        pair: matchedDelim.pair,
+        raw: matchedDelim.delimiter,
+        start: i,
+        end: i + matchedDelim.delimiter.length,
+      });
+      i += matchedDelim.delimiter.length;
       continue;
     }
 
@@ -176,9 +272,13 @@ export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS, combi
           i++; // skip closing quote
         }
       } else {
-        // Unquoted value: until next whitespace or end
+        // Unquoted value: until next whitespace, delimiter, or end
         innerStart = i;
-        while (i < len && !/\s/.test(inputStr[i])) {
+        while (
+          i < len &&
+          !/\s/.test(inputStr[i]) &&
+          !matchDelimiter(inputStr.slice(i), delimEntries)
+        ) {
           i++;
         }
         innerEnd = i;
@@ -213,7 +313,11 @@ export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS, combi
       });
     } else {
       // 3. Standalone word token (combinator or plain text)
-      while (i < len && !/\s/.test(inputStr[i])) {
+      while (
+        i < len &&
+        !/\s/.test(inputStr[i]) &&
+        !matchDelimiter(inputStr.slice(i), delimEntries)
+      ) {
         i++;
       }
       const raw = inputStr.slice(tokenStart, i);
@@ -247,16 +351,23 @@ export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS, combi
 }
 
 /**
- * Parses search query into a structured object with keywords, combinators, and free text.
+ * Parses search query into a structured object with keywords, combinators, delimiters, and free text.
  * @param {string} inputStr
  * @param {string|string[]} [operators=DEFAULT_OPERATORS]
  * @param {string|string[]} [combinators=DEFAULT_COMBINATORS]
- * @returns {{ raw: string, text: string, keywords: Record<string, string[]>, combinators: string[], tokens: Array<Object> }}
+ * @param {string|string[]} [delimiters=DEFAULT_DELIMITERS]
+ * @returns {{ raw: string, text: string, keywords: Record<string, string[]>, combinators: string[], delimiters: string[], tokens: Array<Object> }}
  */
-export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS, combinators = DEFAULT_COMBINATORS) {
-  const tokens = parseSearchTokens(inputStr, operators, combinators);
+export function parseSearchQuery(
+  inputStr,
+  operators = DEFAULT_OPERATORS,
+  combinators = DEFAULT_COMBINATORS,
+  delimiters = DEFAULT_DELIMITERS
+) {
+  const tokens = parseSearchTokens(inputStr, operators, combinators, delimiters);
   const keywords = {};
   const matchedCombinators = [];
+  const matchedDelimiters = [];
   const textWords = [];
 
   for (const token of tokens) {
@@ -268,6 +379,8 @@ export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS, combin
       keywords[kw].push(token.innerValue);
     } else if (token.type === 'combinator') {
       matchedCombinators.push(token.combinator);
+    } else if (token.type === 'delimiter') {
+      matchedDelimiters.push(token.delimiter);
     } else if (token.type === 'text') {
       textWords.push(token.raw);
     }
@@ -278,6 +391,7 @@ export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS, combin
     text: textWords.join(' '),
     keywords,
     combinators: matchedCombinators,
+    delimiters: matchedDelimiters,
     tokens,
   };
 }
@@ -289,6 +403,7 @@ export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS, combin
  * @param {Map<string, Object>|Object} configuredKeywords
  * @param {string|string[]} [operators=DEFAULT_OPERATORS]
  * @param {string|string[]} [combinators=DEFAULT_COMBINATORS]
+ * @param {string|string[]} [delimiters=DEFAULT_DELIMITERS]
  * @returns {Object}
  */
 export function getCaretContext(
@@ -296,24 +411,26 @@ export function getCaretContext(
   caretPos,
   configuredKeywords,
   operators = DEFAULT_OPERATORS,
-  combinators = DEFAULT_COMBINATORS
+  combinators = DEFAULT_COMBINATORS,
+  delimiters = DEFAULT_DELIMITERS
 ) {
   if (typeof inputStr !== 'string') inputStr = '';
   caretPos = Math.max(0, Math.min(caretPos || 0, inputStr.length));
 
-  const tokens = parseSearchTokens(inputStr, operators, combinators);
+  const tokens = parseSearchTokens(inputStr, operators, combinators, delimiters);
 
-  // Find token at caret
+  // Find token at caret (skip whitespace and delimiter boundary tokens)
   let activeToken = null;
   for (const token of tokens) {
+    if (token.type === 'whitespace' || token.type === 'delimiter') continue;
     if (caretPos >= token.start && caretPos <= token.end) {
       activeToken = token;
       break;
     }
   }
 
-  // If caret is in whitespace or empty input (at the start of a new token)
-  if (!activeToken || activeToken.type === 'whitespace') {
+  // If caret is in whitespace, delimiter, or empty input (at the start of a new token)
+  if (!activeToken || activeToken.type === 'whitespace' || activeToken.type === 'delimiter') {
     return {
       mode: 'keyword',
       query: '',
@@ -457,9 +574,13 @@ export function getSuggestions(context, configuredKeywords, configuredCombinator
             (t) => t.type !== 'whitespace' && t.end <= context.replaceStart
           );
           const lastPreceding = precedingTokens[precedingTokens.length - 1];
-          // Don't suggest combinators at the very start of an empty query (unless typing a query prefix)
-          // or immediately after another combinator
-          if (precedingTokens.length === 0 || lastPreceding?.type === 'combinator') {
+          // Don't suggest combinators at the very start of an empty query (unless typing a query prefix),
+          // immediately after another combinator, or immediately after an opening delimiter
+          if (
+            precedingTokens.length === 0 ||
+            lastPreceding?.type === 'combinator' ||
+            (lastPreceding?.type === 'delimiter' && lastPreceding?.role === 'open')
+          ) {
             shouldIncludeCombinators = false;
           }
         }
@@ -535,12 +656,23 @@ export function applySuggestion(inputStr, suggestion, context) {
   let after = inputStr.slice(replaceEnd);
   let insertText = suggestion.insertText;
 
+  const followingToken = Array.isArray(context.tokens)
+    ? context.tokens.find((t) => t.start === replaceEnd)
+    : null;
+  const isFollowedByCloseDelimiter =
+    followingToken?.type === 'delimiter' && followingToken?.role === 'close';
+
   if (suggestion.type === 'keyword') {
     // When inserting a keyword like `mix:`, do not add trailing space so user can immediately type value
     // If after text starts with colon, remove it to avoid `mix::`
     if (after.startsWith(':')) {
       after = after.slice(1);
-    } else if (context.token?.type !== 'keyword' && after.length > 0 && !/^\s/.test(after)) {
+    } else if (
+      context.token?.type !== 'keyword' &&
+      after.length > 0 &&
+      !/^\s/.test(after) &&
+      !isFollowedByCloseDelimiter
+    ) {
       // Ensure space before following token so it doesn't become the value of this keyword
       after = ' ' + after;
     }
@@ -550,9 +682,9 @@ export function applySuggestion(inputStr, suggestion, context) {
   }
 
   // When inserting a value (e.g. `"We Play House Recordings"`)
-  // Add a trailing space if after does not already start with whitespace
+  // Add a trailing space if after does not already start with whitespace or a closing delimiter
   const hasLeadingSpaceAfter = /^\s/.test(after);
-  if (after.length === 0 || !hasLeadingSpaceAfter) {
+  if ((after.length === 0 || !hasLeadingSpaceAfter) && !isFollowedByCloseDelimiter) {
     insertText += ' ';
   }
 

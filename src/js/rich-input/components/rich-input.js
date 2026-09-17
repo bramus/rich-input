@@ -3,7 +3,7 @@
  * Keyword-based autocomplete input field powered by OpaqueRange and Custom Highlight API.
  */
 
-import { DEFAULT_OPERATORS, normalizeOperators, DEFAULT_COMBINATORS, normalizeCombinators, parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from '../utils/query-parser.js';
+import { DEFAULT_OPERATORS, normalizeOperators, DEFAULT_COMBINATORS, normalizeCombinators, DEFAULT_DELIMITERS, normalizeDelimiters, parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from '../utils/query-parser.js';
 import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from '../utils/highlights.js';
 import { getCaretCoordinates, positionPopover } from '../utils/positioning.js';
 import { setupContentEditableAdapter, isContentEditableFallbackActive } from '../utils/contenteditable-adapter.js';
@@ -124,6 +124,12 @@ TEMPLATE.innerHTML = `
   /* Generic highlight for combinators */
   ::highlight(rich-input-combinator) {
     color: var(--ri-combinator-color, var(--ri-operator-color, var(--ri-keyword-color, #64748b)));
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Generic highlight for delimiters */
+  ::highlight(rich-input-delimiter) {
+    color: var(--ri-delimiter-color, var(--ri-operator-color, var(--ri-keyword-color, #64748b)));
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
   }
 
@@ -376,6 +382,7 @@ export class RichInput extends HTMLElement {
 
   static _globalOperators = [...DEFAULT_OPERATORS];
   static _globalCombinators = [...DEFAULT_COMBINATORS];
+  static _globalDelimiters = [...DEFAULT_DELIMITERS];
 
   /**
    * Global default operators inherited by newly created <rich-input> instances.
@@ -423,6 +430,29 @@ export class RichInput extends HTMLElement {
     RichInput.combinators = val;
   }
 
+  /**
+   * Global default delimiters inherited by newly created <rich-input> instances.
+   */
+  static get delimiters() {
+    return [...RichInput._globalDelimiters];
+  }
+
+  static set delimiters(val) {
+    if (val === null || val === undefined) {
+      RichInput._globalDelimiters = [...DEFAULT_DELIMITERS];
+    } else {
+      RichInput._globalDelimiters = normalizeDelimiters(val);
+    }
+  }
+
+  static get defaultDelimiters() {
+    return RichInput.delimiters;
+  }
+
+  static set defaultDelimiters(val) {
+    RichInput.delimiters = val;
+  }
+
   static get observedAttributes() {
     return [
       'value',
@@ -435,6 +465,7 @@ export class RichInput extends HTMLElement {
       'highlight-quotes',
       'operators',
       'combinators',
+      'delimiters',
       'aria-label',
       'aria-labelledby',
     ];
@@ -479,6 +510,8 @@ export class RichInput extends HTMLElement {
     this._settingOperatorsAttribute = false;
     this._combinators = [...RichInput.combinators];
     this._settingCombinatorsAttribute = false;
+    this._delimiters = [...RichInput.delimiters];
+    this._settingDelimitersAttribute = false;
     this._activeSuggestions = [];
     this._selectedIndex = -1;
     this._context = null;
@@ -487,6 +520,7 @@ export class RichInput extends HTMLElement {
     this._invalidRanges = [];
     this._operatorRanges = [];
     this._combinatorRanges = [];
+    this._delimiterRanges = [];
     this._activeKeywordHighlightMap = new Map();
     this._isFocused = false;
     this._lastCaretPosition = -1;
@@ -579,6 +613,20 @@ export class RichInput extends HTMLElement {
       this._settingCombinatorsAttribute = true;
       this.setAttribute('combinators', this._combinators.join(' '));
       this._settingCombinatorsAttribute = false;
+    }
+    if (this.hasAttribute('delimiters')) {
+      const rawDelims = this.getAttribute('delimiters');
+      this._delimiters = normalizeDelimiters(rawDelims);
+      const normalizedAttr = this._delimiters.join(' ');
+      if (rawDelims !== normalizedAttr) {
+        this._settingDelimitersAttribute = true;
+        this.setAttribute('delimiters', normalizedAttr);
+        this._settingDelimitersAttribute = false;
+      }
+    } else if (this._delimiters.length > 0) {
+      this._settingDelimitersAttribute = true;
+      this.setAttribute('delimiters', this._delimiters.join(' '));
+      this._settingDelimitersAttribute = false;
     }
     if (this.hasAttribute('value')) {
       this._input.value = this.getAttribute('value');
@@ -698,6 +746,28 @@ export class RichInput extends HTMLElement {
       this.updateHighlights();
       if (this._isPopoverOpen()) {
         this.updateSuggestions('combinators-changed');
+      }
+    } else if (name === 'delimiters') {
+      if (this._settingDelimitersAttribute) return;
+      if (newValue === null) {
+        this._delimiters = [...RichInput.delimiters];
+        if (this._delimiters.length > 0) {
+          this._settingDelimitersAttribute = true;
+          this.setAttribute('delimiters', this._delimiters.join(' '));
+          this._settingDelimitersAttribute = false;
+        }
+      } else {
+        this._delimiters = normalizeDelimiters(newValue);
+        const normalizedAttr = this._delimiters.join(' ');
+        if (newValue !== normalizedAttr) {
+          this._settingDelimitersAttribute = true;
+          this.setAttribute('delimiters', normalizedAttr);
+          this._settingDelimitersAttribute = false;
+        }
+      }
+      this.updateHighlights();
+      if (this._isPopoverOpen()) {
+        this.updateSuggestions('delimiters-changed');
       }
     }
   }
@@ -882,6 +952,40 @@ export class RichInput extends HTMLElement {
     this.combinators = val;
   }
 
+  get delimiters() {
+    return [...this._delimiters];
+  }
+
+  set delimiters(val) {
+    if (val === null || val === undefined) {
+      this._delimiters = [...RichInput.delimiters];
+      this._settingDelimitersAttribute = true;
+      if (this._delimiters.length > 0) {
+        this.setAttribute('delimiters', this._delimiters.join(' '));
+      } else {
+        this.removeAttribute('delimiters');
+      }
+      this._settingDelimitersAttribute = false;
+    } else {
+      this._delimiters = normalizeDelimiters(val);
+      this._settingDelimitersAttribute = true;
+      this.setAttribute('delimiters', this._delimiters.join(' '));
+      this._settingDelimitersAttribute = false;
+    }
+    this.updateHighlights();
+    if (this._isPopoverOpen()) {
+      this.updateSuggestions('delimiters-changed');
+    }
+  }
+
+  getDelimiters() {
+    return this.delimiters;
+  }
+
+  setDelimiters(val) {
+    this.delimiters = val;
+  }
+
   // --- Public Methods ---
   focus(options) {
     this._isFocused = true;
@@ -902,7 +1006,7 @@ export class RichInput extends HTMLElement {
   }
 
   getParsedQuery() {
-    return parseSearchQuery(this._input.value, this.operators, this.combinators);
+    return parseSearchQuery(this._input.value, this.operators, this.combinators, this.delimiters);
   }
 
   getKeywords() {
@@ -1008,6 +1112,7 @@ export class RichInput extends HTMLElement {
     this._invalidRanges = [];
     this._operatorRanges = [];
     this._combinatorRanges = [];
+    this._delimiterRanges = [];
     this._activeKeywordHighlightMap.clear();
   }
 
@@ -1030,7 +1135,7 @@ export class RichInput extends HTMLElement {
       return;
     }
 
-    const tokens = parseSearchTokens(text, this.operators, this.combinators);
+    const tokens = parseSearchTokens(text, this.operators, this.combinators, this.delimiters);
     const highlightQuotes = this.getAttribute('highlight-quotes') !== 'exclude';
 
     const isFocused = this._isFocused;
@@ -1129,6 +1234,14 @@ export class RichInput extends HTMLElement {
             this._combinatorRanges.push(combRange);
           } catch (e) {}
         }
+      } else if (token.type === 'delimiter') {
+        if (token.end > token.start && token.end <= text.length) {
+          try {
+            const delimRange = this._input.createValueRange(token.start, token.end);
+            this._ownedRanges.push(delimRange);
+            this._delimiterRanges.push(delimRange);
+          } catch (e) {}
+        }
       } else if (token.type === 'text' && token.operator) {
         // Highlight operator while typing an operator prefix before colon (e.g. "-" or "-sty")
         const remainder = token.raw.slice(token.operator.length).toLowerCase();
@@ -1162,6 +1275,10 @@ export class RichInput extends HTMLElement {
 
   getActiveCombinatorRanges() {
     return this._combinatorRanges;
+  }
+
+  getActiveDelimiterRanges() {
+    return this._delimiterRanges;
   }
 
   getActiveInvalidRanges() {
@@ -1359,7 +1476,7 @@ export class RichInput extends HTMLElement {
     }
 
     const caretPos = this._input.selectionStart;
-    const context = getCaretContext(this._input.value, caretPos, this._configuredKeywords, this.operators, this.combinators);
+    const context = getCaretContext(this._input.value, caretPos, this._configuredKeywords, this.operators, this.combinators, this.delimiters);
 
     // If trigger is arrow and context is 'none', allow suggesting all keywords
     if (trigger === 'arrow' && context.mode === 'none') {
@@ -1410,7 +1527,7 @@ export class RichInput extends HTMLElement {
         if (!isFocused) return;
 
         const currentCaretPos = this._input.selectionStart;
-        const currentContext = getCaretContext(this._input.value, currentCaretPos, this._configuredKeywords, this.operators, this.combinators);
+        const currentContext = getCaretContext(this._input.value, currentCaretPos, this._configuredKeywords, this.operators, this.combinators, this.delimiters);
         this._context = currentContext;
         const currentSuggestions = getSuggestions(currentContext, this._configuredKeywords, this.combinators);
         if (currentSuggestions.length === 0) {

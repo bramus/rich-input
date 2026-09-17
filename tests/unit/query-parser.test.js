@@ -5,6 +5,8 @@ import {
   normalizeOperators,
   DEFAULT_COMBINATORS,
   normalizeCombinators,
+  DEFAULT_DELIMITERS,
+  normalizeDelimiters,
   parseSearchTokens,
   parseSearchQuery,
   getCaretContext,
@@ -52,6 +54,26 @@ describe('query-parser unit tests', () => {
       assert.deepEqual(normalizeCombinators('AND OR NOT'), ['AND', 'OR', 'NOT']);
       assert.deepEqual(normalizeCombinators(['AND', 'OR', 'NOT', 'AND']), ['AND', 'OR', 'NOT']);
       assert.deepEqual(normalizeCombinators(['AND OR', 'XOR']), ['AND', 'OR', 'XOR']);
+    });
+  });
+
+  describe('normalizeDelimiters()', () => {
+    it('returns default delimiters ["()"] when undefined', () => {
+      assert.deepEqual(normalizeDelimiters(undefined), DEFAULT_DELIMITERS);
+      assert.deepEqual(normalizeDelimiters(undefined), ['()']);
+    });
+
+    it('returns empty array for null or empty string', () => {
+      assert.deepEqual(normalizeDelimiters(null), []);
+      assert.deepEqual(normalizeDelimiters(''), []);
+      assert.deepEqual(normalizeDelimiters('   '), []);
+    });
+
+    it('parses space-separated strings and arrays with deduplication and collapses repeated characters', () => {
+      assert.deepEqual(normalizeDelimiters('{} () []'), ['{}', '()', '[]']);
+      assert.deepEqual(normalizeDelimiters(['{}', '()', '[]', '{}']), ['{}', '()', '[]']);
+      assert.deepEqual(normalizeDelimiters(['{} ()', '<>']), ['{}', '()', '<>']);
+      assert.deepEqual(normalizeDelimiters('(()) []'), ['()', '[]']);
     });
   });
 
@@ -204,6 +226,50 @@ describe('query-parser unit tests', () => {
       assert.equal(combTokens[1].combinator, 'AND');
       assert.equal(combTokens[1].raw, 'AND');
     });
+
+    it('parses delimiter tokens and separates adjacent keywords and values from delimiters', () => {
+      const input = '(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")';
+      const tokens = parseSearchTokens(input, DEFAULT_OPERATORS, 'AND OR NOT', DEFAULT_DELIMITERS);
+
+      const delimTokens = tokens.filter((t) => t.type === 'delimiter');
+      assert.equal(delimTokens.length, 4);
+      assert.deepEqual(
+        delimTokens.map((t) => ({ delimiter: t.delimiter, role: t.role, pair: t.pair })),
+        [
+          { delimiter: '(', role: 'open', pair: '()' },
+          { delimiter: ')', role: 'close', pair: '()' },
+          { delimiter: '(', role: 'open', pair: '()' },
+          { delimiter: ')', role: 'close', pair: '()' },
+        ]
+      );
+
+      const kwTokens = tokens.filter((t) => t.type === 'keyword');
+      assert.equal(kwTokens.length, 4);
+      assert.equal(kwTokens[0].keyword, 'label');
+      assert.equal(kwTokens[0].innerValue, 'We Play House Recordings');
+      assert.equal(kwTokens[1].keyword, 'year');
+      assert.equal(kwTokens[1].innerValue, '2026');
+      assert.equal(kwTokens[2].keyword, 'year');
+      assert.equal(kwTokens[2].innerValue, '2024');
+      assert.equal(kwTokens[3].keyword, 'style');
+      assert.equal(kwTokens[3].innerValue, 'Deep House');
+    });
+
+    it('supports custom delimiters such as "{} () []" and ignores delimiters inside quotes', () => {
+      const input = '{artist:"Aphex (UK)"} [year:2024]';
+      const tokens = parseSearchTokens(input, DEFAULT_OPERATORS, DEFAULT_COMBINATORS, '{} () []');
+
+      const delimTokens = tokens.filter((t) => t.type === 'delimiter');
+      assert.equal(delimTokens.length, 4);
+      assert.deepEqual(delimTokens.map((t) => t.delimiter), ['{', '}', '[', ']']);
+
+      const kwTokens = tokens.filter((t) => t.type === 'keyword');
+      assert.equal(kwTokens.length, 2);
+      assert.equal(kwTokens[0].keyword, 'artist');
+      assert.equal(kwTokens[0].innerValue, 'Aphex (UK)');
+      assert.equal(kwTokens[1].keyword, 'year');
+      assert.equal(kwTokens[1].innerValue, '2024');
+    });
   });
 
   describe('parseSearchQuery()', () => {
@@ -214,6 +280,7 @@ describe('query-parser unit tests', () => {
       assert.equal(result.raw, input);
       assert.equal(result.text, 'ambient deep');
       assert.deepEqual(result.combinators, []);
+      assert.deepEqual(result.delimiters, []);
       assert.deepEqual(result.keywords, {
         artist: ['Aphex Twin', 'Four Tet'],
         label: ['Warp'],
@@ -229,15 +296,31 @@ describe('query-parser unit tests', () => {
       assert.equal(result.raw, input);
       assert.equal(result.text, 'ambient');
       assert.deepEqual(result.combinators, ['OR']);
+      assert.deepEqual(result.delimiters, []);
       assert.deepEqual(result.keywords, {
         artist: ['Aphex Twin'],
         label: ['Defected'],
       });
     });
+
+    it('collects matched delimiters and excludes them from free text', () => {
+      const input = '(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")';
+      const result = parseSearchQuery(input, DEFAULT_OPERATORS, 'AND OR NOT', DEFAULT_DELIMITERS);
+
+      assert.equal(result.raw, input);
+      assert.equal(result.text, '');
+      assert.deepEqual(result.combinators, ['OR']);
+      assert.deepEqual(result.delimiters, ['(', ')', '(', ')']);
+      assert.deepEqual(result.keywords, {
+        label: ['We Play House Recordings'],
+        year: ['2026', '2024'],
+        style: ['Deep House'],
+      });
+    });
   });
 
   describe('getCaretContext()', () => {
-    it('returns keyword mode when input is empty or caret is in whitespace', () => {
+    it('returns keyword mode when input is empty or caret is in whitespace or immediately after a delimiter', () => {
       const ctxEmpty = getCaretContext('', 0);
       assert.equal(ctxEmpty.mode, 'keyword');
       assert.equal(ctxEmpty.query, '');
@@ -247,6 +330,12 @@ describe('query-parser unit tests', () => {
       assert.equal(ctxWs.query, '');
       assert.equal(ctxWs.replaceStart, 10);
       assert.equal(ctxWs.replaceEnd, 10);
+
+      const ctxDelim = getCaretContext('(', 1);
+      assert.equal(ctxDelim.mode, 'keyword');
+      assert.equal(ctxDelim.query, '');
+      assert.equal(ctxDelim.replaceStart, 1);
+      assert.equal(ctxDelim.replaceEnd, 1);
     });
 
     it('returns keyword mode when caret is inside plain text token', () => {

@@ -54,6 +54,7 @@ class HighlightRegistryManager {
     const allValueRanges = [];
     const allOperatorRanges = [];
     const allCombinatorRanges = [];
+    const allDelimiterRanges = [];
     const allInvalidRanges = [];
 
     for (const inst of this.instances) {
@@ -87,6 +88,13 @@ class HighlightRegistryManager {
         const combRanges = inst.getActiveCombinatorRanges();
         if (combRanges && combRanges.length > 0) {
           allCombinatorRanges.push(...combRanges);
+        }
+      }
+
+      if (typeof inst.getActiveDelimiterRanges === 'function') {
+        const delimRanges = inst.getActiveDelimiterRanges();
+        if (delimRanges && delimRanges.length > 0) {
+          allDelimiterRanges.push(...delimRanges);
         }
       }
 
@@ -150,6 +158,23 @@ class HighlightRegistryManager {
         try {
           if (isRangeCollapsed(r)) continue;
           combHl.add(r);
+        } catch (e) {}
+      }
+    }
+
+    let delimHl = CSS.highlights.get('rich-input-delimiter');
+    if (!delimHl) {
+      try {
+        delimHl = new Highlight();
+        CSS.highlights.set('rich-input-delimiter', delimHl);
+      } catch (e) {}
+    }
+    if (delimHl) {
+      delimHl.clear();
+      for (const r of allDelimiterRanges) {
+        try {
+          if (isRangeCollapsed(r)) continue;
+          delimHl.add(r);
         } catch (e) {}
       }
     }

@@ -93,6 +93,10 @@ export class RichInputDemoApp {
               const strong = document.createElement('strong');
               strong.textContent = t.combinator;
               span.appendChild(strong);
+            } else if (t.type === 'delimiter') {
+              const strong = document.createElement('strong');
+              strong.textContent = t.delimiter;
+              span.appendChild(strong);
             } else {
               span.textContent = `text: "${t.raw}"`;
             }
@@ -107,6 +111,7 @@ export class RichInputDemoApp {
           raw: parsed.raw,
           freeText: parsed.text,
           combinators: parsed.combinators,
+          delimiters: parsed.delimiters,
           keywords: parsed.keywords,
           tokenCount: parsed.tokens.filter(t => t.type !== 'whitespace').length,
           activeHighlights: Array.from(CSS.highlights ? CSS.highlights.keys() : []),

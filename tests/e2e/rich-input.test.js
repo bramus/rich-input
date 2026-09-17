@@ -780,6 +780,207 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.equal(testResult.afterRemoveHasAttr, false);
     assert.deepEqual(testResult.afterRemoveProp, []);
   });
+
+  it('supports delimiters configuration and highlights delimiters via ::highlight(rich-input-delimiter)', async () => {
+    const state = await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      el.combinators = ['AND', 'OR', 'NOT'];
+      el.value = '(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")';
+      el.updateHighlights();
+
+      const delimHighlight = CSS.highlights?.get('rich-input-delimiter');
+      const delimRanges = el.getActiveDelimiterRanges();
+      const invalidRanges = el.getActiveInvalidRanges();
+      const parsed = el.getParsedQuery();
+
+      return {
+        hasHighlightEntry: Boolean(delimHighlight),
+        allRangesInHighlight: delimHighlight ? delimRanges.every((r) => delimHighlight.has(r)) : false,
+        delimRangesCount: delimRanges.length,
+        invalidRangesCount: invalidRanges.length,
+        delimiters: parsed.delimiters,
+        combinators: parsed.combinators,
+        keywords: parsed.keywords,
+      };
+    });
+
+    assert.equal(state.hasHighlightEntry, true);
+    assert.equal(state.delimRangesCount, 4);
+    assert.equal(state.allRangesInHighlight, true);
+    assert.equal(state.invalidRangesCount, 0, 'Keywords adjacent to delimiters should not be marked invalid');
+    assert.deepEqual(state.delimiters, ['(', ')', '(', ')']);
+    assert.deepEqual(state.combinators, ['OR']);
+    assert.deepEqual(state.keywords, {
+      label: ['We Play House Recordings'],
+      year: ['2026', '2024'],
+      style: ['Deep House'],
+    });
+  });
+
+  it('isolates global vs local delimiters correctly across existing and newly created instances', async () => {
+    const testResult = await page.evaluate(() => {
+      const RichInputClass = customElements.get('rich-input');
+      const existingEl = document.querySelector('#example-form rich-input');
+
+      // 1. Check initial defaults (DEFAULT_DELIMITERS is ['()'])
+      const initialClassDelimiters = [...RichInputClass.delimiters];
+      const initialExistingInstanceDelimiters = [...existingEl.delimiters];
+      const initialAttr = existingEl.getAttribute('delimiters');
+
+      // 2. Change global delimiters on the RichInput class
+      RichInputClass.delimiters = '{} []';
+
+      // Existing instance should NOT be mutated when global default changes
+      const globalAfterChange = [...RichInputClass.delimiters];
+      const existingAfterGlobalChange = [...existingEl.delimiters];
+
+      // 3. Create a new instance WITHOUT custom delimiters attribute -> should inherit new global default
+      const newInheritedEl = document.createElement('rich-input');
+      document.body.appendChild(newInheritedEl);
+      const newInheritedDelimiters = [...newInheritedEl.delimiters];
+      const newInheritedAttr = newInheritedEl.getAttribute('delimiters');
+
+      newInheritedEl.value = '{artist:"Aphex Twin"} [year:2024]';
+      newInheritedEl.updateHighlights();
+      const newInheritedRangesCount = newInheritedEl.getActiveDelimiterRanges().length;
+
+      // Existing instance with value '{artist:"Aphex Twin"}' should NOT highlight '{' or '}' because its delimiters are ['()']
+      existingEl.value = '{artist:"Aphex Twin"}';
+      existingEl.updateHighlights();
+      const existingRangesForBraces = existingEl.getActiveDelimiterRanges().length;
+
+      // 4. Create a new instance WITH custom delimiters via attribute
+      const newCustomAttrEl = document.createElement('rich-input');
+      newCustomAttrEl.setAttribute('delimiters', '<>');
+      document.body.appendChild(newCustomAttrEl);
+      const newCustomAttrDelimiters = [...newCustomAttrEl.delimiters];
+
+      newCustomAttrEl.value = '<artist:"Aphex Twin">';
+      newCustomAttrEl.updateHighlights();
+      const customAttrRangesForAngles = newCustomAttrEl.getActiveDelimiterRanges().length;
+
+      newCustomAttrEl.value = '(artist:"Aphex Twin")';
+      newCustomAttrEl.updateHighlights();
+      const customAttrRangesForParens = newCustomAttrEl.getActiveDelimiterRanges().length;
+
+      // 5. Modify local delimiters via JS property on newInheritedEl
+      newInheritedEl.delimiters = ['()'];
+      const afterLocalPropSet = [...newInheritedEl.delimiters];
+      const reflectedAttr = newInheritedEl.getAttribute('delimiters');
+
+      // Verify global and other instances were not affected
+      const globalUnchanged = [...RichInputClass.delimiters];
+      const customAttrUnchanged = [...newCustomAttrEl.delimiters];
+
+      // Cleanup dynamically created test elements and reset global default
+      newInheritedEl.remove();
+      newCustomAttrEl.remove();
+      RichInputClass.delimiters = ['()'];
+
+      return {
+        initialClassDelimiters,
+        initialExistingInstanceDelimiters,
+        initialAttr,
+        globalAfterChange,
+        existingAfterGlobalChange,
+        newInheritedDelimiters,
+        newInheritedAttr,
+        newInheritedRangesCount,
+        existingRangesForBraces,
+        newCustomAttrDelimiters,
+        customAttrRangesForAngles,
+        customAttrRangesForParens,
+        afterLocalPropSet,
+        reflectedAttr,
+        globalUnchanged,
+        customAttrUnchanged,
+      };
+    });
+
+    assert.deepEqual(testResult.initialClassDelimiters, ['()']);
+    assert.deepEqual(testResult.initialExistingInstanceDelimiters, ['()']);
+    assert.equal(testResult.initialAttr, '()');
+    assert.deepEqual(testResult.globalAfterChange, ['{}', '[]']);
+    assert.deepEqual(testResult.existingAfterGlobalChange, ['()']);
+    assert.equal(testResult.existingRangesForBraces, 0);
+
+    // Newly created instance inherits the new global delimiters and reflects attribute
+    assert.deepEqual(testResult.newInheritedDelimiters, ['{}', '[]']);
+    assert.equal(testResult.newInheritedAttr, '{} []');
+    assert.equal(testResult.newInheritedRangesCount, 4);
+
+    // Newly created instance with custom attribute uses only its custom delimiters
+    assert.deepEqual(testResult.newCustomAttrDelimiters, ['<>']);
+    assert.equal(testResult.customAttrRangesForAngles, 2);
+    assert.equal(testResult.customAttrRangesForParens, 0);
+
+    // Local property change updates only that instance and reflects to attribute
+    assert.deepEqual(testResult.afterLocalPropSet, ['()']);
+    assert.equal(testResult.reflectedAttr, '()');
+    assert.deepEqual(testResult.globalUnchanged, ['{}', '[]']);
+    assert.deepEqual(testResult.customAttrUnchanged, ['<>']);
+  });
+
+  it('syncs delimiters between JS property and DOM attribute including default writeback, normalization, empty string, and removal', async () => {
+    const testResult = await page.evaluate(() => {
+      const el = document.createElement('rich-input');
+      document.body.appendChild(el);
+
+      // 0. Default delimiters is ['()'], so delimiters="()" attribute is written on connection
+      const initialAttr = el.getAttribute('delimiters');
+      const initialProp = [...el.delimiters];
+
+      // 1. Setting via JS writes back to DOM attribute
+      el.delimiters = ['{}', '()', '[]'];
+      const jsSetAttr = el.getAttribute('delimiters');
+      const jsSetProp = [...el.delimiters];
+
+      // 2. Setting unnormalized attribute in DOM normalizes and rewrites attribute
+      el.setAttribute('delimiters', '{}   ()  {}   []');
+      const normalizedAttr = el.getAttribute('delimiters');
+      const normalizedProp = [...el.delimiters];
+
+      // 3. Setting empty string disables delimiters
+      el.setAttribute('delimiters', '');
+      const emptyAttr = el.getAttribute('delimiters');
+      const emptyProp = [...el.delimiters];
+
+      // 4. Removing attribute resets to default delimiters (['()']) and writes back delimiters="()"
+      el.removeAttribute('delimiters');
+      const afterRemoveAttr = el.getAttribute('delimiters');
+      const afterRemoveProp = [...el.delimiters];
+
+      el.remove();
+
+      return {
+        initialAttr,
+        initialProp,
+        jsSetAttr,
+        jsSetProp,
+        normalizedAttr,
+        normalizedProp,
+        emptyAttr,
+        emptyProp,
+        afterRemoveAttr,
+        afterRemoveProp,
+      };
+    });
+
+    assert.equal(testResult.initialAttr, '()');
+    assert.deepEqual(testResult.initialProp, ['()']);
+
+    assert.equal(testResult.jsSetAttr, '{} () []');
+    assert.deepEqual(testResult.jsSetProp, ['{}', '()', '[]']);
+
+    assert.equal(testResult.normalizedAttr, '{} () []');
+    assert.deepEqual(testResult.normalizedProp, ['{}', '()', '[]']);
+
+    assert.equal(testResult.emptyAttr, '');
+    assert.deepEqual(testResult.emptyProp, []);
+
+    assert.equal(testResult.afterRemoveAttr, '()');
+    assert.deepEqual(testResult.afterRemoveProp, ['()']);
+  });
 });
 
 

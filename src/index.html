@@ -199,6 +199,9 @@
               <button type="button" class="btn" data-preset='artist:"Aphex Twin" OR label:"Defected"'>
                 🔀 Combinator Query (OR)
               </button>
+              <button type="button" class="btn" data-preset='(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")'>
+                📦 Grouped Query with Delimiters
+              </button>
             </div>
           </div>
         </section>
@@ -529,6 +532,12 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 ::highlight(rich-input-combinator) {
   color: #7c3aed;
   text-shadow: 0 0 1px rgba(124, 58, 237, 0.2);
+}
+
+/* Generic highlight for delimiters (e.g. "(" and ")") */
+::highlight(rich-input-delimiter) {
+  color: #0284c7;
+  text-shadow: 0 0 1px rgba(2, 132, 199, 0.25);
 }
 
 /* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
@@ -1140,7 +1149,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 
             <!-- Playground <rich-input> Element -->
             <div style="margin-bottom: 1.25rem;">
-              <rich-input id="playground-search" combinators="AND OR NOT" value='label:"We Play House Recordings" OR year:2026 style:"Deep House"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+              <rich-input id="playground-search" combinators="AND OR NOT" value='(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
                 <datalist id="label" label="Record Label">
                   <option value="Defected">
                     <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -1573,9 +1582,19 @@ rich-input::part(suggestion-image) {
                   <td>Static getter/setter for global default combinators used by all instances without a local override (defaults to <code>[]</code>).</td>
                 </tr>
                 <tr>
+                  <td><code>delimiters</code></td>
+                  <td><code>string[] | string</code></td>
+                  <td>Gets or sets the delimiter pairs (e.g. <code>['()', '{}', '[]']</code> or <code>"{} () []"</code>) for this instance. Also configurable via the <code>delimiters</code> HTML attribute.</td>
+                </tr>
+                <tr>
+                  <td><code>RichInput.delimiters</code></td>
+                  <td><code>string[] | string</code></td>
+                  <td>Static getter/setter for global default delimiter pairs used by all instances without a local override (defaults to <code>['()']</code>).</td>
+                </tr>
+                <tr>
                   <td><code>getParsedQuery()</code></td>
                   <td><code>() =&gt; Object</code></td>
-                  <td>Returns structured breakdown with <code>{ raw, text, combinators, keywords, tokens }</code>.</td>
+                  <td>Returns structured breakdown with <code>{ raw, text, combinators, delimiters, keywords, tokens }</code>.</td>
                 </tr>
                 <tr>
                   <td><code>getKeywords()</code></td>
