@@ -63,9 +63,13 @@ export class RichInputDemoApp {
 
       // Render tokens
       if (this.tokensContainer) {
-        this.tokensContainer.innerHTML = '';
+        this.tokensContainer.replaceChildren();
         if (parsed.tokens.length === 0 || (parsed.tokens.length === 1 && parsed.tokens[0].type === 'whitespace')) {
-          this.tokensContainer.innerHTML = '<span style="color: #94a3b8; font-style: italic;">No tokens yet. Start typing!</span>';
+          const emptySpan = document.createElement('span');
+          emptySpan.style.color = '#94a3b8';
+          emptySpan.style.fontStyle = 'italic';
+          emptySpan.textContent = 'No tokens yet. Start typing!';
+          this.tokensContainer.appendChild(emptySpan);
         } else {
           parsed.tokens.forEach((t) => {
             if (t.type === 'whitespace') return;
@@ -74,7 +78,17 @@ export class RichInputDemoApp {
             span.className = `token-pill pill-${t.type}`;
 
             if (t.type === 'keyword') {
-              span.innerHTML = `<strong>${t.keyword}:</strong> ${t.innerValue ? `"${t.innerValue}"` : '<em>(empty)</em>'}`;
+              const strong = document.createElement('strong');
+              strong.textContent = `${t.operator || ''}${t.keyword}:`;
+              span.appendChild(strong);
+              if (t.innerValue) {
+                span.appendChild(document.createTextNode(` "${t.innerValue}"`));
+              } else {
+                span.appendChild(document.createTextNode(' '));
+                const em = document.createElement('em');
+                em.textContent = '(empty)';
+                span.appendChild(em);
+              }
             } else {
               span.textContent = `text: "${t.raw}"`;
             }

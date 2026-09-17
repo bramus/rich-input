@@ -3,14 +3,71 @@
  * Handles keyword:value tokenization, caret context inspection, and suggestion application.
  */
 
+export const DEFAULT_OPERATORS = ['-'];
+
+/**
+ * Normalizes an operators configuration (string or array) into an array of non-empty operator strings.
+ * @param {string|string[]|null|undefined} operators
+ * @returns {string[]}
+ */
+export function normalizeOperators(operators) {
+  if (operators === undefined) {
+    return [...DEFAULT_OPERATORS];
+  }
+  if (operators === null || operators === '') {
+    return [];
+  }
+  const rawList = Array.isArray(operators)
+    ? operators
+    : typeof operators === 'string'
+      ? operators.split(/\s+/)
+      : [];
+
+  const result = [];
+  const seen = new Set();
+  for (const item of rawList) {
+    if (typeof item !== 'string') continue;
+    const parts = item.trim().split(/\s+/).filter(Boolean);
+    for (let part of parts) {
+      part = part.replace(/^(.)\1+$/, '$1');
+      if (!seen.has(part)) {
+        seen.add(part);
+        result.push(part);
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Matches if a string starts with any of the configured operators (longest match first).
+ * @param {string} str
+ * @param {string[]} normalizedOperators
+ * @returns {string|null}
+ */
+function matchOperator(str, normalizedOperators) {
+  if (!str || !normalizedOperators || normalizedOperators.length === 0) {
+    return null;
+  }
+  const sorted = [...normalizedOperators].sort((a, b) => b.length - a.length);
+  for (const op of sorted) {
+    if (str.startsWith(op)) {
+      return op;
+    }
+  }
+  return null;
+}
+
 /**
  * Parses raw search input into token objects.
  * @param {string} inputStr
+ * @param {string|string[]} [operators=DEFAULT_OPERATORS]
  * @returns {Array<Object>}
  */
-export function parseSearchTokens(inputStr) {
+export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS) {
   if (typeof inputStr !== 'string') return [];
 
+  const normalizedOps = normalizeOperators(operators);
   const tokens = [];
   let i = 0;
   const len = inputStr.length;
@@ -33,15 +90,31 @@ export function parseSearchTokens(inputStr) {
 
     const tokenStart = i;
 
-    // 2. Check for keyword pattern: [a-zA-Z0-9_-]+:
+    // 2. Check for optional operator followed by keyword pattern: [a-zA-Z0-9][a-zA-Z0-9_-]*:
     const remaining = inputStr.slice(i);
-    const colonMatch = remaining.match(/^([a-zA-Z0-9_-]+):/);
+    const matchedOp = matchOperator(remaining, normalizedOps);
+    let colonMatch = null;
+    let opLen = 0;
+
+    if (matchedOp) {
+      const afterOp = remaining.slice(matchedOp.length);
+      const afterOpMatch = afterOp.match(/^([a-zA-Z0-9][a-zA-Z0-9_-]*):/);
+      if (afterOpMatch) {
+        colonMatch = afterOpMatch;
+        opLen = matchedOp.length;
+      }
+    } else {
+      colonMatch = remaining.match(/^([a-zA-Z0-9][a-zA-Z0-9_-]*):/);
+    }
 
     if (colonMatch) {
       const keyword = colonMatch[1];
-      const keywordStart = i;
-      const colonIndex = i + keyword.length;
-      i += colonMatch[0].length; // Move index past ':'
+      const operator = matchedOp || null;
+      const operatorStart = operator ? tokenStart : null;
+      const operatorEnd = operator ? tokenStart + opLen : null;
+      const keywordStart = tokenStart + opLen;
+      const colonIndex = keywordStart + keyword.length;
+      i = colonIndex + 1; // Move index past ':'
 
       const valueStart = i;
       let quoted = false;
@@ -84,6 +157,9 @@ export function parseSearchTokens(inputStr) {
         raw: inputStr.slice(tokenStart, i),
         start: tokenStart,
         end: i,
+        operator,
+        operatorStart,
+        operatorEnd,
         keyword,
         keywordLower: keyword.toLowerCase(),
         keywordStart,
@@ -104,12 +180,20 @@ export function parseSearchTokens(inputStr) {
       while (i < len && !/\s/.test(inputStr[i])) {
         i++;
       }
-      tokens.push({
+      const raw = inputStr.slice(tokenStart, i);
+      const textOp = matchOperator(raw, normalizedOps);
+      const textToken = {
         type: 'text',
-        raw: inputStr.slice(tokenStart, i),
+        raw,
         start: tokenStart,
         end: i,
-      });
+      };
+      if (textOp) {
+        textToken.operator = textOp;
+        textToken.operatorStart = tokenStart;
+        textToken.operatorEnd = tokenStart + textOp.length;
+      }
+      tokens.push(textToken);
     }
   }
 
@@ -119,16 +203,17 @@ export function parseSearchTokens(inputStr) {
 /**
  * Parses search query into a structured object with keywords and free text.
  * @param {string} inputStr
+ * @param {string|string[]} [operators=DEFAULT_OPERATORS]
  * @returns {{ raw: string, text: string, keywords: Record<string, string[]>, tokens: Array<Object> }}
  */
-export function parseSearchQuery(inputStr) {
-  const tokens = parseSearchTokens(inputStr);
+export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS) {
+  const tokens = parseSearchTokens(inputStr, operators);
   const keywords = {};
   const textWords = [];
 
   for (const token of tokens) {
     if (token.type === 'keyword') {
-      const kw = token.keywordLower;
+      const kw = token.operator ? `${token.operator}${token.keywordLower}` : token.keywordLower;
       if (!keywords[kw]) {
         keywords[kw] = [];
       }
@@ -151,13 +236,14 @@ export function parseSearchQuery(inputStr) {
  * @param {string} inputStr
  * @param {number} caretPos
  * @param {Map<string, Object>|Object} configuredKeywords
+ * @param {string|string[]} [operators=DEFAULT_OPERATORS]
  * @returns {Object}
  */
-export function getCaretContext(inputStr, caretPos, configuredKeywords) {
+export function getCaretContext(inputStr, caretPos, configuredKeywords, operators = DEFAULT_OPERATORS) {
   if (typeof inputStr !== 'string') inputStr = '';
   caretPos = Math.max(0, Math.min(caretPos || 0, inputStr.length));
 
-  const tokens = parseSearchTokens(inputStr);
+  const tokens = parseSearchTokens(inputStr, operators);
 
   // Find token at caret
   let activeToken = null;
@@ -185,21 +271,25 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords) {
     if (caretPos <= activeToken.colonIndex) {
       // User is editing the keyword name (filter based on full keyword name, not caret position)
       const query = activeToken.keyword;
-      return {
+      const context = {
         mode: 'keyword',
         query,
-        replaceStart: activeToken.start,
+        replaceStart: activeToken.keywordStart,
         replaceEnd: activeToken.colonIndex + 1,
         caretPos,
         token: activeToken,
         tokens,
       };
+      if (activeToken.operator) {
+        context.operator = activeToken.operator;
+      }
+      return context;
     } else {
       // User is editing the keyword value (filter based on full value string, not caret position)
       const isQuoted = activeToken.quoted;
       const value = activeToken.innerValue;
 
-      return {
+      const context = {
         mode: 'value',
         keyword: activeToken.keyword,
         keywordLower: activeToken.keywordLower,
@@ -214,11 +304,28 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords) {
         token: activeToken,
         tokens,
       };
+      if (activeToken.operator) {
+        context.operator = activeToken.operator;
+      }
+      return context;
     }
   }
 
   // 2. Caret is within a plain text token (filter based on full word, not caret position)
   if (activeToken.type === 'text') {
+    if (activeToken.operator) {
+      const query = activeToken.raw.slice(activeToken.operator.length);
+      return {
+        mode: 'keyword',
+        operator: activeToken.operator,
+        query,
+        replaceStart: activeToken.operatorEnd,
+        replaceEnd: activeToken.end,
+        caretPos,
+        token: activeToken,
+        tokens,
+      };
+    }
     const query = activeToken.raw;
     return {
       mode: 'keyword',

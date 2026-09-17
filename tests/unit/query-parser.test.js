@@ -1,6 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  DEFAULT_OPERATORS,
+  normalizeOperators,
   parseSearchTokens,
   parseSearchQuery,
   getCaretContext,
@@ -10,6 +12,28 @@ import {
 } from '../../src/js/rich-input/utils/query-parser.js';
 
 describe('query-parser unit tests', () => {
+  describe('normalizeOperators()', () => {
+    it('returns default operators ["-"] when undefined', () => {
+      assert.deepEqual(normalizeOperators(undefined), DEFAULT_OPERATORS);
+      assert.deepEqual(normalizeOperators(undefined), ['-']);
+    });
+
+    it('returns empty array for null or empty string', () => {
+      assert.deepEqual(normalizeOperators(null), []);
+      assert.deepEqual(normalizeOperators(''), []);
+      assert.deepEqual(normalizeOperators('   '), []);
+    });
+
+    it('parses space-separated strings and arrays with deduplication and collapses repeated characters', () => {
+      assert.deepEqual(normalizeOperators('- ~ +'), ['-', '~', '+']);
+      assert.deepEqual(normalizeOperators(['-', '~', '+', '-']), ['-', '~', '+']);
+      assert.deepEqual(normalizeOperators(['- ~', '!=']), ['-', '~', '!=']);
+      assert.deepEqual(normalizeOperators('- - +'), ['-', '+']);
+      assert.deepEqual(normalizeOperators('~~ +'), ['~', '+']);
+      assert.deepEqual(normalizeOperators('--- ~~~ +++'), ['-', '~', '+']);
+    });
+  });
+
   describe('parseSearchTokens()', () => {
     it('returns an empty array for non-string or empty input', () => {
       assert.deepEqual(parseSearchTokens(null), []);
@@ -45,6 +69,7 @@ describe('query-parser unit tests', () => {
       const tokens = parseSearchTokens('year:2026');
       assert.equal(tokens.length, 1);
       assert.equal(tokens[0].type, 'keyword');
+      assert.equal(tokens[0].operator, null);
       assert.equal(tokens[0].keyword, 'year');
       assert.equal(tokens[0].keywordLower, 'year');
       assert.equal(tokens[0].rawValue, '2026');
@@ -53,6 +78,58 @@ describe('query-parser unit tests', () => {
       assert.equal(tokens[0].isClosed, true);
       assert.equal(tokens[0].start, 0);
       assert.equal(tokens[0].end, 9);
+    });
+
+    it('parses negative keyword:value tokens with default "-" operator', () => {
+      const tokens = parseSearchTokens('-style:Acid');
+      assert.equal(tokens.length, 1);
+      assert.equal(tokens[0].type, 'keyword');
+      assert.equal(tokens[0].operator, '-');
+      assert.equal(tokens[0].operatorStart, 0);
+      assert.equal(tokens[0].operatorEnd, 1);
+      assert.equal(tokens[0].keyword, 'style');
+      assert.equal(tokens[0].keywordLower, 'style');
+      assert.equal(tokens[0].keywordStart, 1);
+      assert.equal(tokens[0].keywordEnd, 7);
+      assert.equal(tokens[0].colonIndex, 6);
+      assert.equal(tokens[0].valueStart, 7);
+      assert.equal(tokens[0].valueEnd, 11);
+      assert.equal(tokens[0].innerValue, 'Acid');
+    });
+
+    it('parses custom operators when configured', () => {
+      const tokens = parseSearchTokens('~style:Acid +year:2026 !=label:"Warp Records"', '- ~ + !=');
+      const kwTokens = tokens.filter((t) => t.type === 'keyword');
+      assert.equal(kwTokens.length, 3);
+
+      assert.equal(kwTokens[0].operator, '~');
+      assert.equal(kwTokens[0].keyword, 'style');
+      assert.equal(kwTokens[0].innerValue, 'Acid');
+
+      assert.equal(kwTokens[1].operator, '+');
+      assert.equal(kwTokens[1].keyword, 'year');
+      assert.equal(kwTokens[1].innerValue, '2026');
+
+      assert.equal(kwTokens[2].operator, '!=');
+      assert.equal(kwTokens[2].operatorStart, 23);
+      assert.equal(kwTokens[2].operatorEnd, 25);
+      assert.equal(kwTokens[2].keyword, 'label');
+      assert.equal(kwTokens[2].innerValue, 'Warp Records');
+    });
+
+    it('treats -key:value and ~key:value as plain text tokens when their prefix is not in configured operators', () => {
+      const tokens = parseSearchTokens('-year:2024 ~year:2024 !year:2024 +year:2024', '+');
+      const nonWhitespace = tokens.filter((t) => t.type !== 'whitespace');
+      assert.equal(nonWhitespace.length, 4);
+      assert.equal(nonWhitespace[0].type, 'text');
+      assert.equal(nonWhitespace[0].raw, '-year:2024');
+      assert.equal(nonWhitespace[1].type, 'text');
+      assert.equal(nonWhitespace[1].raw, '~year:2024');
+      assert.equal(nonWhitespace[2].type, 'text');
+      assert.equal(nonWhitespace[2].raw, '!year:2024');
+      assert.equal(nonWhitespace[3].type, 'keyword');
+      assert.equal(nonWhitespace[3].operator, '+');
+      assert.equal(nonWhitespace[3].keyword, 'year');
     });
 
     it('parses double-quoted and single-quoted keyword values', () => {
@@ -95,8 +172,8 @@ describe('query-parser unit tests', () => {
   });
 
   describe('parseSearchQuery()', () => {
-    it('aggregates free text and grouped keyword values', () => {
-      const input = 'ambient artist:"Aphex Twin" LABEL:Warp artist:"Four Tet" deep';
+    it('aggregates free text and grouped keyword values including operators', () => {
+      const input = 'ambient artist:"Aphex Twin" LABEL:Warp -style:Acid artist:"Four Tet" deep';
       const result = parseSearchQuery(input);
 
       assert.equal(result.raw, input);
@@ -104,6 +181,7 @@ describe('query-parser unit tests', () => {
       assert.deepEqual(result.keywords, {
         artist: ['Aphex Twin', 'Four Tet'],
         label: ['Warp'],
+        '-style': ['Acid'],
       });
       assert.ok(Array.isArray(result.tokens));
     });
@@ -130,12 +208,35 @@ describe('query-parser unit tests', () => {
       assert.equal(ctx.replaceEnd, 3);
     });
 
+    it('returns keyword mode with operator when typing an operator prefix', () => {
+      const ctxOpOnly = getCaretContext('-', 1);
+      assert.equal(ctxOpOnly.mode, 'keyword');
+      assert.equal(ctxOpOnly.operator, '-');
+      assert.equal(ctxOpOnly.query, '');
+      assert.equal(ctxOpOnly.replaceStart, 1);
+      assert.equal(ctxOpOnly.replaceEnd, 1);
+
+      const ctxOpText = getCaretContext('-st', 3);
+      assert.equal(ctxOpText.mode, 'keyword');
+      assert.equal(ctxOpText.operator, '-');
+      assert.equal(ctxOpText.query, 'st');
+      assert.equal(ctxOpText.replaceStart, 1);
+      assert.equal(ctxOpText.replaceEnd, 3);
+    });
+
     it('returns keyword mode when caret is before or at colon of a keyword token', () => {
       const ctx = getCaretContext('label:Warp', 3);
       assert.equal(ctx.mode, 'keyword');
       assert.equal(ctx.query, 'label');
       assert.equal(ctx.replaceStart, 0);
       assert.equal(ctx.replaceEnd, 6);
+
+      const ctxNeg = getCaretContext('-label:Warp', 4);
+      assert.equal(ctxNeg.mode, 'keyword');
+      assert.equal(ctxNeg.operator, '-');
+      assert.equal(ctxNeg.query, 'label');
+      assert.equal(ctxNeg.replaceStart, 1);
+      assert.equal(ctxNeg.replaceEnd, 7);
     });
 
     it('returns value mode when caret is in the value part of a keyword token', () => {
@@ -147,6 +248,15 @@ describe('query-parser unit tests', () => {
       assert.equal(ctx.quoted, true);
       assert.equal(ctx.replaceStart, 6);
       assert.equal(ctx.replaceEnd, 15);
+
+      const ctxNeg = getCaretContext('-style:Ac', 9);
+      assert.equal(ctxNeg.mode, 'value');
+      assert.equal(ctxNeg.operator, '-');
+      assert.equal(ctxNeg.keyword, 'style');
+      assert.equal(ctxNeg.keywordLower, 'style');
+      assert.equal(ctxNeg.valuePrefix, 'Ac');
+      assert.equal(ctxNeg.replaceStart, 7);
+      assert.equal(ctxNeg.replaceEnd, 9);
     });
   });
 
@@ -177,6 +287,18 @@ describe('query-parser unit tests', () => {
           ],
         },
       ],
+      [
+        'style',
+        {
+          id: 'style',
+          label: 'Style',
+          dataType: 'string',
+          options: [
+            { value: 'Acid', label: 'Acid' },
+            { value: 'Deep House', label: 'Deep House' },
+          ],
+        },
+      ],
     ]);
 
     it('returns matching keyword suggestions in keyword mode', () => {
@@ -186,6 +308,15 @@ describe('query-parser unit tests', () => {
       assert.equal(suggestions[0].type, 'keyword');
       assert.equal(suggestions[0].id, 'label');
       assert.equal(suggestions[0].insertText, 'label:');
+    });
+
+    it('returns matching keyword suggestions when prefixed by an operator', () => {
+      const ctx = getCaretContext('-st', 3);
+      const suggestions = getSuggestions(ctx, configuredKeywords);
+      assert.equal(suggestions.length, 1);
+      assert.equal(suggestions[0].type, 'keyword');
+      assert.equal(suggestions[0].id, 'style');
+      assert.equal(suggestions[0].insertText, 'style:');
     });
 
     it('matches keyword suggestions by label as well as id', () => {
@@ -202,6 +333,15 @@ describe('query-parser unit tests', () => {
       assert.equal(suggestions[0].type, 'value');
       assert.equal(suggestions[0].value, 'We Play House Recordings');
       assert.equal(suggestions[0].insertText, '"We Play House Recordings"');
+    });
+
+    it('returns matching value suggestions when keyword has an operator prefix', () => {
+      const ctx = getCaretContext('-style:Ac', 9);
+      const suggestions = getSuggestions(ctx, configuredKeywords);
+      assert.equal(suggestions.length, 1);
+      assert.equal(suggestions[0].type, 'value');
+      assert.equal(suggestions[0].value, 'Acid');
+      assert.equal(suggestions[0].insertText, 'Acid');
     });
 
     it('does not quote single-word values unless already quoted', () => {
@@ -226,6 +366,16 @@ describe('query-parser unit tests', () => {
       assert.equal(newCaret, 6);
     });
 
+    it('preserves operator prefix when applying a keyword suggestion', () => {
+      const input = '-st';
+      const ctx = getCaretContext(input, 3);
+      const suggestion = { type: 'keyword', insertText: 'style:' };
+      const { newValue, newCaret } = applySuggestion(input, suggestion, ctx);
+
+      assert.equal(newValue, '-style:');
+      assert.equal(newCaret, 7);
+    });
+
     it('applies a value suggestion and appends a trailing space', () => {
       const input = 'label:We';
       const ctx = getCaretContext(input, 8);
@@ -234,6 +384,16 @@ describe('query-parser unit tests', () => {
 
       assert.equal(newValue, 'label:"We Play House Recordings" ');
       assert.equal(newCaret, 33);
+    });
+
+    it('preserves operator and keyword when applying a value suggestion', () => {
+      const input = '-style:Ac';
+      const ctx = getCaretContext(input, 9);
+      const suggestion = { type: 'value', insertText: 'Acid' };
+      const { newValue, newCaret } = applySuggestion(input, suggestion, ctx);
+
+      assert.equal(newValue, '-style:Acid ');
+      assert.equal(newCaret, 12);
     });
 
     it('preserves existing following tokens when applying a suggestion in the middle of input', () => {

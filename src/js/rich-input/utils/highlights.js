@@ -52,6 +52,7 @@ class HighlightRegistryManager {
     const rangesByKeyword = new Map();
     const allKeywordRanges = [];
     const allValueRanges = [];
+    const allOperatorRanges = [];
     const allInvalidRanges = [];
 
     for (const inst of this.instances) {
@@ -71,6 +72,13 @@ class HighlightRegistryManager {
 
         if (data.keywordRanges && data.keywordRanges.length > 0) {
           allKeywordRanges.push(...data.keywordRanges);
+        }
+      }
+
+      if (typeof inst.getActiveOperatorRanges === 'function') {
+        const opRanges = inst.getActiveOperatorRanges();
+        if (opRanges && opRanges.length > 0) {
+          allOperatorRanges.push(...opRanges);
         }
       }
 
@@ -104,6 +112,23 @@ class HighlightRegistryManager {
     }
 
     // 2. Set generic highlights
+    let opHl = CSS.highlights.get('rich-input-operator');
+    if (!opHl) {
+      try {
+        opHl = new Highlight();
+        CSS.highlights.set('rich-input-operator', opHl);
+      } catch (e) {}
+    }
+    if (opHl) {
+      opHl.clear();
+      for (const r of allOperatorRanges) {
+        try {
+          if (isRangeCollapsed(r)) continue;
+          opHl.add(r);
+        } catch (e) {}
+      }
+    }
+
     let kwHl = CSS.highlights.get('rich-input-keyword');
     if (!kwHl) {
       try {

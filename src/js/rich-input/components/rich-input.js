@@ -3,7 +3,7 @@
  * Keyword-based autocomplete input field powered by OpaqueRange and Custom Highlight API.
  */
 
-import { parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from '../utils/query-parser.js';
+import { DEFAULT_OPERATORS, normalizeOperators, parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from '../utils/query-parser.js';
 import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from '../utils/highlights.js';
 import { getCaretCoordinates, positionPopover } from '../utils/positioning.js';
 import { setupContentEditableAdapter, isContentEditableFallbackActive } from '../utils/contenteditable-adapter.js';
@@ -113,6 +113,12 @@ TEMPLATE.innerHTML = `
     color: var(--ri-placeholder-color, var(--rs-placeholder-color, #9ca3af));
     pointer-events: none;
     display: inline-block;
+  }
+
+  /* Generic prefix highlight for operators */
+  ::highlight(rich-input-operator) {
+    color: var(--ri-operator-color, var(--ri-keyword-color, #64748b));
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
   }
 
   /* Generic prefix highlight for keywords */
@@ -362,6 +368,31 @@ function syncDocumentHighlightStyles(shadowRoot) {
 export class RichInput extends HTMLElement {
   static formAssociated = true;
 
+  static _globalOperators = [...DEFAULT_OPERATORS];
+
+  /**
+   * Global default operators inherited by newly created <rich-input> instances.
+   */
+  static get operators() {
+    return [...RichInput._globalOperators];
+  }
+
+  static set operators(val) {
+    if (val === null || val === undefined) {
+      RichInput._globalOperators = [...DEFAULT_OPERATORS];
+    } else {
+      RichInput._globalOperators = normalizeOperators(val);
+    }
+  }
+
+  static get defaultOperators() {
+    return RichInput.operators;
+  }
+
+  static set defaultOperators(val) {
+    RichInput.operators = val;
+  }
+
   static get observedAttributes() {
     return [
       'value',
@@ -372,6 +403,7 @@ export class RichInput extends HTMLElement {
       'autofocus',
       'required',
       'highlight-quotes',
+      'operators',
       'aria-label',
       'aria-labelledby',
     ];
@@ -412,12 +444,15 @@ export class RichInput extends HTMLElement {
     this._slot = this.shadowRoot.querySelector('slot:not([name])');
 
     this._configuredKeywords = new Map();
+    this._operators = [...RichInput.operators];
+    this._settingOperatorsAttribute = false;
     this._activeSuggestions = [];
     this._selectedIndex = -1;
     this._context = null;
     this._suggestionTimeout = null;
     this._ownedRanges = [];
     this._invalidRanges = [];
+    this._operatorRanges = [];
     this._activeKeywordHighlightMap = new Map();
     this._isFocused = false;
     this._lastCaretPosition = -1;
@@ -455,7 +490,11 @@ export class RichInput extends HTMLElement {
 
     // Listen to changes on light DOM datalists and style tags
     this._slot.addEventListener('slotchange', this._onSlotChange);
-    this._mutationObserver = new MutationObserver(() => {
+    this._mutationObserver = new MutationObserver((mutations) => {
+      const hasLightDomChange = mutations.some(
+        (m) => !(m.target === this && m.type === 'attributes')
+      );
+      if (!hasLightDomChange) return;
       this._loadDatalists();
       this._syncInjectedStyles();
       this.updateHighlights();
@@ -479,6 +518,20 @@ export class RichInput extends HTMLElement {
     window.addEventListener('scroll', this._onGlobalResizeOrScroll, { passive: true });
 
     // Sync initial attributes
+    if (this.hasAttribute('operators')) {
+      const rawOps = this.getAttribute('operators');
+      this._operators = normalizeOperators(rawOps);
+      const normalizedAttr = this._operators.join(' ');
+      if (rawOps !== normalizedAttr) {
+        this._settingOperatorsAttribute = true;
+        this.setAttribute('operators', normalizedAttr);
+        this._settingOperatorsAttribute = false;
+      }
+    } else if (this._operators.length > 0) {
+      this._settingOperatorsAttribute = true;
+      this.setAttribute('operators', this._operators.join(' '));
+      this._settingOperatorsAttribute = false;
+    }
     if (this.hasAttribute('value')) {
       this._input.value = this.getAttribute('value');
     }
@@ -554,6 +607,28 @@ export class RichInput extends HTMLElement {
       }
     } else if (name === 'highlight-quotes') {
       this.updateHighlights();
+    } else if (name === 'operators') {
+      if (this._settingOperatorsAttribute) return;
+      if (newValue === null) {
+        this._operators = [...RichInput.operators];
+        if (this._operators.length > 0) {
+          this._settingOperatorsAttribute = true;
+          this.setAttribute('operators', this._operators.join(' '));
+          this._settingOperatorsAttribute = false;
+        }
+      } else {
+        this._operators = normalizeOperators(newValue);
+        const normalizedAttr = this._operators.join(' ');
+        if (newValue !== normalizedAttr) {
+          this._settingOperatorsAttribute = true;
+          this.setAttribute('operators', normalizedAttr);
+          this._settingOperatorsAttribute = false;
+        }
+      }
+      this.updateHighlights();
+      if (this._isPopoverOpen()) {
+        this.updateSuggestions('operators-changed');
+      }
     }
   }
 
@@ -669,6 +744,40 @@ export class RichInput extends HTMLElement {
     this._input.selectionDirection = val;
   }
 
+  get operators() {
+    return [...this._operators];
+  }
+
+  set operators(val) {
+    if (val === null || val === undefined) {
+      this._operators = [...RichInput.operators];
+      this._settingOperatorsAttribute = true;
+      if (this._operators.length > 0) {
+        this.setAttribute('operators', this._operators.join(' '));
+      } else {
+        this.removeAttribute('operators');
+      }
+      this._settingOperatorsAttribute = false;
+    } else {
+      this._operators = normalizeOperators(val);
+      this._settingOperatorsAttribute = true;
+      this.setAttribute('operators', this._operators.join(' '));
+      this._settingOperatorsAttribute = false;
+    }
+    this.updateHighlights();
+    if (this._isPopoverOpen()) {
+      this.updateSuggestions('operators-changed');
+    }
+  }
+
+  getOperators() {
+    return this.operators;
+  }
+
+  setOperators(val) {
+    this.operators = val;
+  }
+
   // --- Public Methods ---
   focus(options) {
     this._isFocused = true;
@@ -689,7 +798,7 @@ export class RichInput extends HTMLElement {
   }
 
   getParsedQuery() {
-    return parseSearchQuery(this._input.value);
+    return parseSearchQuery(this._input.value, this.operators);
   }
 
   getKeywords() {
@@ -793,6 +902,7 @@ export class RichInput extends HTMLElement {
     }
     this._ownedRanges = [];
     this._invalidRanges = [];
+    this._operatorRanges = [];
     this._activeKeywordHighlightMap.clear();
   }
 
@@ -815,7 +925,7 @@ export class RichInput extends HTMLElement {
       return;
     }
 
-    const tokens = parseSearchTokens(text);
+    const tokens = parseSearchTokens(text, this.operators);
     const highlightQuotes = this.getAttribute('highlight-quotes') !== 'exclude';
 
     const isFocused = this._isFocused;
@@ -838,6 +948,15 @@ export class RichInput extends HTMLElement {
         }
 
         const bucket = this._activeKeywordHighlightMap.get(kw);
+
+        // 0. Operator prefix range (for ::highlight(rich-input-operator))
+        if (token.operator && token.operatorEnd > token.operatorStart && token.operatorEnd <= text.length) {
+          try {
+            const opRange = this._input.createValueRange(token.operatorStart, token.operatorEnd);
+            this._ownedRanges.push(opRange);
+            this._operatorRanges.push(opRange);
+          } catch (e) {}
+        }
 
         // 1. Value range
         const start = highlightQuotes ? token.valueStart : token.innerStart;
@@ -897,6 +1016,23 @@ export class RichInput extends HTMLElement {
             }
           }
         }
+      } else if (token.type === 'text' && token.operator) {
+        // Highlight operator while typing an operator prefix before colon (e.g. "-" or "-sty")
+        const remainder = token.raw.slice(token.operator.length).toLowerCase();
+        const matchesKeywordPrefix =
+          remainder.length === 0 ||
+          Array.from(this._configuredKeywords.keys()).some((k) => k.startsWith(remainder));
+        if (
+          matchesKeywordPrefix &&
+          token.operatorEnd > token.operatorStart &&
+          token.operatorEnd <= text.length
+        ) {
+          try {
+            const opRange = this._input.createValueRange(token.operatorStart, token.operatorEnd);
+            this._ownedRanges.push(opRange);
+            this._operatorRanges.push(opRange);
+          } catch (e) {}
+        }
       }
     }
 
@@ -905,6 +1041,10 @@ export class RichInput extends HTMLElement {
 
   getActiveHighlightRanges() {
     return this._activeKeywordHighlightMap;
+  }
+
+  getActiveOperatorRanges() {
+    return this._operatorRanges;
   }
 
   getActiveInvalidRanges() {
@@ -1102,7 +1242,7 @@ export class RichInput extends HTMLElement {
     }
 
     const caretPos = this._input.selectionStart;
-    const context = getCaretContext(this._input.value, caretPos, this._configuredKeywords);
+    const context = getCaretContext(this._input.value, caretPos, this._configuredKeywords, this.operators);
 
     // If trigger is arrow and context is 'none', allow suggesting all keywords
     if (trigger === 'arrow' && context.mode === 'none') {
@@ -1124,6 +1264,7 @@ export class RichInput extends HTMLElement {
     // Keyword suggestions show immediately when:
     // - focusing/clearing an empty field
     // - typing characters that match a keyword (Boolean(context.query))
+    // - typing an operator (Boolean(context.operator))
     // - explicitly triggered via the Down Arrow key
     // In other cases (at the start of a new token after a space when the field is not empty),
     // show after a small delay to prevent constant popups when typing regular sentences with spaces.
@@ -1132,6 +1273,7 @@ export class RichInput extends HTMLElement {
       context.mode === 'value' ||
       isEmptyField ||
       Boolean(context.query) ||
+      Boolean(context.operator) ||
       trigger === 'arrow';
 
     if (shouldShowImmediately) {
@@ -1151,7 +1293,7 @@ export class RichInput extends HTMLElement {
         if (!isFocused) return;
 
         const currentCaretPos = this._input.selectionStart;
-        const currentContext = getCaretContext(this._input.value, currentCaretPos, this._configuredKeywords);
+        const currentContext = getCaretContext(this._input.value, currentCaretPos, this._configuredKeywords, this.operators);
         this._context = currentContext;
         const currentSuggestions = getSuggestions(currentContext, this._configuredKeywords);
         if (currentSuggestions.length === 0) {
@@ -1359,6 +1501,7 @@ export class RichInput extends HTMLElement {
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     const selectDetail = {
       type: suggestion.type,
+      operator: this._context?.operator || null,
       keyword: suggestion.keyword || suggestion.id,
       value: suggestion.value || null,
       label: suggestion.label || null,

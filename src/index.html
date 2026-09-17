@@ -193,6 +193,9 @@
               <button type="button" class="btn" data-preset='year:2022 artist:"Daft Punk"'>
                 ⚠️ Search with Invalid Value
               </button>
+              <button type="button" class="btn" data-preset='artist:"Aphex Twin" -style:Acid'>
+                🚫 Negative Filter (-style:Acid)
+              </button>
             </div>
           </div>
         </section>
@@ -511,6 +514,12 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
 ::highlight(artist) {
   background-color: oklch(0.92 0.1 320);
   color: oklch(0.32 0.14 320);
+}
+
+/* Generic prefix highlight for operators (e.g. "-" in "-style:Acid") */
+::highlight(rich-input-operator) {
+  color: #e11d48;
+  text-shadow: 0 0 1px rgba(225, 29, 72, 0.2);
 }
 
 /* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
@@ -1533,6 +1542,16 @@ rich-input::part(suggestion-image) {
                   <td><code>value</code></td>
                   <td><code>string</code></td>
                   <td>Gets or sets the current search text, refreshing highlights and form values.</td>
+                </tr>
+                <tr>
+                  <td><code>operators</code></td>
+                  <td><code>string[] | string</code></td>
+                  <td>Gets or sets the prefix operators (e.g. <code>['-', '~', '+']</code> or <code>"- ~ +"</code>) for this instance. Also configurable via the <code>operators</code> HTML attribute.</td>
+                </tr>
+                <tr>
+                  <td><code>RichInput.operators</code></td>
+                  <td><code>string[] | string</code></td>
+                  <td>Static getter/setter for global default operators used by all instances without a local override (defaults to <code>['-']</code>).</td>
                 </tr>
                 <tr>
                   <td><code>getParsedQuery()</code></td>

@@ -85,6 +85,11 @@ rich-input:not(:defined) {
   color: oklch(0.3 0.14 145);
 }
 
+::highlight(rich-input-operator) {
+  color: #e11d48;
+  text-shadow: 0 0 1px rgba(225, 29, 72, 0.2);
+}
+
 ::highlight(rich-input-keyword) {
   color: #64748b;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
