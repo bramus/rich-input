@@ -91,11 +91,14 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
 
     assert.equal(state.isDefined, true);
     assert.equal(state.value, 'ambient artist:"Aphex Twin" label:"Warp Records"');
-    assert.equal(state.parsed.text, 'ambient');
-    assert.deepEqual(state.parsed.keywords, {
-      artist: ['Aphex Twin'],
-      label: ['Warp Records'],
-    });
+    assert.deepEqual(Object.keys(state.parsed), ['raw', 'tokens']);
+    assert.equal(state.parsed.raw, 'ambient artist:"Aphex Twin" label:"Warp Records"');
+    const kwTokens = state.parsed.tokens.filter((t) => t.type === 'keyword');
+    assert.equal(kwTokens.length, 2);
+    assert.equal(kwTokens[0].keyword, 'artist');
+    assert.equal(kwTokens[0].innerValue, 'Aphex Twin');
+    assert.equal(kwTokens[1].keyword, 'label');
+    assert.equal(kwTokens[1].innerValue, 'Warp Records');
   });
 
   it('clears the input when clicking the shadow DOM clear button', async () => {
@@ -188,9 +191,10 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     });
 
     assert.equal(finalState.value, 'label:"We Play House Recordings" ');
-    assert.deepEqual(finalState.parsed.keywords, {
-      label: ['We Play House Recordings'],
-    });
+    const finalKeywords = finalState.parsed.tokens.filter((t) => t.type === 'keyword');
+    assert.equal(finalKeywords.length, 1);
+    assert.equal(finalKeywords[0].keyword, 'label');
+    assert.equal(finalKeywords[0].innerValue, 'We Play House Recordings');
   });
 
   it('updates value when clicking a preset button', async () => {
@@ -208,10 +212,12 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     });
 
     assert.equal(state.value, 'artist:"Larry Heard" style:"Deep House"');
-    assert.deepEqual(state.parsed.keywords, {
-      artist: ['Larry Heard'],
-      style: ['Deep House'],
-    });
+    const presetKeywords = state.parsed.tokens.filter((t) => t.type === 'keyword');
+    assert.equal(presetKeywords.length, 2);
+    assert.equal(presetKeywords[0].keyword, 'artist');
+    assert.equal(presetKeywords[0].innerValue, 'Larry Heard');
+    assert.equal(presetKeywords[1].keyword, 'style');
+    assert.equal(presetKeywords[1].innerValue, 'Deep House');
   });
 
   it('integrates with standard HTML <form> and FormData via ElementInternals', async () => {
@@ -331,7 +337,11 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.equal(result.value, '-style:Acid ');
     assert.equal(result.operatorRangesCount, 1);
     assert.equal(result.hasHighlight, true);
-    assert.deepEqual(result.parsedQuery.keywords['-style'], ['Acid']);
+    const opKwTokens = result.parsedQuery.tokens.filter((t) => t.type === 'keyword');
+    assert.equal(opKwTokens.length, 1);
+    assert.equal(opKwTokens[0].operator, '-');
+    assert.equal(opKwTokens[0].keyword, 'style');
+    assert.equal(opKwTokens[0].innerValue, 'Acid');
   });
 
   it('applies global operators to newly created instances while keeping existing instances and local overrides independent', async () => {
@@ -623,7 +633,8 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.equal(result.value, 'artist:"Aphex Twin" OR ');
     assert.equal(result.combinatorRangesCount, 1);
     assert.equal(result.hasHighlight, true);
-    assert.deepEqual(result.parsedQuery.combinators, ['OR']);
+    const combTokens = result.parsedQuery.tokens.filter((t) => t.type === 'combinator');
+    assert.deepEqual(combTokens.map((t) => t.combinator), ['OR']);
   });
 
   it('applies global combinators to newly created instances while keeping existing instances and local overrides independent', async () => {
@@ -798,9 +809,10 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
         allRangesInHighlight: delimHighlight ? delimRanges.every((r) => delimHighlight.has(r)) : false,
         delimRangesCount: delimRanges.length,
         invalidRangesCount: invalidRanges.length,
-        delimiters: parsed.delimiters,
-        combinators: parsed.combinators,
-        keywords: parsed.keywords,
+        parsedKeys: Object.keys(parsed),
+        delimiters: parsed.tokens.filter((t) => t.type === 'delimiter').map((t) => t.delimiter),
+        combinators: parsed.tokens.filter((t) => t.type === 'combinator').map((t) => t.combinator),
+        keywords: parsed.tokens.filter((t) => t.type === 'keyword').map((t) => ({ key: t.keyword, value: t.innerValue })),
       };
     });
 
@@ -808,13 +820,15 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.equal(state.delimRangesCount, 4);
     assert.equal(state.allRangesInHighlight, true);
     assert.equal(state.invalidRangesCount, 0, 'Keywords adjacent to delimiters should not be marked invalid');
+    assert.deepEqual(state.parsedKeys, ['raw', 'tokens']);
     assert.deepEqual(state.delimiters, ['(', ')', '(', ')']);
     assert.deepEqual(state.combinators, ['OR']);
-    assert.deepEqual(state.keywords, {
-      label: ['We Play House Recordings'],
-      year: ['2026', '2024'],
-      style: ['Deep House'],
-    });
+    assert.deepEqual(state.keywords, [
+      { key: 'label', value: 'We Play House Recordings' },
+      { key: 'year', value: '2026' },
+      { key: 'year', value: '2024' },
+      { key: 'style', value: 'Deep House' },
+    ]);
   });
 
   it('isolates global vs local delimiters correctly across existing and newly created instances', async () => {

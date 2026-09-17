@@ -273,54 +273,20 @@ describe('query-parser unit tests', () => {
   });
 
   describe('parseSearchQuery()', () => {
-    it('aggregates free text and grouped keyword values including operators', () => {
+    it('returns only raw and tokens keys', () => {
       const input = 'ambient artist:"Aphex Twin" LABEL:Warp -style:Acid artist:"Four Tet" deep';
       const result = parseSearchQuery(input);
 
+      assert.deepEqual(Object.keys(result), ['raw', 'tokens']);
       assert.equal(result.raw, input);
-      assert.equal(result.text, 'ambient deep');
-      assert.deepEqual(result.combinators, []);
-      assert.deepEqual(result.delimiters, []);
-      assert.deepEqual(result.keywords, {
-        artist: ['Aphex Twin', 'Four Tet'],
-        label: ['Warp'],
-        '-style': ['Acid'],
-      });
       assert.ok(Array.isArray(result.tokens));
-    });
-
-    it('collects matched combinators and excludes them from free text', () => {
-      const input = 'ambient artist:"Aphex Twin" OR label:"Defected"';
-      const result = parseSearchQuery(input, DEFAULT_OPERATORS, 'AND OR NOT');
-
-      assert.equal(result.raw, input);
-      assert.equal(result.text, 'ambient');
-      assert.deepEqual(result.combinators, ['OR']);
-      assert.deepEqual(result.delimiters, []);
-      assert.deepEqual(result.keywords, {
-        artist: ['Aphex Twin'],
-        label: ['Defected'],
-      });
-    });
-
-    it('collects matched delimiters and excludes them from free text', () => {
-      const input = '(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")';
-      const result = parseSearchQuery(input, DEFAULT_OPERATORS, 'AND OR NOT', DEFAULT_DELIMITERS);
-
-      assert.equal(result.raw, input);
-      assert.equal(result.text, '');
-      assert.deepEqual(result.combinators, ['OR']);
-      assert.deepEqual(result.delimiters, ['(', ')', '(', ')']);
-      assert.deepEqual(result.keywords, {
-        label: ['We Play House Recordings'],
-        year: ['2026', '2024'],
-        style: ['Deep House'],
-      });
     });
 
     it('preserves full lexical analysis order in tokens and allows lossless query string reconstruction', () => {
       const input = '(label:"We Play House Recordings" -year:2026 ) OR (year:2024 style:"Deep House") ambient';
       const result = parseSearchQuery(input, DEFAULT_OPERATORS, 'AND OR NOT', DEFAULT_DELIMITERS);
+
+      assert.deepEqual(Object.keys(result), ['raw', 'tokens']);
 
       // Reconstruct original query from tokens
       const reconstructed = result.tokens.map((t) => t.raw).join('');

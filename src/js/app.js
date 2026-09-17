@@ -156,11 +156,34 @@ export class RichInputDemoApp {
       const parsed = searchEl ? searchEl.getParsedQuery() : null;
 
       this.formResult.hidden = false;
-      this.formResult.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 0.25rem;">Form Submitted successfully!</div>
-        <div><strong>Submitted Value (FormData):</strong> <code>${query || '(empty)'}</code></div>
-        <div style="margin-top: 0.25rem;"><strong>Parsed Keywords:</strong> <code>${JSON.stringify(parsed?.keywords || {})}</code></div>
-      `;
+      this.formResult.style.minWidth = '0';
+      this.formResult.replaceChildren();
+
+      const header = document.createElement('div');
+      header.style.fontWeight = '600';
+      header.style.marginBottom = '0.5rem';
+      header.textContent = 'Form Submitted successfully!';
+
+      const submittedLine = document.createElement('div');
+      const submittedStrong = document.createElement('strong');
+      submittedStrong.textContent = 'Submitted Value (FormData):';
+      const submittedPre = document.createElement('pre');
+      submittedPre.style.overflowX = 'auto';
+      submittedPre.style.margin = '0.25rem 0 0';
+      submittedPre.textContent = query || '(empty)';
+      submittedLine.append(submittedStrong, submittedPre);
+
+      const tokensLine = document.createElement('div');
+      tokensLine.style.marginTop = '0.75rem';
+      const tokensStrong = document.createElement('strong');
+      tokensStrong.textContent = 'Parsed Tokens:';
+      const tokensPre = document.createElement('pre');
+      tokensPre.style.overflowX = 'auto';
+      tokensPre.style.margin = '0.25rem 0 0';
+      tokensPre.textContent = JSON.stringify(parsed?.tokens || [], null, 2);
+      tokensLine.append(tokensStrong, tokensPre);
+
+      this.formResult.append(header, submittedLine, tokensLine);
     });
   }
 

@@ -407,14 +407,6 @@ rich-input::part(suggestion-item-active) {
   ```json
   {
     "raw": "(label:\"We Play House Recordings\" year:2026 ) OR (year:2024 style:\"Deep House\")",
-    "text": "",
-    "combinators": ["OR"],
-    "delimiters": ["(", ")", "(", ")"],
-    "keywords": {
-      "label": ["We Play House Recordings"],
-      "year": ["2026", "2024"],
-      "style": ["Deep House"]
-    },
     "tokens": [...]
   }
   ```

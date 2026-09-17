@@ -351,12 +351,12 @@ export function parseSearchTokens(
 }
 
 /**
- * Parses search query into a structured object with keywords, combinators, delimiters, and free text.
+ * Parses search query into a structured object with the raw string and lexical tokens.
  * @param {string} inputStr
  * @param {string|string[]} [operators=DEFAULT_OPERATORS]
  * @param {string|string[]} [combinators=DEFAULT_COMBINATORS]
  * @param {string|string[]} [delimiters=DEFAULT_DELIMITERS]
- * @returns {{ raw: string, text: string, keywords: Record<string, string[]>, combinators: string[], delimiters: string[], tokens: Array<Object> }}
+ * @returns {{ raw: string, tokens: Array<Object> }}
  */
 export function parseSearchQuery(
   inputStr,
@@ -365,33 +365,9 @@ export function parseSearchQuery(
   delimiters = DEFAULT_DELIMITERS
 ) {
   const tokens = parseSearchTokens(inputStr, operators, combinators, delimiters);
-  const keywords = {};
-  const matchedCombinators = [];
-  const matchedDelimiters = [];
-  const textWords = [];
-
-  for (const token of tokens) {
-    if (token.type === 'keyword') {
-      const kw = token.operator ? `${token.operator}${token.keywordLower}` : token.keywordLower;
-      if (!keywords[kw]) {
-        keywords[kw] = [];
-      }
-      keywords[kw].push(token.innerValue);
-    } else if (token.type === 'combinator') {
-      matchedCombinators.push(token.combinator);
-    } else if (token.type === 'delimiter') {
-      matchedDelimiters.push(token.delimiter);
-    } else if (token.type === 'text') {
-      textWords.push(token.raw);
-    }
-  }
 
   return {
     raw: inputStr,
-    text: textWords.join(' '),
-    keywords,
-    combinators: matchedCombinators,
-    delimiters: matchedDelimiters,
     tokens,
   };
 }

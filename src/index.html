@@ -1253,7 +1253,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
             <form id="demo-form" style="display: flex; flex-direction: column; gap: 1rem;">
               <div>
                 <label for="form-search" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Search Filter:</label>
-                <rich-input id="form-search" name="q" placeholder="Type query and submit form..." required>
+                <rich-input id="form-search" combinators="AND OR" operators="- ~" name="q" placeholder="Type query and submit form..." required>
                   <datalist id="artist" label="Artist">
                     <option value="Aphex Twin">
                       <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
@@ -1594,7 +1594,7 @@ rich-input::part(suggestion-image) {
                 <tr>
                   <td><code>getParsedQuery()</code></td>
                   <td><code>() =&gt; Object</code></td>
-                  <td>Returns structured breakdown with <code>{ raw, text, combinators, delimiters, keywords, tokens }</code>.</td>
+                  <td>Returns structured breakdown with <code>{ raw, tokens }</code>.</td>
                 </tr>
                 <tr>
                   <td><code>getKeywords()</code></td>
