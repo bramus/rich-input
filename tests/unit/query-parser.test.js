@@ -317,6 +317,43 @@ describe('query-parser unit tests', () => {
         style: ['Deep House'],
       });
     });
+
+    it('preserves full lexical analysis order in tokens and allows lossless query string reconstruction', () => {
+      const input = '(label:"We Play House Recordings" -year:2026 ) OR (year:2024 style:"Deep House") ambient';
+      const result = parseSearchQuery(input, DEFAULT_OPERATORS, 'AND OR NOT', DEFAULT_DELIMITERS);
+
+      // Reconstruct original query from tokens
+      const reconstructed = result.tokens.map((t) => t.raw).join('');
+      assert.equal(reconstructed, input);
+
+      // Verify sequence of non-whitespace token types and values
+      const sequence = result.tokens
+        .filter((t) => t.type !== 'whitespace')
+        .map((t) => ({
+          type: t.type,
+          value:
+            t.type === 'keyword'
+              ? `${t.operator || ''}${t.keyword}:${t.innerValue}`
+              : t.type === 'combinator'
+                ? t.combinator
+                : t.type === 'delimiter'
+                  ? t.delimiter
+                  : t.raw,
+        }));
+
+      assert.deepEqual(sequence, [
+        { type: 'delimiter', value: '(' },
+        { type: 'keyword', value: 'label:We Play House Recordings' },
+        { type: 'keyword', value: '-year:2026' },
+        { type: 'delimiter', value: ')' },
+        { type: 'combinator', value: 'OR' },
+        { type: 'delimiter', value: '(' },
+        { type: 'keyword', value: 'year:2024' },
+        { type: 'keyword', value: 'style:Deep House' },
+        { type: 'delimiter', value: ')' },
+        { type: 'text', value: 'ambient' },
+      ]);
+    });
   });
 
   describe('getCaretContext()', () => {

@@ -107,22 +107,16 @@ export class RichInputDemoApp {
 
       // Render JSON
       if (this.jsonOutput) {
-        this.jsonOutput.textContent = JSON.stringify({
-          raw: parsed.raw,
-          freeText: parsed.text,
-          combinators: parsed.combinators,
-          delimiters: parsed.delimiters,
-          keywords: parsed.keywords,
-          tokenCount: parsed.tokens.filter(t => t.type !== 'whitespace').length,
-          activeHighlights: Array.from(CSS.highlights ? CSS.highlights.keys() : []),
-        }, null, 2);
+        this.jsonOutput.textContent = JSON.stringify(parsed, null, 2);
       }
 
       // Render caret info
       if (this.caretInfo) {
+        const activeHighlights = Array.from(CSS.highlights ? CSS.highlights.keys() : []);
         this.caretInfo.innerHTML = `
           <span><strong>Caret index:</strong> ${caretPos}</span> · 
           <span><strong>Viewport rect:</strong> X: ${Math.round(coords.left)}, Y: ${Math.round(coords.bottom)}</span> · 
+          <span><strong>Active highlights:</strong> ${activeHighlights.length ? activeHighlights.join(', ') : 'none'}</span> · 
           <span><strong>Highlight engine:</strong> ${isOpaqueRangeSupported ? 'OpaqueRange (native)' : (isHighlightSupported ? 'contenteditable + Custom Highlights' : 'Mirror div')}</span>
         `;
       }
