@@ -39,6 +39,7 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(icon)`: The default leading search magnifying glass SVG icon (fallback in `slot="leading"`).
 - `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
 - `::highlight(rich-input-operator)`: Target pseudo-element for styling keyword operators (e.g. `-` in `-style:Acid`).
+- `::highlight(rich-input-combinator)`: Target pseudo-element for styling query combinators (e.g. `OR` in `artist:"Aphex Twin" OR label:"Defected"`).
 - `::highlight(rich-input-keyword)`: Target pseudo-element for styling keyword prefixes (e.g. `label:`, `year:`).
 - `::highlight(rich-input-invalid)`: Target pseudo-element for marking unrecognized keywords or invalid keyword values (not in datalist) with a squiggly underline.
 - `::part(clear-button)`: The clear button (visible when text is present).
@@ -50,6 +51,7 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(suggestion-item-selected)`: The suggestion row matching the value currently echoed in the input.
 - `::part(suggestion-image)`: The circular logo, icon, or avatar image prepended to rich suggestions.
 - `::part(suggestion-keyword)`: The keyword label text inside a keyword suggestion.
+- `::part(suggestion-combinator)`: The combinator label text inside a combinator suggestion.
 - `::part(suggestion-value)`: The value label text inside a value suggestion.
 
 ---
@@ -116,6 +118,7 @@ Configuration is defined by standard HTML `<datalist>` elements placed inside th
 | Element / Attribute | Type | Description |
 |---|---|---|
 | `<rich-input operators="...">` | `string` | Optional space-separated list of prefix operators (e.g. `operators="- ~ +"`). Defaults to `"-"` (negative filter). |
+| `<rich-input combinators="...">` | `string` | Optional space-separated list of query combinators (e.g. `combinators="AND OR NOT"`). Defaults to `""` (empty array). |
 | `<datalist id="...">` | `string` | **Required.** The keyword identifier used in queries (e.g. `id="artist"` produces `artist:`). Case-insensitive. |
 | `<datalist label="...">` | `string` | Human-readable label displayed in suggestion headers. Defaults to capitalized `id`. |
 | `<datalist data-type="...">` | `string` | Optional data type (`"string"` or `"number"`). |
@@ -283,6 +286,12 @@ Values corresponding to configured keywords are registered into the global `CSS.
   text-shadow: 0 0 1px rgba(225, 29, 72, 0.2);
 }
 
+/* Generic highlight for combinators (e.g. "OR" in "artist:Aphex OR label:Defected") */
+::highlight(rich-input-combinator) {
+  color: #7c3aed;
+  text-shadow: 0 0 1px rgba(124, 58, 237, 0.2);
+}
+
 /* Generic prefix highlight for keyword labels (e.g. "label:", "year:") */
 ::highlight(rich-input-keyword) {
   color: #64748b;
@@ -362,6 +371,7 @@ rich-input::part(suggestion-item-active) {
 | `::part(suggestion-item-active)` | The currently focused / hovered suggestion item |
 | `::part(suggestion-item-selected)` | The suggestion item matching the value currently echoed in the input |
 | `::part(suggestion-keyword)` | Keyword name element in suggestion items |
+| `::part(suggestion-combinator)` | Combinator name element in suggestion items |
 | `::part(suggestion-value)` | Value element in suggestion items |
 | `::part(suggestion-content)` | The content container inside each suggestion item |
 | `::part(suggestion-image)` | Image or icon element rendered inside rich suggestion items |
@@ -375,6 +385,8 @@ rich-input::part(suggestion-item-active) {
 - `value` (`string`): Gets or sets the search input value. Updates highlights and form value automatically.
 - `operators` (`string[] | string`): Gets or sets the prefix operators (e.g. `['-', '~', '+']` or `'- ~ +'`) for this instance. Defaults to `RichInput.operators` (`['-']`). Setting to `null` clears the instance override and falls back to the global configuration.
 - `RichInput.operators` (`string[] | string`): Static getter and setter to configure global default operators for all instances without a local override.
+- `combinators` (`string[] | string`): Gets or sets the query combinators (e.g. `['AND', 'OR', 'NOT']` or `'AND OR NOT'`) for this instance. Defaults to `RichInput.combinators` (`[]`). Setting to `null` clears the instance override and falls back to the global configuration.
+- `RichInput.combinators` (`string[] | string`): Static getter and setter to configure global default combinators for all instances without a local override.
 - `placeholder` (`string`): Gets or sets the input placeholder text.
 - `disabled` (`boolean`): Disables or enables the input control.
 - `name` (`string`): Form field name when submitted inside a `<form>`.
@@ -385,8 +397,9 @@ rich-input::part(suggestion-item-active) {
 - `getParsedQuery()`: Returns a parsed object representing the search query:
   ```json
   {
-    "raw": "label:\"We Play House Recordings\" -style:Acid chicago house",
+    "raw": "label:\"We Play House Recordings\" OR -style:Acid chicago house",
     "text": "chicago house",
+    "combinators": ["OR"],
     "keywords": {
       "label": ["We Play House Recordings"],
       "-style": ["Acid"]
@@ -396,6 +409,7 @@ rich-input::part(suggestion-item-active) {
   ```
 - `getKeywords()`: Returns an array of configured keyword definitions from the datalists.
 - `getOperators()` / `setOperators(operators)`: Gets or sets the operators for this instance (or globally via `RichInput.getOperators()` / `RichInput.setOperators(operators)`).
+- `getCombinators()` / `setCombinators(combinators)`: Gets or sets the combinators for this instance (or globally via `RichInput.getCombinators()` / `RichInput.setCombinators(combinators)`).
 - `focus(options)`: Focuses the internal input.
 - `blur()`: Removes focus from the internal input.
 - `select()`: Selects all text inside the input.

@@ -4,7 +4,7 @@
  */
 
 import { RichInput } from './components/rich-input.js';
-import { DEFAULT_OPERATORS, normalizeOperators, parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from './utils/query-parser.js';
+import { DEFAULT_OPERATORS, normalizeOperators, DEFAULT_COMBINATORS, normalizeCombinators, parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from './utils/query-parser.js';
 import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from './utils/highlights.js';
 import { getCaretCoordinates, getRangeCoordinates, positionPopover, getCaretLeftWithMirrorDiv } from './utils/positioning.js';
 import { setupContentEditableAdapter, isContentEditableFallbackActive } from './utils/contenteditable-adapter.js';
@@ -19,6 +19,8 @@ export {
   RichInput,
   DEFAULT_OPERATORS,
   normalizeOperators,
+  DEFAULT_COMBINATORS,
+  normalizeCombinators,
   parseSearchTokens,
   parseSearchQuery,
   getCaretContext,

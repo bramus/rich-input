@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   DEFAULT_OPERATORS,
   normalizeOperators,
+  DEFAULT_COMBINATORS,
+  normalizeCombinators,
   parseSearchTokens,
   parseSearchQuery,
   getCaretContext,
@@ -31,6 +33,25 @@ describe('query-parser unit tests', () => {
       assert.deepEqual(normalizeOperators('- - +'), ['-', '+']);
       assert.deepEqual(normalizeOperators('~~ +'), ['~', '+']);
       assert.deepEqual(normalizeOperators('--- ~~~ +++'), ['-', '~', '+']);
+    });
+  });
+
+  describe('normalizeCombinators()', () => {
+    it('returns default combinators [] when undefined', () => {
+      assert.deepEqual(normalizeCombinators(undefined), DEFAULT_COMBINATORS);
+      assert.deepEqual(normalizeCombinators(undefined), []);
+    });
+
+    it('returns empty array for null or empty string', () => {
+      assert.deepEqual(normalizeCombinators(null), []);
+      assert.deepEqual(normalizeCombinators(''), []);
+      assert.deepEqual(normalizeCombinators('   '), []);
+    });
+
+    it('parses space-separated strings and arrays with deduplication', () => {
+      assert.deepEqual(normalizeCombinators('AND OR NOT'), ['AND', 'OR', 'NOT']);
+      assert.deepEqual(normalizeCombinators(['AND', 'OR', 'NOT', 'AND']), ['AND', 'OR', 'NOT']);
+      assert.deepEqual(normalizeCombinators(['AND OR', 'XOR']), ['AND', 'OR', 'XOR']);
     });
   });
 
@@ -169,6 +190,20 @@ describe('query-parser unit tests', () => {
       assert.equal(tokens[0].innerValue, '');
       assert.equal(tokens[0].rawValue, '');
     });
+
+    it('parses standalone combinator tokens when configured', () => {
+      const tokens = parseSearchTokens(
+        'artist:"Aphex Twin" OR label:"Defected" AND -style:Acid',
+        DEFAULT_OPERATORS,
+        'AND OR NOT'
+      );
+      const combTokens = tokens.filter((t) => t.type === 'combinator');
+      assert.equal(combTokens.length, 2);
+      assert.equal(combTokens[0].combinator, 'OR');
+      assert.equal(combTokens[0].raw, 'OR');
+      assert.equal(combTokens[1].combinator, 'AND');
+      assert.equal(combTokens[1].raw, 'AND');
+    });
   });
 
   describe('parseSearchQuery()', () => {
@@ -178,12 +213,26 @@ describe('query-parser unit tests', () => {
 
       assert.equal(result.raw, input);
       assert.equal(result.text, 'ambient deep');
+      assert.deepEqual(result.combinators, []);
       assert.deepEqual(result.keywords, {
         artist: ['Aphex Twin', 'Four Tet'],
         label: ['Warp'],
         '-style': ['Acid'],
       });
       assert.ok(Array.isArray(result.tokens));
+    });
+
+    it('collects matched combinators and excludes them from free text', () => {
+      const input = 'ambient artist:"Aphex Twin" OR label:"Defected"';
+      const result = parseSearchQuery(input, DEFAULT_OPERATORS, 'AND OR NOT');
+
+      assert.equal(result.raw, input);
+      assert.equal(result.text, 'ambient');
+      assert.deepEqual(result.combinators, ['OR']);
+      assert.deepEqual(result.keywords, {
+        artist: ['Aphex Twin'],
+        label: ['Defected'],
+      });
     });
   });
 
@@ -206,6 +255,14 @@ describe('query-parser unit tests', () => {
       assert.equal(ctx.query, 'art');
       assert.equal(ctx.replaceStart, 0);
       assert.equal(ctx.replaceEnd, 3);
+    });
+
+    it('returns keyword mode when caret is inside a combinator token', () => {
+      const ctx = getCaretContext('artist:Aphex OR', 14, new Map(), DEFAULT_OPERATORS, 'AND OR NOT');
+      assert.equal(ctx.mode, 'keyword');
+      assert.equal(ctx.query, 'OR');
+      assert.equal(ctx.replaceStart, 13);
+      assert.equal(ctx.replaceEnd, 15);
     });
 
     it('returns keyword mode with operator when typing an operator prefix', () => {
@@ -310,6 +367,15 @@ describe('query-parser unit tests', () => {
       assert.equal(suggestions[0].insertText, 'label:');
     });
 
+    it('returns matching combinator suggestions when typing a combinator prefix', () => {
+      const ctx = getCaretContext('label:Warp O', 12, configuredKeywords, DEFAULT_OPERATORS, 'AND OR NOT');
+      const suggestions = getSuggestions(ctx, configuredKeywords, 'AND OR NOT');
+      const combSug = suggestions.find((s) => s.type === 'combinator');
+      assert.ok(combSug);
+      assert.equal(combSug.combinator, 'OR');
+      assert.equal(combSug.insertText, 'OR');
+    });
+
     it('returns matching keyword suggestions when prefixed by an operator', () => {
       const ctx = getCaretContext('-st', 3);
       const suggestions = getSuggestions(ctx, configuredKeywords);
@@ -364,6 +430,16 @@ describe('query-parser unit tests', () => {
 
       assert.equal(newValue, 'label:');
       assert.equal(newCaret, 6);
+    });
+
+    it('applies a combinator suggestion and appends a trailing space', () => {
+      const input = 'label:Warp O';
+      const ctx = getCaretContext(input, 12, new Map(), DEFAULT_OPERATORS, 'AND OR NOT');
+      const suggestion = { type: 'combinator', combinator: 'OR', insertText: 'OR' };
+      const { newValue, newCaret } = applySuggestion(input, suggestion, ctx);
+
+      assert.equal(newValue, 'label:Warp OR ');
+      assert.equal(newCaret, 14);
     });
 
     it('preserves operator prefix when applying a keyword suggestion', () => {

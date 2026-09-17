@@ -90,6 +90,11 @@ rich-input:not(:defined) {
   text-shadow: 0 0 1px rgba(225, 29, 72, 0.2);
 }
 
+::highlight(rich-input-combinator) {
+  color: #7c3aed;
+  text-shadow: 0 0 1px rgba(124, 58, 237, 0.2);
+}
+
 ::highlight(rich-input-keyword) {
   color: #64748b;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
@@ -686,6 +691,11 @@ pre {
 .token-pill.pill-keyword {
   background: #dbeafe;
   color: #1e40af;
+}
+
+.token-pill.pill-combinator {
+  background: #ede9fe;
+  color: #5b21b6;
 }
 
 .token-pill.pill-text {

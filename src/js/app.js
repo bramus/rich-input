@@ -89,6 +89,10 @@ export class RichInputDemoApp {
                 em.textContent = '(empty)';
                 span.appendChild(em);
               }
+            } else if (t.type === 'combinator') {
+              const strong = document.createElement('strong');
+              strong.textContent = t.combinator;
+              span.appendChild(strong);
             } else {
               span.textContent = `text: "${t.raw}"`;
             }
@@ -102,6 +106,7 @@ export class RichInputDemoApp {
         this.jsonOutput.textContent = JSON.stringify({
           raw: parsed.raw,
           freeText: parsed.text,
+          combinators: parsed.combinators,
           keywords: parsed.keywords,
           tokenCount: parsed.tokens.filter(t => t.type !== 'whitespace').length,
           activeHighlights: Array.from(CSS.highlights ? CSS.highlights.keys() : []),

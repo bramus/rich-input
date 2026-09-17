@@ -3,7 +3,7 @@
  * Keyword-based autocomplete input field powered by OpaqueRange and Custom Highlight API.
  */
 
-import { DEFAULT_OPERATORS, normalizeOperators, parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from '../utils/query-parser.js';
+import { DEFAULT_OPERATORS, normalizeOperators, DEFAULT_COMBINATORS, normalizeCombinators, parseSearchTokens, parseSearchQuery, getCaretContext, getSuggestions, applySuggestion, isDatalistValue } from '../utils/query-parser.js';
 import { highlightManager, isOpaqueRangeSupported, isHighlightSupported } from '../utils/highlights.js';
 import { getCaretCoordinates, positionPopover } from '../utils/positioning.js';
 import { setupContentEditableAdapter, isContentEditableFallbackActive } from '../utils/contenteditable-adapter.js';
@@ -118,6 +118,12 @@ TEMPLATE.innerHTML = `
   /* Generic prefix highlight for operators */
   ::highlight(rich-input-operator) {
     color: var(--ri-operator-color, var(--ri-keyword-color, #64748b));
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Generic highlight for combinators */
+  ::highlight(rich-input-combinator) {
+    color: var(--ri-combinator-color, var(--ri-operator-color, var(--ri-keyword-color, #64748b)));
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
   }
 
@@ -369,6 +375,7 @@ export class RichInput extends HTMLElement {
   static formAssociated = true;
 
   static _globalOperators = [...DEFAULT_OPERATORS];
+  static _globalCombinators = [...DEFAULT_COMBINATORS];
 
   /**
    * Global default operators inherited by newly created <rich-input> instances.
@@ -393,6 +400,29 @@ export class RichInput extends HTMLElement {
     RichInput.operators = val;
   }
 
+  /**
+   * Global default combinators inherited by newly created <rich-input> instances.
+   */
+  static get combinators() {
+    return [...RichInput._globalCombinators];
+  }
+
+  static set combinators(val) {
+    if (val === null || val === undefined) {
+      RichInput._globalCombinators = [...DEFAULT_COMBINATORS];
+    } else {
+      RichInput._globalCombinators = normalizeCombinators(val);
+    }
+  }
+
+  static get defaultCombinators() {
+    return RichInput.combinators;
+  }
+
+  static set defaultCombinators(val) {
+    RichInput.combinators = val;
+  }
+
   static get observedAttributes() {
     return [
       'value',
@@ -404,6 +434,7 @@ export class RichInput extends HTMLElement {
       'required',
       'highlight-quotes',
       'operators',
+      'combinators',
       'aria-label',
       'aria-labelledby',
     ];
@@ -446,6 +477,8 @@ export class RichInput extends HTMLElement {
     this._configuredKeywords = new Map();
     this._operators = [...RichInput.operators];
     this._settingOperatorsAttribute = false;
+    this._combinators = [...RichInput.combinators];
+    this._settingCombinatorsAttribute = false;
     this._activeSuggestions = [];
     this._selectedIndex = -1;
     this._context = null;
@@ -453,6 +486,7 @@ export class RichInput extends HTMLElement {
     this._ownedRanges = [];
     this._invalidRanges = [];
     this._operatorRanges = [];
+    this._combinatorRanges = [];
     this._activeKeywordHighlightMap = new Map();
     this._isFocused = false;
     this._lastCaretPosition = -1;
@@ -531,6 +565,20 @@ export class RichInput extends HTMLElement {
       this._settingOperatorsAttribute = true;
       this.setAttribute('operators', this._operators.join(' '));
       this._settingOperatorsAttribute = false;
+    }
+    if (this.hasAttribute('combinators')) {
+      const rawCombs = this.getAttribute('combinators');
+      this._combinators = normalizeCombinators(rawCombs);
+      const normalizedAttr = this._combinators.join(' ');
+      if (rawCombs !== normalizedAttr) {
+        this._settingCombinatorsAttribute = true;
+        this.setAttribute('combinators', normalizedAttr);
+        this._settingCombinatorsAttribute = false;
+      }
+    } else if (this._combinators.length > 0) {
+      this._settingCombinatorsAttribute = true;
+      this.setAttribute('combinators', this._combinators.join(' '));
+      this._settingCombinatorsAttribute = false;
     }
     if (this.hasAttribute('value')) {
       this._input.value = this.getAttribute('value');
@@ -628,6 +676,28 @@ export class RichInput extends HTMLElement {
       this.updateHighlights();
       if (this._isPopoverOpen()) {
         this.updateSuggestions('operators-changed');
+      }
+    } else if (name === 'combinators') {
+      if (this._settingCombinatorsAttribute) return;
+      if (newValue === null) {
+        this._combinators = [...RichInput.combinators];
+        if (this._combinators.length > 0) {
+          this._settingCombinatorsAttribute = true;
+          this.setAttribute('combinators', this._combinators.join(' '));
+          this._settingCombinatorsAttribute = false;
+        }
+      } else {
+        this._combinators = normalizeCombinators(newValue);
+        const normalizedAttr = this._combinators.join(' ');
+        if (newValue !== normalizedAttr) {
+          this._settingCombinatorsAttribute = true;
+          this.setAttribute('combinators', normalizedAttr);
+          this._settingCombinatorsAttribute = false;
+        }
+      }
+      this.updateHighlights();
+      if (this._isPopoverOpen()) {
+        this.updateSuggestions('combinators-changed');
       }
     }
   }
@@ -778,6 +848,40 @@ export class RichInput extends HTMLElement {
     this.operators = val;
   }
 
+  get combinators() {
+    return [...this._combinators];
+  }
+
+  set combinators(val) {
+    if (val === null || val === undefined) {
+      this._combinators = [...RichInput.combinators];
+      this._settingCombinatorsAttribute = true;
+      if (this._combinators.length > 0) {
+        this.setAttribute('combinators', this._combinators.join(' '));
+      } else {
+        this.removeAttribute('combinators');
+      }
+      this._settingCombinatorsAttribute = false;
+    } else {
+      this._combinators = normalizeCombinators(val);
+      this._settingCombinatorsAttribute = true;
+      this.setAttribute('combinators', this._combinators.join(' '));
+      this._settingCombinatorsAttribute = false;
+    }
+    this.updateHighlights();
+    if (this._isPopoverOpen()) {
+      this.updateSuggestions('combinators-changed');
+    }
+  }
+
+  getCombinators() {
+    return this.combinators;
+  }
+
+  setCombinators(val) {
+    this.combinators = val;
+  }
+
   // --- Public Methods ---
   focus(options) {
     this._isFocused = true;
@@ -798,7 +902,7 @@ export class RichInput extends HTMLElement {
   }
 
   getParsedQuery() {
-    return parseSearchQuery(this._input.value, this.operators);
+    return parseSearchQuery(this._input.value, this.operators, this.combinators);
   }
 
   getKeywords() {
@@ -903,6 +1007,7 @@ export class RichInput extends HTMLElement {
     this._ownedRanges = [];
     this._invalidRanges = [];
     this._operatorRanges = [];
+    this._combinatorRanges = [];
     this._activeKeywordHighlightMap.clear();
   }
 
@@ -925,7 +1030,7 @@ export class RichInput extends HTMLElement {
       return;
     }
 
-    const tokens = parseSearchTokens(text, this.operators);
+    const tokens = parseSearchTokens(text, this.operators, this.combinators);
     const highlightQuotes = this.getAttribute('highlight-quotes') !== 'exclude';
 
     const isFocused = this._isFocused;
@@ -1016,6 +1121,14 @@ export class RichInput extends HTMLElement {
             }
           }
         }
+      } else if (token.type === 'combinator') {
+        if (token.end > token.start && token.end <= text.length) {
+          try {
+            const combRange = this._input.createValueRange(token.start, token.end);
+            this._ownedRanges.push(combRange);
+            this._combinatorRanges.push(combRange);
+          } catch (e) {}
+        }
       } else if (token.type === 'text' && token.operator) {
         // Highlight operator while typing an operator prefix before colon (e.g. "-" or "-sty")
         const remainder = token.raw.slice(token.operator.length).toLowerCase();
@@ -1045,6 +1158,10 @@ export class RichInput extends HTMLElement {
 
   getActiveOperatorRanges() {
     return this._operatorRanges;
+  }
+
+  getActiveCombinatorRanges() {
+    return this._combinatorRanges;
   }
 
   getActiveInvalidRanges() {
@@ -1242,7 +1359,7 @@ export class RichInput extends HTMLElement {
     }
 
     const caretPos = this._input.selectionStart;
-    const context = getCaretContext(this._input.value, caretPos, this._configuredKeywords, this.operators);
+    const context = getCaretContext(this._input.value, caretPos, this._configuredKeywords, this.operators, this.combinators);
 
     // If trigger is arrow and context is 'none', allow suggesting all keywords
     if (trigger === 'arrow' && context.mode === 'none') {
@@ -1253,7 +1370,7 @@ export class RichInput extends HTMLElement {
     }
 
     this._context = context;
-    const suggestions = getSuggestions(context, this._configuredKeywords);
+    const suggestions = getSuggestions(context, this._configuredKeywords, this.combinators);
 
     if (suggestions.length === 0) {
       this.hideSuggestions();
@@ -1293,9 +1410,9 @@ export class RichInput extends HTMLElement {
         if (!isFocused) return;
 
         const currentCaretPos = this._input.selectionStart;
-        const currentContext = getCaretContext(this._input.value, currentCaretPos, this._configuredKeywords, this.operators);
+        const currentContext = getCaretContext(this._input.value, currentCaretPos, this._configuredKeywords, this.operators, this.combinators);
         this._context = currentContext;
-        const currentSuggestions = getSuggestions(currentContext, this._configuredKeywords);
+        const currentSuggestions = getSuggestions(currentContext, this._configuredKeywords, this.combinators);
         if (currentSuggestions.length === 0) {
           this.hideSuggestions();
           return;
@@ -1368,6 +1485,13 @@ export class RichInput extends HTMLElement {
       return currentKw === sugId;
     }
 
+    if (sug.type === 'combinator' && this._context.mode === 'keyword' && this._context.token?.type === 'combinator') {
+      const currentComb = (this._context.token.combinator ?? '').trim().toLowerCase();
+      if (!currentComb) return false;
+      const sugComb = (sug.combinator ?? sug.value ?? '').trim().toLowerCase();
+      return currentComb === sugComb;
+    }
+
     return false;
   }
 
@@ -1412,7 +1536,13 @@ export class RichInput extends HTMLElement {
 
       const title = document.createElement('span');
       title.className = 'suggestion-title';
-      title.setAttribute('part', sug.type === 'keyword' ? 'suggestion-keyword' : 'suggestion-value');
+      const titlePart =
+        sug.type === 'keyword'
+          ? 'suggestion-keyword'
+          : sug.type === 'combinator'
+          ? 'suggestion-combinator'
+          : 'suggestion-value';
+      title.setAttribute('part', titlePart);
       title.textContent = sug.display;
 
       const desc = document.createElement('span');
@@ -1502,7 +1632,8 @@ export class RichInput extends HTMLElement {
     const selectDetail = {
       type: suggestion.type,
       operator: this._context?.operator || null,
-      keyword: suggestion.keyword || suggestion.id,
+      combinator: suggestion.combinator || (suggestion.type === 'combinator' ? suggestion.value : null),
+      keyword: suggestion.keyword || (suggestion.type === 'keyword' ? suggestion.id : null),
       value: suggestion.value || null,
       label: suggestion.label || null,
       query: newValue,
@@ -1513,7 +1644,7 @@ export class RichInput extends HTMLElement {
       detail: selectDetail,
     }));
     // Immediately show value suggestions when a keyword was selected (e.g. `mix:`),
-    // or keyword suggestions when a value was selected (since cursor is now after a space at a new token)
+    // or keyword suggestions when a value or combinator was selected (since cursor is now after a space at a new token)
     this.updateSuggestions(suggestion.type === 'keyword' ? 'keyword-selected' : 'value-selected');
   }
 }

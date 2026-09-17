@@ -4,6 +4,7 @@
  */
 
 export const DEFAULT_OPERATORS = ['-'];
+export const DEFAULT_COMBINATORS = [];
 
 /**
  * Normalizes an operators configuration (string or array) into an array of non-empty operator strings.
@@ -40,6 +41,39 @@ export function normalizeOperators(operators) {
 }
 
 /**
+ * Normalizes a combinators configuration (string or array) into an array of non-empty combinator strings.
+ * @param {string|string[]|null|undefined} combinators
+ * @returns {string[]}
+ */
+export function normalizeCombinators(combinators) {
+  if (combinators === undefined) {
+    return [...DEFAULT_COMBINATORS];
+  }
+  if (combinators === null || combinators === '') {
+    return [];
+  }
+  const rawList = Array.isArray(combinators)
+    ? combinators
+    : typeof combinators === 'string'
+      ? combinators.split(/\s+/)
+      : [];
+
+  const result = [];
+  const seen = new Set();
+  for (const item of rawList) {
+    if (typeof item !== 'string') continue;
+    const parts = item.trim().split(/\s+/).filter(Boolean);
+    for (const part of parts) {
+      if (!seen.has(part)) {
+        seen.add(part);
+        result.push(part);
+      }
+    }
+  }
+  return result;
+}
+
+/**
  * Matches if a string starts with any of the configured operators (longest match first).
  * @param {string} str
  * @param {string[]} normalizedOperators
@@ -62,12 +96,14 @@ function matchOperator(str, normalizedOperators) {
  * Parses raw search input into token objects.
  * @param {string} inputStr
  * @param {string|string[]} [operators=DEFAULT_OPERATORS]
+ * @param {string|string[]} [combinators=DEFAULT_COMBINATORS]
  * @returns {Array<Object>}
  */
-export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS) {
+export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS, combinators = DEFAULT_COMBINATORS) {
   if (typeof inputStr !== 'string') return [];
 
   const normalizedOps = normalizeOperators(operators);
+  const normalizedCombs = normalizeCombinators(combinators);
   const tokens = [];
   let i = 0;
   const len = inputStr.length;
@@ -176,24 +212,34 @@ export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS) {
         isClosed,
       });
     } else {
-      // 3. Plain text token (single word or unfinished keyword)
+      // 3. Standalone word token (combinator or plain text)
       while (i < len && !/\s/.test(inputStr[i])) {
         i++;
       }
       const raw = inputStr.slice(tokenStart, i);
-      const textOp = matchOperator(raw, normalizedOps);
-      const textToken = {
-        type: 'text',
-        raw,
-        start: tokenStart,
-        end: i,
-      };
-      if (textOp) {
-        textToken.operator = textOp;
-        textToken.operatorStart = tokenStart;
-        textToken.operatorEnd = tokenStart + textOp.length;
+      if (normalizedCombs.includes(raw)) {
+        tokens.push({
+          type: 'combinator',
+          combinator: raw,
+          raw,
+          start: tokenStart,
+          end: i,
+        });
+      } else {
+        const textOp = matchOperator(raw, normalizedOps);
+        const textToken = {
+          type: 'text',
+          raw,
+          start: tokenStart,
+          end: i,
+        };
+        if (textOp) {
+          textToken.operator = textOp;
+          textToken.operatorStart = tokenStart;
+          textToken.operatorEnd = tokenStart + textOp.length;
+        }
+        tokens.push(textToken);
       }
-      tokens.push(textToken);
     }
   }
 
@@ -201,14 +247,16 @@ export function parseSearchTokens(inputStr, operators = DEFAULT_OPERATORS) {
 }
 
 /**
- * Parses search query into a structured object with keywords and free text.
+ * Parses search query into a structured object with keywords, combinators, and free text.
  * @param {string} inputStr
  * @param {string|string[]} [operators=DEFAULT_OPERATORS]
- * @returns {{ raw: string, text: string, keywords: Record<string, string[]>, tokens: Array<Object> }}
+ * @param {string|string[]} [combinators=DEFAULT_COMBINATORS]
+ * @returns {{ raw: string, text: string, keywords: Record<string, string[]>, combinators: string[], tokens: Array<Object> }}
  */
-export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS) {
-  const tokens = parseSearchTokens(inputStr, operators);
+export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS, combinators = DEFAULT_COMBINATORS) {
+  const tokens = parseSearchTokens(inputStr, operators, combinators);
   const keywords = {};
+  const matchedCombinators = [];
   const textWords = [];
 
   for (const token of tokens) {
@@ -218,6 +266,8 @@ export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS) {
         keywords[kw] = [];
       }
       keywords[kw].push(token.innerValue);
+    } else if (token.type === 'combinator') {
+      matchedCombinators.push(token.combinator);
     } else if (token.type === 'text') {
       textWords.push(token.raw);
     }
@@ -227,6 +277,7 @@ export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS) {
     raw: inputStr,
     text: textWords.join(' '),
     keywords,
+    combinators: matchedCombinators,
     tokens,
   };
 }
@@ -237,13 +288,20 @@ export function parseSearchQuery(inputStr, operators = DEFAULT_OPERATORS) {
  * @param {number} caretPos
  * @param {Map<string, Object>|Object} configuredKeywords
  * @param {string|string[]} [operators=DEFAULT_OPERATORS]
+ * @param {string|string[]} [combinators=DEFAULT_COMBINATORS]
  * @returns {Object}
  */
-export function getCaretContext(inputStr, caretPos, configuredKeywords, operators = DEFAULT_OPERATORS) {
+export function getCaretContext(
+  inputStr,
+  caretPos,
+  configuredKeywords,
+  operators = DEFAULT_OPERATORS,
+  combinators = DEFAULT_COMBINATORS
+) {
   if (typeof inputStr !== 'string') inputStr = '';
   caretPos = Math.max(0, Math.min(caretPos || 0, inputStr.length));
 
-  const tokens = parseSearchTokens(inputStr, operators);
+  const tokens = parseSearchTokens(inputStr, operators, combinators);
 
   // Find token at caret
   let activeToken = null;
@@ -311,7 +369,20 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords, operator
     }
   }
 
-  // 2. Caret is within a plain text token (filter based on full word, not caret position)
+  // 2. Caret is within a combinator token
+  if (activeToken.type === 'combinator') {
+    return {
+      mode: 'keyword',
+      query: activeToken.raw,
+      replaceStart: activeToken.start,
+      replaceEnd: activeToken.end,
+      caretPos,
+      token: activeToken,
+      tokens,
+    };
+  }
+
+  // 3. Caret is within a plain text token (filter based on full word, not caret position)
   if (activeToken.type === 'text') {
     if (activeToken.operator) {
       const query = activeToken.raw.slice(activeToken.operator.length);
@@ -349,9 +420,10 @@ export function getCaretContext(inputStr, caretPos, configuredKeywords, operator
  * Generates suggestions for the given caret context.
  * @param {Object} context
  * @param {Map<string, Object>} configuredKeywords
+ * @param {string|string[]} [configuredCombinators=DEFAULT_COMBINATORS]
  * @returns {Array<Object>}
  */
-export function getSuggestions(context, configuredKeywords) {
+export function getSuggestions(context, configuredKeywords, configuredCombinators = DEFAULT_COMBINATORS) {
   if (!context || context.mode === 'none') return [];
 
   const suggestions = [];
@@ -373,6 +445,40 @@ export function getSuggestions(context, configuredKeywords) {
           description: kw.label || kw.id,
           dataType: kw.dataType || 'string',
         });
+      }
+    }
+
+    if (!context.operator) {
+      const normalizedCombs = normalizeCombinators(configuredCombinators);
+      if (normalizedCombs.length > 0) {
+        let shouldIncludeCombinators = true;
+        if (!q && Array.isArray(context.tokens)) {
+          const precedingTokens = context.tokens.filter(
+            (t) => t.type !== 'whitespace' && t.end <= context.replaceStart
+          );
+          const lastPreceding = precedingTokens[precedingTokens.length - 1];
+          // Don't suggest combinators at the very start of an empty query (unless typing a query prefix)
+          // or immediately after another combinator
+          if (precedingTokens.length === 0 || lastPreceding?.type === 'combinator') {
+            shouldIncludeCombinators = false;
+          }
+        }
+        if (shouldIncludeCombinators) {
+          for (const comb of normalizedCombs) {
+            const combLower = comb.toLowerCase();
+            if (!q || combLower.startsWith(q)) {
+              suggestions.push({
+                type: 'combinator',
+                id: comb,
+                combinator: comb,
+                label: comb,
+                display: comb,
+                insertText: comb,
+                description: 'Combinator',
+              });
+            }
+          }
+        }
       }
     }
   } else if (context.mode === 'value') {

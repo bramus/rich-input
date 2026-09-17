@@ -53,6 +53,7 @@ class HighlightRegistryManager {
     const allKeywordRanges = [];
     const allValueRanges = [];
     const allOperatorRanges = [];
+    const allCombinatorRanges = [];
     const allInvalidRanges = [];
 
     for (const inst of this.instances) {
@@ -79,6 +80,13 @@ class HighlightRegistryManager {
         const opRanges = inst.getActiveOperatorRanges();
         if (opRanges && opRanges.length > 0) {
           allOperatorRanges.push(...opRanges);
+        }
+      }
+
+      if (typeof inst.getActiveCombinatorRanges === 'function') {
+        const combRanges = inst.getActiveCombinatorRanges();
+        if (combRanges && combRanges.length > 0) {
+          allCombinatorRanges.push(...combRanges);
         }
       }
 
@@ -125,6 +133,23 @@ class HighlightRegistryManager {
         try {
           if (isRangeCollapsed(r)) continue;
           opHl.add(r);
+        } catch (e) {}
+      }
+    }
+
+    let combHl = CSS.highlights.get('rich-input-combinator');
+    if (!combHl) {
+      try {
+        combHl = new Highlight();
+        CSS.highlights.set('rich-input-combinator', combHl);
+      } catch (e) {}
+    }
+    if (combHl) {
+      combHl.clear();
+      for (const r of allCombinatorRanges) {
+        try {
+          if (isRangeCollapsed(r)) continue;
+          combHl.add(r);
         } catch (e) {}
       }
     }

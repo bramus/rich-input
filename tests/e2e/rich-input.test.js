@@ -578,6 +578,208 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.equal(invalidCount.countWithPlus, 0);
     assert.equal(invalidCount.countWithEmpty, 0);
   });
+
+  it('supports combinator autocompletion and creates rich-input-combinator highlight ranges', async () => {
+    await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      el.setAttribute('combinators', 'AND OR NOT');
+      el.value = 'artist:"Aphex Twin" ';
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    });
+
+    await page.keyboard.type('O');
+
+    const popoverState = await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      const popover = el.shadowRoot.querySelector('.popover');
+      const items = Array.from(el.shadowRoot.querySelectorAll('.suggestion-item')).map((item) =>
+        item.textContent.trim()
+      );
+      return {
+        isOpen: popover.matches(':popover-open'),
+        items,
+      };
+    });
+
+    assert.equal(popoverState.isOpen, true);
+    assert.ok(popoverState.items.some((text) => text.includes('OR')));
+
+    // Accept combinator suggestion (`OR`) -> should become `artist:"Aphex Twin" OR `
+    await page.keyboard.press('Enter');
+
+    const result = await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      const combinatorRanges = el.getActiveCombinatorRanges();
+      const highlight = CSS.highlights.get('rich-input-combinator');
+      return {
+        value: el.value,
+        combinatorRangesCount: combinatorRanges.length,
+        hasHighlight: Boolean(highlight && highlight.size > 0),
+        parsedQuery: el.getParsedQuery(),
+      };
+    });
+
+    assert.equal(result.value, 'artist:"Aphex Twin" OR ');
+    assert.equal(result.combinatorRangesCount, 1);
+    assert.equal(result.hasHighlight, true);
+    assert.deepEqual(result.parsedQuery.combinators, ['OR']);
+  });
+
+  it('applies global combinators to newly created instances while keeping existing instances and local overrides independent', async () => {
+    const testResult = await page.evaluate(() => {
+      const RichInputClass = customElements.get('rich-input');
+      const existingEl = document.querySelector('#form-search'); // form-search has no combinators attribute
+
+      // 1. Verify initial defaults on class (empty array) and existing instance
+      const initialClassCombinators = [...RichInputClass.combinators];
+      const initialExistingInstanceCombinators = [...existingEl.combinators];
+      const initialHasAttr = existingEl.hasAttribute('combinators');
+
+      // 2. Change global combinators on RichInput class
+      RichInputClass.combinators = ['AND', 'OR'];
+      const globalAfterChange = [...RichInputClass.combinators];
+
+      // Existing instance should NOT be mutated by global change
+      const existingAfterGlobalChange = [...existingEl.combinators];
+
+      // 3. Create a new instance without custom combinators -> should inherit new global combinators ['AND', 'OR'] and write attribute
+      const newInheritedEl = document.createElement('rich-input');
+      document.body.appendChild(newInheritedEl);
+      const newInheritedCombinators = [...newInheritedEl.combinators];
+      const newInheritedAttr = newInheritedEl.getAttribute('combinators');
+
+      newInheritedEl.value = 'artist:Aphex OR label:Warp';
+      newInheritedEl.updateHighlights();
+      const newInheritedRangesCount = newInheritedEl.getActiveCombinatorRanges().length;
+
+      // Existing instance with value 'artist:Aphex OR label:Warp' should NOT highlight 'OR' because its combinators are []
+      existingEl.value = 'artist:Aphex OR label:Warp';
+      existingEl.updateHighlights();
+      const existingRangesForOr = existingEl.getActiveCombinatorRanges().length;
+
+      // 4. Create a new instance WITH custom combinators via attribute
+      const newCustomAttrEl = document.createElement('rich-input');
+      newCustomAttrEl.setAttribute('combinators', 'XOR NOR');
+      document.body.appendChild(newCustomAttrEl);
+      const newCustomAttrCombinators = [...newCustomAttrEl.combinators];
+
+      newCustomAttrEl.value = 'artist:Aphex XOR label:Warp';
+      newCustomAttrEl.updateHighlights();
+      const customAttrRangesForXor = newCustomAttrEl.getActiveCombinatorRanges().length;
+
+      newCustomAttrEl.value = 'artist:Aphex OR label:Warp';
+      newCustomAttrEl.updateHighlights();
+      const customAttrRangesForOr = newCustomAttrEl.getActiveCombinatorRanges().length;
+
+      // 5. Modify local combinators via JS property on newInheritedEl
+      newInheritedEl.combinators = ['NOT'];
+      const afterLocalPropSet = [...newInheritedEl.combinators];
+      const reflectedAttr = newInheritedEl.getAttribute('combinators');
+
+      // Verify global and other instances were not affected
+      const globalUnchanged = [...RichInputClass.combinators];
+      const customAttrUnchanged = [...newCustomAttrEl.combinators];
+
+      // Cleanup dynamically created test elements and reset global default
+      newInheritedEl.remove();
+      newCustomAttrEl.remove();
+      RichInputClass.combinators = [];
+
+      return {
+        initialClassCombinators,
+        initialExistingInstanceCombinators,
+        initialHasAttr,
+        globalAfterChange,
+        existingAfterGlobalChange,
+        newInheritedCombinators,
+        newInheritedAttr,
+        newInheritedRangesCount,
+        existingRangesForOr,
+        newCustomAttrCombinators,
+        customAttrRangesForXor,
+        customAttrRangesForOr,
+        afterLocalPropSet,
+        reflectedAttr,
+        globalUnchanged,
+        customAttrUnchanged,
+      };
+    });
+
+    assert.deepEqual(testResult.initialClassCombinators, []);
+    assert.deepEqual(testResult.initialExistingInstanceCombinators, []);
+    assert.equal(testResult.initialHasAttr, false);
+    assert.deepEqual(testResult.globalAfterChange, ['AND', 'OR']);
+    assert.deepEqual(testResult.existingAfterGlobalChange, []);
+    assert.equal(testResult.existingRangesForOr, 0);
+
+    // Newly created instance inherits the new global combinators and reflects attribute
+    assert.deepEqual(testResult.newInheritedCombinators, ['AND', 'OR']);
+    assert.equal(testResult.newInheritedAttr, 'AND OR');
+    assert.equal(testResult.newInheritedRangesCount, 1);
+
+    // Newly created instance with custom attribute uses only its custom combinators
+    assert.deepEqual(testResult.newCustomAttrCombinators, ['XOR', 'NOR']);
+    assert.equal(testResult.customAttrRangesForXor, 1);
+    assert.equal(testResult.customAttrRangesForOr, 0);
+
+    // Local property change updates only that instance and reflects to attribute
+    assert.deepEqual(testResult.afterLocalPropSet, ['NOT']);
+    assert.equal(testResult.reflectedAttr, 'NOT');
+    assert.deepEqual(testResult.globalUnchanged, ['AND', 'OR']);
+    assert.deepEqual(testResult.customAttrUnchanged, ['XOR', 'NOR']);
+  });
+
+  it('syncs combinators between JS property and DOM attribute including normalization and removal', async () => {
+    const testResult = await page.evaluate(() => {
+      const el = document.createElement('rich-input');
+      document.body.appendChild(el);
+
+      // 0. Default combinators is empty array [], so no combinators attribute is added on connection
+      const initialHasAttr = el.hasAttribute('combinators');
+      const initialProp = [...el.combinators];
+
+      // 1. Setting via JS writes back to DOM attribute
+      el.combinators = ['AND', 'OR'];
+      const jsSetAttr = el.getAttribute('combinators');
+      const jsSetProp = [...el.combinators];
+
+      // 2. Setting unnormalized attribute in DOM normalizes and rewrites attribute
+      el.setAttribute('combinators', 'AND   OR  AND   NOT');
+      const normalizedAttr = el.getAttribute('combinators');
+      const normalizedProp = [...el.combinators];
+
+      // 3. Removing attribute resets to default combinators ([])
+      el.removeAttribute('combinators');
+      const afterRemoveHasAttr = el.hasAttribute('combinators');
+      const afterRemoveProp = [...el.combinators];
+
+      el.remove();
+
+      return {
+        initialHasAttr,
+        initialProp,
+        jsSetAttr,
+        jsSetProp,
+        normalizedAttr,
+        normalizedProp,
+        afterRemoveHasAttr,
+        afterRemoveProp,
+      };
+    });
+
+    assert.equal(testResult.initialHasAttr, false);
+    assert.deepEqual(testResult.initialProp, []);
+
+    assert.equal(testResult.jsSetAttr, 'AND OR');
+    assert.deepEqual(testResult.jsSetProp, ['AND', 'OR']);
+
+    assert.equal(testResult.normalizedAttr, 'AND OR NOT');
+    assert.deepEqual(testResult.normalizedProp, ['AND', 'OR', 'NOT']);
+
+    assert.equal(testResult.afterRemoveHasAttr, false);
+    assert.deepEqual(testResult.afterRemoveProp, []);
+  });
 });
 
 
