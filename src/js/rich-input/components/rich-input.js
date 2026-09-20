@@ -200,6 +200,7 @@ TEMPLATE.innerHTML = `
     max-height: 290px;
     overflow-y: auto;
     background-color: var(--ri-popover-bg, var(--rs-popover-bg, #ffffff));
+    color: var(--ri-item-title-color, var(--rs-item-title-color, #0f172a));
     border: 1px solid var(--ri-popover-border, var(--rs-popover-border, #e2e8f0));
     border-radius: var(--ri-popover-radius, var(--rs-popover-radius, 8px));
     box-shadow: var(--ri-popover-shadow, var(--rs-popover-shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)));
@@ -241,7 +242,7 @@ TEMPLATE.innerHTML = `
     line-height: 1.4;
     transition: background-color 0.1s ease;
     user-select: none;
-    color: var(--ri-item-title-color, var(--rs-item-title-color, #0f172a));
+    color: var(--ri-item-title-color, var(--rs-item-title-color, inherit));
   }
 
   .suggestion-item.selected {
@@ -263,7 +264,7 @@ TEMPLATE.innerHTML = `
 
   .suggestion-title {
     font-weight: 600;
-    color: var(--ri-item-title-color, var(--rs-item-title-color, #0f172a));
+    color: var(--ri-item-title-color, var(--rs-item-title-color, inherit));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
