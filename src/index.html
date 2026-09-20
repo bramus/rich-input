@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-syntax-theme="github">
 
 <head>
   <meta charset="UTF-8">
@@ -24,7 +24,9 @@
   <meta name="twitter:image" content="https://rich-input.netlify.app/assets/og-image.jpg">
   <meta name="twitter:creator" content="@bramus">
 
+  <link rel="stylesheet" href="https://davatron5000.github.io/microlighter/microlighter/themes/github.css">
   <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="https://davatron5000.github.io/microlighter/microlighter/micro-lighter-element.min.js"></script>
   <script type="module" src="js/rich-input/index.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -251,15 +253,19 @@
             <div class="card-header">
               <span class="card-title">npm</span>
             </div>
-            <pre><code>npm install rich-input</code></pre>
+            <micro-lighter language="bash" controls="copy">
+              <pre><code>npm install rich-input</code></pre>
+            </micro-lighter>
           </div>
 
           <div class="card">
             <div class="card-header">
               <span class="card-title">JavaScript Module Import</span>
             </div>
-            <pre><code>import 'rich-input';
+            <micro-lighter language="javascript" controls="copy">
+              <pre><code>import 'rich-input';
 // &lt;rich-input&gt; is now registered and ready to use!</code></pre>
+            </micro-lighter>
           </div>
         </section>
 
@@ -271,7 +277,8 @@
           </p>
 
           <div class="card">
-            <pre><code>&lt;rich-input placeholder="Search tracks, labels, artists..."&gt;
+            <micro-lighter language="html" controls="copy">
+              <pre><code>&lt;rich-input placeholder="Search tracks, labels, artists..."&gt;
   &lt;!-- String keyword with options --&gt;
   &lt;datalist id="label" label="Record Label"&gt;
     &lt;option value="Defected"&gt;&lt;/option&gt;
@@ -292,6 +299,7 @@
     &lt;option value="2024"&gt;&lt;/option&gt;
   &lt;/datalist&gt;
 &lt;/rich-input&gt;</code></pre>
+            </micro-lighter>
 
             <div class="data-table-wrapper">
               <table class="data-table">
@@ -347,7 +355,8 @@
             <p>
               Embed markup directly inside the <code>&lt;option&gt;</code> element:
             </p>
-            <pre><code>&lt;rich-input placeholder="Search..."&gt;
+            <micro-lighter language="html" controls="copy">
+              <pre><code>&lt;rich-input placeholder="Search..."&gt;
   &lt;datalist id="label" label="Record Label"&gt;
     &lt;option value="Defected"&gt;
       &lt;img
@@ -414,6 +423,7 @@
     &lt;/option&gt;
   &lt;/datalist&gt;
 &lt;/rich-input&gt;</code></pre>
+            </micro-lighter>
             <p>
               When suggestions appear, the custom HTML markup is rendered directly inside the suggestion list. When selected, the clean <code>value</code> (<code>"We Play House Recordings"</code>) is inserted into the input:
             </p>
@@ -480,7 +490,8 @@
               <li><strong>Resource Cleanup:</strong> When text mutations occur, previously created ranges are cleanly disconnected using <code>range.disconnect()</code>.</li>
             </ol>
 
-            <pre><code>// 1. Measuring the start of the active range for the dropdown popover
+            <micro-lighter language="javascript" controls="copy">
+              <pre><code>// 1. Measuring the start of the active range for the dropdown popover
 const rect = valueRange.getBoundingClientRect();
 popover.style.left = `${rect.left}px`;
 popover.style.top = `${rect.bottom + 6}px`;
@@ -489,6 +500,7 @@ popover.style.top = `${rect.bottom + 6}px`;
 const valueRange = input.createValueRange(valStart, valEnd);
 const labelHighlight = new Highlight(valueRange);
 CSS.highlights.set('label', labelHighlight);</code></pre>
+            </micro-lighter>
 
             <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: #f8fafc; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.9rem; color: #334155;">
               <strong>Cross-browser fallback:</strong> In browsers with no <code>OpaqueRange</code> support but with CSS Custom Highlight API support (such as Safari 17.2+ and Firefox 141+), <code>&lt;rich-input&gt;</code> automatically falls back to an adapted <code>[contenteditable]</code> element inside its shadow DOM to provide in-input <code>::highlight()</code> syntax highlighting, while using a hidden mirror <code>&lt;div&gt;</code> to position the suggestions popover.
@@ -504,7 +516,8 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
           </p>
 
           <div class="card">
-            <pre><code>/* Style the value set in label:"Warp Records" */
+            <micro-lighter language="css" controls="copy">
+              <pre><code>/* Style the value set in label:"Warp Records" */
 ::highlight(label) {
   background-color: oklch(0.92 0.08 240);
   color: oklch(0.28 0.14 240);
@@ -552,6 +565,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
   text-decoration: underline wavy #ef4444;
   text-decoration-skip-ink: none;
 }</code></pre>
+            </micro-lighter>
           </div>
 
           <p class="section-desc" style="margin-top: 1.5rem;">
@@ -1347,11 +1361,13 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                   </option>
                 </datalist>
               </rich-input>
-              <pre><code>rich-input.theme-pill::part(control) {
+              <micro-lighter language="css" controls="copy">
+                <pre><code>rich-input.theme-pill::part(control) {
   border-radius: 9999px;
   border: 2px solid #3b82f6;
   padding: 0 1.25rem;
 }</code></pre>
+              </micro-lighter>
             </div>
 
             <div class="card">
@@ -1364,7 +1380,8 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
                   <option value="Techno"></option>
                 </datalist>
               </rich-input>
-              <pre><code>rich-input.theme-terminal::part(control) {
+              <micro-lighter language="css" controls="copy">
+                <pre><code>rich-input.theme-terminal::part(control) {
   background: #0f172a;
   border: 1px solid #22c55e;
 }
@@ -1372,6 +1389,7 @@ rich-input.theme-terminal::part(input) {
   color: #4ade80;
   font-family: monospace;
 }</code></pre>
+              </micro-lighter>
             </div>
           </div>
         </section>
@@ -1460,7 +1478,8 @@ rich-input.theme-terminal::part(input) {
               </datalist>
             </rich-input>
 
-            <pre><code>/* Style suggestion logos as circular avatar icons */
+            <micro-lighter language="css" controls="copy">
+              <pre><code>/* Style suggestion logos as circular avatar icons */
 rich-input::part(suggestion-image) {
   width: 2.5em;
   height: 2.5em;
@@ -1468,6 +1487,7 @@ rich-input::part(suggestion-image) {
   object-fit: cover;
   outline: 1px solid #ccc;
 }</code></pre>
+            </micro-lighter>
           </div>
         </section>
 
@@ -1503,7 +1523,8 @@ rich-input::part(suggestion-image) {
               </datalist>
             </rich-input>
 
-            <pre><code>&lt;rich-input value='genre:"Deep House"' placeholder="Search musical genres (e.g. type 'genre:')..."&gt;
+            <micro-lighter language="html" controls="copy">
+              <pre><code>&lt;rich-input value='genre:"Deep House"' placeholder="Search musical genres (e.g. type 'genre:')..."&gt;
   &lt;!-- Custom leading icon replaces the default search magnifying glass --&gt;
   &lt;svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
     &lt;path d="M9 18V5l12-2v13"&gt;&lt;/path&gt;
@@ -1520,6 +1541,7 @@ rich-input::part(suggestion-image) {
     &lt;option value="Electro"&gt;&lt;/option&gt;
   &lt;/datalist&gt;
 &lt;/rich-input&gt;</code></pre>
+            </micro-lighter>
           </div>
         </section>
 
@@ -1669,7 +1691,9 @@ rich-input::part(suggestion-image) {
                   <button type="button" class="syntax-code-tab" data-lang="js" role="tab" aria-selected="false">JS</button>
                 </div>
               </div>
-              <pre id="syntax-live-markup"><code id="syntax-live-code"></code></pre>
+              <micro-lighter id="syntax-live-lighter" language="html" controls="copy">
+                <pre id="syntax-live-markup"><code id="syntax-live-code"></code></pre>
+              </micro-lighter>
             </div>
 
             <!-- Parsed Query Parts Breakdown -->

@@ -27,6 +27,7 @@ export class RichInputDemoApp {
     this._setupFormDemo();
     this._setupDynamicFilterDemo();
     this._setupSyntaxDemo();
+    this._setupMicroLighterCopyButtons();
     this._setupScrollspy();
   }
 
@@ -114,7 +115,16 @@ export class RichInputDemoApp {
 
       // Render caret info
       if (this.caretInfo) {
-        const activeHighlights = Array.from(CSS.highlights ? CSS.highlights.keys() : []);
+        const microlighterHighlights = new Set([
+          'comment', 'quote', 'keyword', 'storage', 'at-rule', 'doctype', 'important', 'section',
+          'operator', 'punctuation', 'string', 'regexp', 'attribute-value', 'link', 'raw',
+          'numeric', 'boolean', 'constant', 'symbol', 'character-entity', 'anchor', 'entity',
+          'function', 'decorator', 'animation', 'type', 'support', 'variable', 'interpolation',
+          'property', 'key', 'attribute-name', 'tag', 'selector', 'inserted', 'deleted',
+        ]);
+        const activeHighlights = Array.from(CSS.highlights ? CSS.highlights.keys() : []).filter(
+          (k) => !microlighterHighlights.has(k)
+        );
         this.caretInfo.innerHTML = `
           <span><strong>Caret index:</strong> ${caretPos}</span> · 
           <span><strong>Viewport rect:</strong> X: ${Math.round(coords.left)}, Y: ${Math.round(coords.bottom)}</span> · 
@@ -236,6 +246,7 @@ export class RichInputDemoApp {
     const combChipsEl = document.getElementById('syntax-combinators-chips');
     const delimChipsEl = document.getElementById('syntax-delimiters-chips');
 
+    const liveLighterEl = document.getElementById('syntax-live-lighter');
     const liveCodeEl = document.getElementById('syntax-live-code') || document.getElementById('syntax-live-markup');
     const codeTabBtns = document.querySelectorAll('.syntax-code-tab');
     const partsBreakdownEl = document.getElementById('syntax-parts-breakdown');
@@ -328,6 +339,9 @@ export class RichInputDemoApp {
       const currentVal = this.syntaxInput.value;
 
       // 1. Switchable Live Code (HTML or JS)
+      if (liveLighterEl) {
+        liveLighterEl.setAttribute('language', currentCodeLang === 'js' ? 'javascript' : 'html');
+      }
       if (liveCodeEl) {
         if (currentCodeLang === 'js') {
           liveCodeEl.textContent = [
@@ -344,13 +358,12 @@ export class RichInputDemoApp {
             `RichInput.delimiters = ${JSON.stringify(delimsList)};`,
           ].join('\n');
         } else {
-          const escapedVal = currentVal.replace(/'/g, '&#39;');
           liveCodeEl.textContent = [
             `<rich-input`,
             `  operators="${opsList.join(' ')}"`,
             `  combinators="${combsList.join(' ')}"`,
             `  delimiters="${delimsList.join(' ')}"`,
-            `  value='${escapedVal}'`,
+            `  value='${currentVal}'`,
             `>`,
             `  <datalist id="artist" label="Artist">...</datalist>`,
             `  <datalist id="label" label="Record Label">...</datalist>`,
@@ -454,6 +467,81 @@ export class RichInputDemoApp {
     this.syntaxInput.addEventListener('click', renderAll);
 
     renderAll();
+  }
+
+  _createCopyIconSvg(isCopied = false) {
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNs, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '15');
+    svg.setAttribute('height', '15');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.display = 'block';
+    svg.style.margin = 'auto';
+
+    if (isCopied) {
+      svg.style.color = '#16a34a';
+      const polyline = document.createElementNS(svgNs, 'polyline');
+      polyline.setAttribute('points', '20 6 9 17 4 12');
+      svg.appendChild(polyline);
+    } else {
+      const rect = document.createElementNS(svgNs, 'rect');
+      rect.setAttribute('x', '9');
+      rect.setAttribute('y', '9');
+      rect.setAttribute('width', '13');
+      rect.setAttribute('height', '13');
+      rect.setAttribute('rx', '2');
+      rect.setAttribute('ry', '2');
+      const path = document.createElementNS(svgNs, 'path');
+      path.setAttribute('d', 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1');
+      svg.append(rect, path);
+    }
+
+    return svg;
+  }
+
+  _setupMicroLighterCopyButtons() {
+    if (typeof customElements === 'undefined') return;
+
+    const enhanceAll = () => {
+      document.querySelectorAll('micro-lighter').forEach((lighter) => {
+        const button = lighter.shadowRoot?.querySelector('button[part="copy-button"]');
+        if (!button || button.dataset.iconEnhanced === 'true') return;
+        button.dataset.iconEnhanced = 'true';
+
+        let currentLabel = 'Copy code';
+        const renderIcon = (label) => {
+          currentLabel = String(label || 'Copy');
+          const isCopied = currentLabel.toLowerCase().includes('copied');
+          button.setAttribute('aria-label', isCopied ? 'Copied' : 'Copy code');
+          button.setAttribute('title', isCopied ? 'Copied' : 'Copy code');
+          button.replaceChildren(this._createCopyIconSvg(isCopied));
+        };
+
+        Object.defineProperty(button, 'textContent', {
+          configurable: true,
+          get() {
+            return currentLabel;
+          },
+          set(value) {
+            renderIcon(value);
+          },
+        });
+
+        renderIcon('Copy');
+      });
+    };
+
+    if (customElements.get('micro-lighter')) {
+      enhanceAll();
+    } else {
+      customElements.whenDefined('micro-lighter').then(enhanceAll);
+    }
   }
 
   _setupScrollspy() {
