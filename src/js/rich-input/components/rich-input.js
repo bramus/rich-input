@@ -116,31 +116,31 @@ TEMPLATE.innerHTML = `
   }
 
   /* Generic prefix highlight for operators */
-  ::highlight(rich-input-operator) {
+  :host::highlight(rich-input-operator) {
     color: var(--ri-operator-color, var(--ri-keyword-color, #64748b));
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
   }
 
   /* Generic highlight for combinators */
-  ::highlight(rich-input-combinator) {
+  :host::highlight(rich-input-combinator) {
     color: var(--ri-combinator-color, var(--ri-operator-color, var(--ri-keyword-color, #64748b)));
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
   }
 
   /* Generic highlight for delimiters */
-  ::highlight(rich-input-delimiter) {
+  :host::highlight(rich-input-delimiter) {
     color: var(--ri-delimiter-color, var(--ri-operator-color, var(--ri-keyword-color, #64748b)));
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
   }
 
   /* Generic prefix highlight for keywords */
-  ::highlight(rich-input-keyword) {
+  :host::highlight(rich-input-keyword) {
     color: var(--ri-keyword-color, #64748b);
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
   }
 
   /* Squiggly line underneath invalid keyword values */
-  ::highlight(rich-input-invalid) {
+  :host::highlight(rich-input-invalid) {
     text-decoration: underline wavy var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
     -webkit-text-decoration: underline wavy var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
     text-decoration-line: underline;
