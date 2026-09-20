@@ -15,6 +15,7 @@ export class RichInputDemoApp {
     this.demoForm = document.getElementById('demo-form');
     this.formResult = document.getElementById('form-result');
     this.addFilterBtn = document.getElementById('btn-add-filter');
+    this.syntaxInput = document.getElementById('syntax-demo-input');
 
     this.init();
   }
@@ -25,6 +26,7 @@ export class RichInputDemoApp {
     this._setupPresets();
     this._setupFormDemo();
     this._setupDynamicFilterDemo();
+    this._setupSyntaxDemo();
     this._setupScrollspy();
   }
 
@@ -225,6 +227,233 @@ export class RichInputDemoApp {
       this.addFilterBtn.disabled = true;
       this.addFilterBtn.textContent = '✓ Filter "bpm" Added';
     });
+  }
+
+  _setupSyntaxDemo() {
+    if (!this.syntaxInput) return;
+
+    const opChipsEl = document.getElementById('syntax-operators-chips');
+    const combChipsEl = document.getElementById('syntax-combinators-chips');
+    const delimChipsEl = document.getElementById('syntax-delimiters-chips');
+
+    const liveCodeEl = document.getElementById('syntax-live-code') || document.getElementById('syntax-live-markup');
+    const codeTabBtns = document.querySelectorAll('.syntax-code-tab');
+    const partsBreakdownEl = document.getElementById('syntax-parts-breakdown');
+
+    const availableOperators = ['-', '~', '+', '!', '^'];
+    const availableCombinators = ['AND', 'OR', 'NOT', 'XOR', '&&', '||'];
+    const availableDelimiters = ['()', '[]', '{}', '<>'];
+
+    const activeOperators = new Set(this.syntaxInput.operators || ['-', '~', '+']);
+    const activeCombinators = new Set(this.syntaxInput.combinators || ['AND', 'OR', 'NOT']);
+    const activeDelimiters = new Set(this.syntaxInput.delimiters || ['()', '[]', '{}']);
+
+    let currentCodeLang = 'html';
+
+    const syncToComponent = () => {
+      this.syntaxInput.operators = Array.from(activeOperators);
+      this.syntaxInput.combinators = Array.from(activeCombinators);
+      this.syntaxInput.delimiters = Array.from(activeDelimiters);
+      renderAll();
+    };
+
+    const renderChips = (container, pool, activeSet) => {
+      if (!container) return;
+      container.replaceChildren();
+      pool.forEach((item) => {
+        const isActive = activeSet.has(item);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `syntax-chip${isActive ? ' is-active' : ''}`;
+        btn.setAttribute('aria-pressed', String(isActive));
+
+        const status = document.createElement('span');
+        status.className = 'syntax-chip-status';
+        status.textContent = isActive ? '✓' : '+';
+
+        const label = document.createElement('span');
+        label.textContent = item;
+
+        btn.append(status, label);
+        btn.addEventListener('click', () => {
+          if (activeSet.has(item)) {
+            activeSet.delete(item);
+          } else {
+            activeSet.add(item);
+          }
+          syncToComponent();
+        });
+        container.appendChild(btn);
+      });
+    };
+
+    const createPartCard = (title, count, pillNodes) => {
+      const card = document.createElement('div');
+      card.className = 'syntax-part-card';
+
+      const header = document.createElement('div');
+      header.className = 'syntax-part-title';
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = title;
+      const countBadge = document.createElement('span');
+      countBadge.className = 'syntax-part-count';
+      countBadge.textContent = String(count);
+      header.append(titleSpan, countBadge);
+
+      const itemsBox = document.createElement('div');
+      itemsBox.className = 'syntax-part-items';
+      if (pillNodes.length === 0) {
+        const empty = document.createElement('span');
+        empty.style.fontSize = '0.78rem';
+        empty.style.color = 'var(--text-muted)';
+        empty.style.fontStyle = 'italic';
+        empty.textContent = 'None in query';
+        itemsBox.appendChild(empty);
+      } else {
+        pillNodes.forEach((n) => itemsBox.appendChild(n));
+      }
+
+      card.append(header, itemsBox);
+      return card;
+    };
+
+    const renderAll = () => {
+      renderChips(opChipsEl, availableOperators, activeOperators);
+      renderChips(combChipsEl, availableCombinators, activeCombinators);
+      renderChips(delimChipsEl, availableDelimiters, activeDelimiters);
+
+      const opsList = Array.from(activeOperators);
+      const combsList = Array.from(activeCombinators);
+      const delimsList = Array.from(activeDelimiters);
+      const currentVal = this.syntaxInput.value;
+
+      // 1. Switchable Live Code (HTML or JS)
+      if (liveCodeEl) {
+        if (currentCodeLang === 'js') {
+          liveCodeEl.textContent = [
+            `const input = document.querySelector('rich-input');`,
+            ``,
+            `// Configure instance properties dynamically:`,
+            `input.operators = ${JSON.stringify(opsList)};`,
+            `input.combinators = ${JSON.stringify(combsList)};`,
+            `input.delimiters = ${JSON.stringify(delimsList)};`,
+            ``,
+            `// Or set defaults globally for all <rich-input> instances:`,
+            `RichInput.operators = ${JSON.stringify(opsList)};`,
+            `RichInput.combinators = ${JSON.stringify(combsList)};`,
+            `RichInput.delimiters = ${JSON.stringify(delimsList)};`,
+          ].join('\n');
+        } else {
+          const escapedVal = currentVal.replace(/'/g, '&#39;');
+          liveCodeEl.textContent = [
+            `<rich-input`,
+            `  operators="${opsList.join(' ')}"`,
+            `  combinators="${combsList.join(' ')}"`,
+            `  delimiters="${delimsList.join(' ')}"`,
+            `  value='${escapedVal}'`,
+            `>`,
+            `  <datalist id="artist" label="Artist">...</datalist>`,
+            `  <datalist id="label" label="Record Label">...</datalist>`,
+            `  <datalist id="style" label="Style">...</datalist>`,
+            `  <datalist id="year" label="Year" data-type="number">...</datalist>`,
+            `</rich-input>`,
+          ].join('\n');
+        }
+      }
+
+      const parsed = this.syntaxInput.getParsedQuery();
+
+      // 2. Parsed Query Parts Breakdown
+      if (partsBreakdownEl) {
+        partsBreakdownEl.replaceChildren();
+
+        const operatorPills = [];
+        const combinatorPills = [];
+        const delimiterPills = [];
+        const filterAndTextPills = [];
+
+        parsed.tokens.forEach((t) => {
+          if (t.type === 'whitespace') return;
+
+          if (t.type === 'keyword') {
+            if (t.operator) {
+              const opPill = document.createElement('span');
+              opPill.className = 'token-pill pill-keyword';
+              const strong = document.createElement('strong');
+              strong.textContent = t.operator;
+              opPill.append(strong, document.createTextNode(` on ${t.keyword}:${t.innerValue || ''}`));
+              operatorPills.push(opPill);
+            }
+            const kwPill = document.createElement('span');
+            kwPill.className = 'token-pill pill-keyword';
+            const kwStrong = document.createElement('strong');
+            kwStrong.textContent = `${t.operator || ''}${t.keyword}:`;
+            kwPill.append(kwStrong, document.createTextNode(` "${t.innerValue || ''}"`));
+            filterAndTextPills.push(kwPill);
+          } else if (t.type === 'combinator') {
+            const cPill = document.createElement('span');
+            cPill.className = 'token-pill pill-keyword';
+            const strong = document.createElement('strong');
+            strong.textContent = t.combinator;
+            cPill.appendChild(strong);
+            combinatorPills.push(cPill);
+          } else if (t.type === 'delimiter') {
+            const dPill = document.createElement('span');
+            dPill.className = 'token-pill pill-keyword';
+            const strong = document.createElement('strong');
+            strong.textContent = t.delimiter;
+            dPill.append(strong, document.createTextNode(` (${t.role}, pair ${t.pair})`));
+            delimiterPills.push(dPill);
+          } else if (t.type === 'text') {
+            const txtPill = document.createElement('span');
+            txtPill.className = 'token-pill pill-text';
+            txtPill.textContent = `text: "${t.raw}"`;
+            filterAndTextPills.push(txtPill);
+          }
+        });
+
+        partsBreakdownEl.append(
+          createPartCard('Operators Matched', operatorPills.length, operatorPills),
+          createPartCard('Combinators Matched', combinatorPills.length, combinatorPills),
+          createPartCard('Delimiters Matched', delimiterPills.length, delimiterPills),
+          createPartCard('Keywords & Free Text', filterAndTextPills.length, filterAndTextPills)
+        );
+      }
+    };
+
+    codeTabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentCodeLang = btn.getAttribute('data-lang') || 'html';
+        codeTabBtns.forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-selected', String(active));
+        });
+        renderAll();
+      });
+    });
+
+    // When clicking preset buttons inside #example-syntax, auto-enable syntax items used in the preset
+    const syntaxCard = this.syntaxInput.closest('.card');
+    if (syntaxCard) {
+      syntaxCard.querySelectorAll('[data-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const q = btn.getAttribute('data-preset') || '';
+          if (q.includes('XOR')) activeCombinators.add('XOR');
+          if (q.includes('&&')) activeCombinators.add('&&');
+          if (q.includes('!style')) activeOperators.add('!');
+          if (q.includes('{')) activeDelimiters.add('{}');
+          syncToComponent();
+        });
+      });
+    }
+
+    this.syntaxInput.addEventListener('input', renderAll);
+    this.syntaxInput.addEventListener('rich-input-select', renderAll);
+    this.syntaxInput.addEventListener('keyup', renderAll);
+    this.syntaxInput.addEventListener('click', renderAll);
+
+    renderAll();
   }
 
   _setupScrollspy() {

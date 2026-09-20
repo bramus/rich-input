@@ -82,6 +82,7 @@
             <li><a href="#example-rich-styling">4. Rich Option &amp; Image Styling</a></li>
             <li><a href="#example-custom-icon">5. Custom Leading Icon &amp; Slots</a></li>
             <li><a href="#example-dynamic">6. Dynamic Datalists</a></li>
+            <li><a href="#example-syntax">7. Operators, Combinators &amp; Delimiters</a></li>
           </ul>
         </nav>
       </aside>
@@ -1253,7 +1254,7 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
             <form id="demo-form" style="display: flex; flex-direction: column; gap: 1rem;">
               <div>
                 <label for="form-search" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Search Filter:</label>
-                <rich-input id="form-search" combinators="AND OR" operators="- ~" name="q" placeholder="Type query and submit form..." required>
+                <rich-input id="form-search" name="q" placeholder="Type query and submit form..." required>
                   <datalist id="artist" label="Artist">
                     <option value="Aphex Twin">
                       <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
@@ -1536,6 +1537,146 @@ rich-input::part(suggestion-image) {
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">
               Clicking the button above injects <code>&lt;datalist id="bpm" label="Beats Per Minute"&gt;</code> into all <code>&lt;rich-input&gt;</code> instances on the page.
             </p>
+          </div>
+        </section>
+
+        <!-- Example 7: Operators, Combinators & Delimiters -->
+        <section id="example-syntax">
+          <h2>7. Operators, Combinators &amp; Delimiters</h2>
+          <p class="section-desc">
+            Configure prefix <code>operators</code> (e.g. <code>-</code>, <code>~</code>, <code>+</code>), boolean <code>combinators</code> (e.g. <code>AND</code>, <code>OR</code>, <code>NOT</code>), and grouping <code>delimiters</code> (e.g. <code>()</code>, <code>[]</code>, <code>{}</code>) via HTML attributes or JavaScript properties. Toggle or dynamically register items below to see the generated markup, in-input highlights, and parsed query parts update in real time.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Interactive Syntax Configurator &amp; Query Parts Inspector</span>
+              <span class="card-meta">operators / combinators / delimiters</span>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <rich-input
+                id="syntax-demo-input"
+                operators="- ~ +"
+                combinators="AND OR NOT"
+                delimiters="() [] {}"
+                value='(artist:"Aphex Twin" OR ~artist:"Four Tet") AND -style:Acid [year:2026]'
+                placeholder="Type operators (-, ~, +), combinators (AND, OR, NOT), or delimiters ((), [], {})..."
+              >
+                <datalist id="artist" label="Artist">
+                  <option value="Aphex Twin">
+                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                    Aphex Twin
+                  </option>
+                  <option value="Daft Punk">
+                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                    Daft Punk
+                  </option>
+                  <option value="Four Tet">
+                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                    Four Tet
+                  </option>
+                  <option value="Larry Heard">
+                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                    Larry Heard
+                  </option>
+                  <option value="Moodymann">
+                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                    Moodymann
+                  </option>
+                </datalist>
+                <datalist id="label" label="Record Label">
+                  <option value="Defected">
+                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                    Defected
+                  </option>
+                  <option value="Warp Records">
+                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                    Warp Records
+                  </option>
+                  <option value="We Play House Recordings">
+                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                    We Play House Recordings
+                  </option>
+                </datalist>
+                <datalist id="style" label="Style">
+                  <option value="Deep House"></option>
+                  <option value="Acid"></option>
+                  <option value="Dub Techno"></option>
+                  <option value="Minimal"></option>
+                </datalist>
+                <datalist id="year" label="Year" data-type="number">
+                  <option value="2026"></option>
+                  <option value="2025"></option>
+                  <option value="2024"></option>
+                  <option value="1999"></option>
+                </datalist>
+              </rich-input>
+            </div>
+
+            <!-- Preset Queries for Syntax Demo -->
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; margin-bottom: 0.5rem;">Try a preset query or edit the input above:</p>
+            <div class="preset-buttons" style="margin-top: 0.5rem; margin-bottom: 1.25rem;">
+              <button type="button" class="btn" data-preset='(artist:"Aphex Twin" OR ~artist:"Four Tet") AND -style:Acid [year:2026]'>
+                🧩 Grouped + Operators + Combinators
+              </button>
+              <button type="button" class="btn" data-preset='+label:"Warp Records" AND -style:"Deep House" OR ~year:1999'>
+                ⚡ Prefix Operators (+, -, ~)
+              </button>
+              <button type="button" class="btn" data-preset='{artist:"Daft Punk" XOR artist:"Larry Heard"} && !style:Minimal'>
+                🧪 Custom Syntax ({}, XOR, &amp;&amp;, !)
+              </button>
+            </div>
+
+            <!-- Toggle Controls -->
+            <div class="syntax-config-grid">
+              <!-- Operators -->
+              <div class="syntax-config-box">
+                <div class="syntax-config-header">
+                  <strong>Operators</strong>
+                  <code>operators</code>
+                </div>
+                <p class="syntax-config-desc">Prefix tokens before a keyword (e.g. <code>-style:Acid</code>, <code>~artist:"Four Tet"</code>).</p>
+                <div id="syntax-operators-chips" class="syntax-chip-list"></div>
+              </div>
+
+              <!-- Combinators -->
+              <div class="syntax-config-box">
+                <div class="syntax-config-header">
+                  <strong>Combinators</strong>
+                  <code>combinators</code>
+                </div>
+                <p class="syntax-config-desc">Standalone logical tokens between filters (suggested via autocomplete).</p>
+                <div id="syntax-combinators-chips" class="syntax-chip-list"></div>
+              </div>
+
+              <!-- Delimiters -->
+              <div class="syntax-config-box">
+                <div class="syntax-config-header">
+                  <strong>Delimiters</strong>
+                  <code>delimiters</code>
+                </div>
+                <p class="syntax-config-desc">Opening &amp; closing character pairs used to group sub-queries.</p>
+                <div id="syntax-delimiters-chips" class="syntax-chip-list"></div>
+              </div>
+            </div>
+
+            <!-- Switchable Live Code (HTML / JS) -->
+            <div style="margin-top: 1.25rem;">
+              <div class="syntax-code-header">
+                <h4 style="font-size: 0.875rem; margin: 0;">Live Configuration Code:</h4>
+                <div class="syntax-code-tabs" role="tablist" aria-label="Code language">
+                  <button type="button" class="syntax-code-tab is-active" data-lang="html" role="tab" aria-selected="true">HTML</button>
+                  <button type="button" class="syntax-code-tab" data-lang="js" role="tab" aria-selected="false">JS</button>
+                </div>
+              </div>
+              <pre id="syntax-live-markup"><code id="syntax-live-code"></code></pre>
+            </div>
+
+            <!-- Parsed Query Parts Breakdown -->
+            <div style="margin-top: 1.25rem;">
+              <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Parsed Query Parts:</h4>
+              <div id="syntax-parts-breakdown" class="syntax-parts-grid"></div>
+            </div>
           </div>
         </section>
 
