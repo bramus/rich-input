@@ -103,7 +103,7 @@
               <span class="card-title">Live Demonstration</span>
             </div>
 
-            <rich-input id="demo-search" combinators="AND OR NOT" value='ambient artist:"Aphex Twin" label:"Warp Records"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+            <rich-input id="demo-search" operators="-" combinators="AND OR" delimiters="()" value='ambient artist:"Aphex Twin" label:"Warp Records"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
               <datalist id="label" label="Record Label">
                 <option value="Defected">
                   <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
@@ -171,9 +171,12 @@
                 </option>
               </datalist>
               <datalist id="style" label="Style">
+                <option value="Acid House"></option>
+                <option value="Ambient"></option>
+                <option value="Chicago House"></option>
                 <option value="Deep House"></option>
-                <option value="Acid"></option>
                 <option value="Dub Techno"></option>
+                <option value="Electro"></option>
                 <option value="Minimal"></option>
               </datalist>
             </rich-input>
@@ -353,7 +356,87 @@
               <span class="card-meta">HTML Markup</span>
             </div>
             <p>
-              Embed markup directly inside the <code>&lt;option&gt;</code> element:
+              When suggestions appear, custom HTML markup embedded inside each <code>&lt;option&gt;</code> is rendered directly in the suggestion list. When selected, the clean <code>value</code> (e.g. <code>"We Play House Recordings"</code>) is inserted into the input:
+            </p>
+            <rich-input operators="-" combinators="AND OR" delimiters="()" placeholder="Try typing 'label:' to preview rich options...">
+              <datalist id="label" label="Record Label">
+                <option value="Defected">
+                  <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                  Defected
+                </option>
+                <option value="House">
+                  <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+                  House
+                </option>
+                <option value="Keinemusik">
+                  <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                  Keinemusik
+                </option>
+                <option value="Kranky">
+                  <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                  Kranky
+                </option>
+                <option value="Madhouse Records">
+                  <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
+                  Madhouse Records
+                </option>
+                <option value="Ninja Tune">
+                  <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                  Ninja Tune
+                </option>
+                <option value="Warp Records">
+                  <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                  Warp Records
+                </option>
+                <option value="We Play House Recordings">
+                  <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                  We Play House Recordings
+                </option>
+                <option value="XL Recordings">
+                  <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                  XL Recordings
+                </option>
+              </datalist>
+              <datalist id="year" label="Year" data-type="number">
+                <option value="2026"></option>
+                <option value="2025"></option>
+                <option value="2024"></option>
+                <option value="1999"></option>
+              </datalist>
+              <datalist id="artist" label="Artist">
+                <option value="Aphex Twin">
+                  <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                  Aphex Twin
+                </option>
+                <option value="Daft Punk">
+                  <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                  Daft Punk
+                </option>
+                <option value="Four Tet">
+                  <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                  Four Tet
+                </option>
+                <option value="Larry Heard">
+                  <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                  Larry Heard
+                </option>
+                <option value="Moodymann">
+                  <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                  Moodymann
+                </option>
+              </datalist>
+              <datalist id="style" label="Style">
+                <option value="Acid House"></option>
+                <option value="Ambient"></option>
+                <option value="Chicago House"></option>
+                <option value="Deep House"></option>
+                <option value="Dub Techno"></option>
+                <option value="Electro"></option>
+                <option value="Minimal"></option>
+              </datalist>
+            </rich-input>
+            <p style="margin-top: 1rem;">
+              To achieve this, embed the markup directly inside the <code>&lt;option&gt;</code> elements:
             </p>
             <micro-lighter language="html" controls="copy">
               <pre><code>&lt;rich-input placeholder="Search..."&gt;
@@ -424,49 +507,6 @@
   &lt;/datalist&gt;
 &lt;/rich-input&gt;</code></pre>
             </micro-lighter>
-            <p>
-              When suggestions appear, the custom HTML markup is rendered directly inside the suggestion list. When selected, the clean <code>value</code> (<code>"We Play House Recordings"</code>) is inserted into the input:
-            </p>
-            <rich-input placeholder="Try typing 'label:' to preview rich options...">
-              <datalist id="label" label="Record Label">
-                <option value="Defected">
-                  <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
-                  Defected
-                </option>
-                <option value="House">
-                  <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
-                  House
-                </option>
-                <option value="Keinemusik">
-                  <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
-                  Keinemusik
-                </option>
-                <option value="Kranky">
-                  <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
-                  Kranky
-                </option>
-                <option value="Madhouse Records">
-                  <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
-                  Madhouse Records
-                </option>
-                <option value="Ninja Tune">
-                  <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
-                  Ninja Tune
-                </option>
-                <option value="Warp Records">
-                  <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
-                  Warp Records
-                </option>
-                <option value="We Play House Recordings">
-                  <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
-                  We Play House Recordings
-                </option>
-                <option value="XL Recordings">
-                  <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
-                  XL Recordings
-                </option>
-              </datalist>
-            </rich-input>
           </div>
         </section>
 
@@ -1149,561 +1189,6 @@ CSS.highlights.set('label', labelHighlight);</code></pre>
           </div>
         </section>
 
-        <!-- Query Parsing Inspector -->
-        <section id="playground">
-          <h2>1. Parsed Query Inspector</h2>
-          <p class="section-desc">
-            Inspect real-time tokenization and the structured query data returned by <code>getParsedQuery()</code> as you search.
-          </p>
-
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Parsed Query Inspector</span>
-              <span class="card-meta">getParsedQuery()</span>
-            </div>
-
-            <!-- Playground <rich-input> Element -->
-            <div style="margin-bottom: 1.25rem;">
-              <rich-input id="playground-search" combinators="AND OR NOT" value='(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
-                <datalist id="label" label="Record Label">
-                  <option value="Defected">
-                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
-                    Defected
-                  </option>
-                  <option value="House">
-                    <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
-                    House
-                  </option>
-                  <option value="Keinemusik">
-                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
-                    Keinemusik
-                  </option>
-                  <option value="Kranky">
-                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
-                    Kranky
-                  </option>
-                  <option value="Madhouse Records">
-                    <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
-                    Madhouse Records
-                  </option>
-                  <option value="Ninja Tune">
-                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
-                    Ninja Tune
-                  </option>
-                  <option value="Warp Records">
-                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
-                    Warp Records
-                  </option>
-                  <option value="We Play House Recordings">
-                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
-                    We Play House Recordings
-                  </option>
-                  <option value="XL Recordings">
-                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
-                    XL Recordings
-                  </option>
-                </datalist>
-                <datalist id="year" label="Year" data-type="number">
-                  <option value="2026"></option>
-                  <option value="2025"></option>
-                  <option value="2024"></option>
-                  <option value="1999"></option>
-                </datalist>
-                <datalist id="artist" label="Artist">
-                  <option value="Aphex Twin">
-                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
-                    Aphex Twin
-                  </option>
-                  <option value="Daft Punk">
-                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
-                    Daft Punk
-                  </option>
-                  <option value="Four Tet">
-                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
-                    Four Tet
-                  </option>
-                  <option value="Larry Heard">
-                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
-                    Larry Heard
-                  </option>
-                  <option value="Moodymann">
-                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
-                    Moodymann
-                  </option>
-                </datalist>
-                <datalist id="style" label="Style">
-                  <option value="Deep House"></option>
-                  <option value="Acid"></option>
-                  <option value="Dub Techno"></option>
-                  <option value="Minimal"></option>
-                </datalist>
-              </rich-input>
-            </div>
-
-            <!-- Inspector Panels -->
-            <div class="playground-layout">
-              <div>
-                <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Detected Tokens:</h4>
-                <div id="playground-tokens" style="min-height: 40px; padding: 0.5rem; background: var(--bg-surface-elevated); border-radius: 6px; margin-bottom: 0.75rem;"></div>
-
-                <div class="caret-indicator" id="playground-caret"></div>
-              </div>
-
-              <div>
-                <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Structured Query Output (getParsedQuery()):</h4>
-                <pre class="inspector-box" id="playground-json"></pre>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Example 2: Form Integration -->
-        <section id="example-form">
-          <h2>2. Form Integration</h2>
-          <p class="section-desc">
-            <code>&lt;rich-input&gt;</code> seamlessly participates in form submissions, validation, and FormData extraction via <code>formAssociated = true</code>.
-          </p>
-
-          <div class="card">
-            <form id="demo-form" style="display: flex; flex-direction: column; gap: 1rem;">
-              <div>
-                <label for="form-search" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Search Filter:</label>
-                <rich-input id="form-search" name="q" placeholder="Type query and submit form..." required>
-                  <datalist id="artist" label="Artist">
-                    <option value="Aphex Twin">
-                      <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
-                      Aphex Twin
-                    </option>
-                    <option value="Daft Punk">
-                      <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
-                      Daft Punk
-                    </option>
-                    <option value="Four Tet">
-                      <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
-                      Four Tet
-                    </option>
-                    <option value="Larry Heard">
-                      <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
-                      Larry Heard
-                    </option>
-                    <option value="Moodymann">
-                      <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
-                      Moodymann
-                    </option>
-                  </datalist>
-                  <datalist id="style" label="Style">
-                    <option value="Deep House"></option>
-                    <option value="Ambient"></option>
-                    <option value="Techno"></option>
-                  </datalist>
-                </rich-input>
-              </div>
-
-              <div style="display: flex; gap: 0.75rem; align-items: center;">
-                <button type="submit" class="btn btn-primary">Submit Form</button>
-                <button type="reset" class="btn">Reset Form</button>
-              </div>
-
-              <div id="form-result" class="callout" hidden style="margin: 0.5rem 0 0;"></div>
-            </form>
-          </div>
-        </section>
-
-        <!-- Example 3: Shadow Parts Theming -->
-        <section id="example-themes">
-          <h2>3. Shadow Parts Theming (::part)</h2>
-          <p class="section-desc">
-            Style components completely from page CSS without breaking encapsulation.
-          </p>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-header">
-                <span class="card-title">Pill / Rounded Spotlight Theme</span>
-              </div>
-              <rich-input class="theme-pill" placeholder="Minimalist pill styling via ::part(control)...">
-                <datalist id="label" label="Record Label">
-                  <option value="Defected">
-                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
-                    Defected
-                  </option>
-                  <option value="House">
-                    <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
-                    House
-                  </option>
-                  <option value="Keinemusik">
-                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
-                    Keinemusik
-                  </option>
-                  <option value="Kranky">
-                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
-                    Kranky
-                  </option>
-                  <option value="Madhouse Records">
-                    <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
-                    Madhouse Records
-                  </option>
-                  <option value="Ninja Tune">
-                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
-                    Ninja Tune
-                  </option>
-                  <option value="Warp Records">
-                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
-                    Warp Records
-                  </option>
-                  <option value="We Play House Recordings">
-                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
-                    We Play House Recordings
-                  </option>
-                  <option value="XL Recordings">
-                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
-                    XL Recordings
-                  </option>
-                </datalist>
-              </rich-input>
-              <micro-lighter language="css" controls="copy">
-                <pre><code>rich-input.theme-pill::part(control) {
-  border-radius: 9999px;
-  border: 2px solid #3b82f6;
-  padding: 0 1.25rem;
-}</code></pre>
-              </micro-lighter>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <span class="card-title">Retro Terminal Theme</span>
-              </div>
-              <rich-input class="theme-terminal" placeholder="Matrix terminal styling via ::part(input)...">
-                <datalist id="style" label="Style">
-                  <option value="Acid"></option>
-                  <option value="Techno"></option>
-                </datalist>
-              </rich-input>
-              <micro-lighter language="css" controls="copy">
-                <pre><code>rich-input.theme-terminal::part(control) {
-  background: #0f172a;
-  border: 1px solid #22c55e;
-}
-rich-input.theme-terminal::part(input) {
-  color: #4ade80;
-  font-family: monospace;
-}</code></pre>
-              </micro-lighter>
-            </div>
-          </div>
-        </section>
-
-        <!-- Example 4: Rich Option & Image Styling (::part) -->
-        <section id="example-rich-styling">
-          <h2>4. Rich Option &amp; Image Styling (::part)</h2>
-          <p class="section-desc">
-            When options contain images (such as logos, icons, or avatars), the component exposes them via <code>::part(suggestion-image)</code> for external CSS styling.
-          </p>
-
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Circular Logo Avatar via ::part(suggestion-image)</span>
-              <span class="card-meta">CSS Shadow Parts</span>
-            </div>
-            <p>
-              In this example, the record label logos are styled via <code>::part(suggestion-image)</code> as circular avatars:
-            </p>
-
-            <rich-input placeholder="Type 'label:' to preview the circular logos...">
-              <datalist id="label" label="Record Label">
-                <option value="Defected">
-                  <img
-                    src="assets/defected.jpg"
-                    height="50" width="50"
-                    alt="Defected Logo">
-                  Defected
-                </option>
-                <option value="House">
-                  <img
-                    src="assets/house.jpg"
-                    height="50" width="50"
-                    alt="House Logo">
-                  House
-                </option>
-                <option value="Keinemusik">
-                  <img
-                    src="assets/keinemusik.jpg"
-                    height="50" width="50"
-                    alt="Keinemusik Logo">
-                  Keinemusik
-                </option>
-                <option value="Kranky">
-                  <img
-                    src="assets/kranky.jpg"
-                    height="50" width="50"
-                    alt="Kranky Logo">
-                  Kranky
-                </option>
-                <option value="Madhouse Records">
-                  <img
-                    src="assets/madhouse-records.jpg"
-                    height="50" width="50"
-                    alt="Madhouse Records Logo">
-                  Madhouse Records
-                </option>
-                <option value="Ninja Tune">
-                  <img
-                    src="assets/ninja-tune.jpg"
-                    height="50" width="50"
-                    alt="Ninja Tune Logo">
-                  Ninja Tune
-                </option>
-                <option value="Warp Records">
-                  <img
-                    src="assets/warp-records.png"
-                    height="50" width="50"
-                    alt="Warp Records Logo">
-                  Warp Records
-                </option>
-                <option value="We Play House Recordings">
-                  <img
-                    src="assets/we-play-house-recordings.jpg"
-                    height="50" width="50"
-                    alt="We Play House Recordings Logo">
-                  We Play House Recordings
-                </option>
-                <option value="XL Recordings">
-                  <img
-                    src="assets/xl-recordings.jpg"
-                    height="50" width="50"
-                    alt="XL Recordings Logo">
-                  XL Recordings
-                </option>
-              </datalist>
-            </rich-input>
-
-            <micro-lighter language="css" controls="copy">
-              <pre><code>/* Style suggestion logos as circular avatar icons */
-rich-input::part(suggestion-image) {
-  width: 2.5em;
-  height: 2.5em;
-  border-radius: 50%;
-  object-fit: cover;
-  outline: 1px solid #ccc;
-}</code></pre>
-            </micro-lighter>
-          </div>
-        </section>
-
-        <!-- Example 5: Custom Leading Icon & Slots -->
-        <section id="example-custom-icon">
-          <h2>5. Custom Leading Icon &amp; Slots</h2>
-          <p class="section-desc">
-            Pass a custom icon via <code>slot="leading"</code>. The default search magnifying glass SVG is provided as fallback content inside the slot, so supplying a slotted element automatically replaces it without requiring any CSS overrides.
-          </p>
-
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Music Note Icon via slot="leading"</span>
-              <span class="card-meta">HTML Slots</span>
-            </div>
-            <p>
-              In this example, a custom music note SVG replaces the default search icon, and genre values are highlighted via <code>::highlight(genre)</code>:
-            </p>
-
-            <rich-input value='genre:"Deep House"' placeholder="Search musical genres (e.g. type 'genre:')...">
-              <svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M9 18V5l12-2v13"></path>
-                <circle cx="6" cy="18" r="3"></circle>
-                <circle cx="18" cy="16" r="3"></circle>
-              </svg>
-              <datalist id="genre" label="Music Genre">
-                <option value="Acid House"></option>
-                <option value="Ambient"></option>
-                <option value="Chicago House"></option>
-                <option value="Deep House"></option>
-                <option value="Dub Techno"></option>
-                <option value="Electro"></option>
-              </datalist>
-            </rich-input>
-
-            <micro-lighter language="html" controls="copy">
-              <pre><code>&lt;rich-input value='genre:"Deep House"' placeholder="Search musical genres (e.g. type 'genre:')..."&gt;
-  &lt;!-- Custom leading icon replaces the default search magnifying glass --&gt;
-  &lt;svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
-    &lt;path d="M9 18V5l12-2v13"&gt;&lt;/path&gt;
-    &lt;circle cx="6" cy="18" r="3"&gt;&lt;/circle&gt;
-    &lt;circle cx="18" cy="16" r="3"&gt;&lt;/circle&gt;
-  &lt;/svg&gt;
-
-  &lt;datalist id="genre" label="Music Genre"&gt;
-    &lt;option value="Acid House"&gt;&lt;/option&gt;
-    &lt;option value="Ambient"&gt;&lt;/option&gt;
-    &lt;option value="Chicago House"&gt;&lt;/option&gt;
-    &lt;option value="Deep House"&gt;&lt;/option&gt;
-    &lt;option value="Dub Techno"&gt;&lt;/option&gt;
-    &lt;option value="Electro"&gt;&lt;/option&gt;
-  &lt;/datalist&gt;
-&lt;/rich-input&gt;</code></pre>
-            </micro-lighter>
-          </div>
-        </section>
-
-        <!-- Example 6: Dynamic Datalists -->
-        <section id="example-dynamic">
-          <h2>6. Dynamic Datalists</h2>
-          <p class="section-desc">
-            Add or update <code>&lt;datalist&gt;</code> elements dynamically at runtime. The component uses a MutationObserver and slotchange event to immediately update available keywords and suggestions.
-          </p>
-
-          <div class="card">
-            <button type="button" class="btn btn-primary" id="btn-add-filter">
-              + Dynamically Add "bpm" Datalist Filter
-            </button>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">
-              Clicking the button above injects <code>&lt;datalist id="bpm" label="Beats Per Minute"&gt;</code> into all <code>&lt;rich-input&gt;</code> instances on the page.
-            </p>
-          </div>
-        </section>
-
-        <!-- Example 7: Operators, Combinators & Delimiters -->
-        <section id="example-syntax">
-          <h2>7. Operators, Combinators &amp; Delimiters</h2>
-          <p class="section-desc">
-            Configure prefix <code>operators</code> (e.g. <code>-</code>, <code>~</code>, <code>+</code>), boolean <code>combinators</code> (e.g. <code>AND</code>, <code>OR</code>, <code>NOT</code>), and grouping <code>delimiters</code> (e.g. <code>()</code>, <code>[]</code>, <code>{}</code>) via HTML attributes or JavaScript properties. Toggle or dynamically register items below to see the generated markup, in-input highlights, and parsed query parts update in real time.
-          </p>
-
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Interactive Syntax Configurator &amp; Query Parts Inspector</span>
-              <span class="card-meta">operators / combinators / delimiters</span>
-            </div>
-
-            <div style="margin-bottom: 1rem;">
-              <rich-input
-                id="syntax-demo-input"
-                operators="- ~ +"
-                combinators="AND OR NOT"
-                delimiters="() [] {}"
-                value='(artist:"Aphex Twin" OR ~artist:"Four Tet") AND -style:Acid [year:2026]'
-                placeholder="Type operators (-, ~, +), combinators (AND, OR, NOT), or delimiters ((), [], {})..."
-              >
-                <datalist id="artist" label="Artist">
-                  <option value="Aphex Twin">
-                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
-                    Aphex Twin
-                  </option>
-                  <option value="Daft Punk">
-                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
-                    Daft Punk
-                  </option>
-                  <option value="Four Tet">
-                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
-                    Four Tet
-                  </option>
-                  <option value="Larry Heard">
-                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
-                    Larry Heard
-                  </option>
-                  <option value="Moodymann">
-                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
-                    Moodymann
-                  </option>
-                </datalist>
-                <datalist id="label" label="Record Label">
-                  <option value="Defected">
-                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
-                    Defected
-                  </option>
-                  <option value="Warp Records">
-                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
-                    Warp Records
-                  </option>
-                  <option value="We Play House Recordings">
-                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
-                    We Play House Recordings
-                  </option>
-                </datalist>
-                <datalist id="style" label="Style">
-                  <option value="Deep House"></option>
-                  <option value="Acid"></option>
-                  <option value="Dub Techno"></option>
-                  <option value="Minimal"></option>
-                </datalist>
-                <datalist id="year" label="Year" data-type="number">
-                  <option value="2026"></option>
-                  <option value="2025"></option>
-                  <option value="2024"></option>
-                  <option value="1999"></option>
-                </datalist>
-              </rich-input>
-            </div>
-
-            <!-- Preset Queries for Syntax Demo -->
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; margin-bottom: 0.5rem;">Try a preset query or edit the input above:</p>
-            <div class="preset-buttons" style="margin-top: 0.5rem; margin-bottom: 1.25rem;">
-              <button type="button" class="btn" data-preset='(artist:"Aphex Twin" OR ~artist:"Four Tet") AND -style:Acid [year:2026]'>
-                🧩 Grouped + Operators + Combinators
-              </button>
-              <button type="button" class="btn" data-preset='+label:"Warp Records" AND -style:"Deep House" OR ~year:1999'>
-                ⚡ Prefix Operators (+, -, ~)
-              </button>
-              <button type="button" class="btn" data-preset='{artist:"Daft Punk" XOR artist:"Larry Heard"} && !style:Minimal'>
-                🧪 Custom Syntax ({}, XOR, &amp;&amp;, !)
-              </button>
-            </div>
-
-            <!-- Toggle Controls -->
-            <div class="syntax-config-grid">
-              <!-- Operators -->
-              <div class="syntax-config-box">
-                <div class="syntax-config-header">
-                  <strong>Operators</strong>
-                  <code>operators</code>
-                </div>
-                <p class="syntax-config-desc">Prefix tokens before a keyword (e.g. <code>-style:Acid</code>, <code>~artist:"Four Tet"</code>).</p>
-                <div id="syntax-operators-chips" class="syntax-chip-list"></div>
-              </div>
-
-              <!-- Combinators -->
-              <div class="syntax-config-box">
-                <div class="syntax-config-header">
-                  <strong>Combinators</strong>
-                  <code>combinators</code>
-                </div>
-                <p class="syntax-config-desc">Standalone logical tokens between filters (suggested via autocomplete).</p>
-                <div id="syntax-combinators-chips" class="syntax-chip-list"></div>
-              </div>
-
-              <!-- Delimiters -->
-              <div class="syntax-config-box">
-                <div class="syntax-config-header">
-                  <strong>Delimiters</strong>
-                  <code>delimiters</code>
-                </div>
-                <p class="syntax-config-desc">Opening &amp; closing character pairs used to group sub-queries.</p>
-                <div id="syntax-delimiters-chips" class="syntax-chip-list"></div>
-              </div>
-            </div>
-
-            <!-- Switchable Live Code (HTML / JS) -->
-            <div style="margin-top: 1.25rem;">
-              <div class="syntax-code-header">
-                <h4 style="font-size: 0.875rem; margin: 0;">Live Configuration Code:</h4>
-                <div class="syntax-code-tabs" role="tablist" aria-label="Code language">
-                  <button type="button" class="syntax-code-tab is-active" data-lang="html" role="tab" aria-selected="true">HTML</button>
-                  <button type="button" class="syntax-code-tab" data-lang="js" role="tab" aria-selected="false">JS</button>
-                </div>
-              </div>
-              <micro-lighter id="syntax-live-lighter" language="html" controls="copy">
-                <pre id="syntax-live-markup"><code id="syntax-live-code"></code></pre>
-              </micro-lighter>
-            </div>
-
-            <!-- Parsed Query Parts Breakdown -->
-            <div style="margin-top: 1.25rem;">
-              <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Parsed Query Parts:</h4>
-              <div id="syntax-parts-breakdown" class="syntax-parts-grid"></div>
-            </div>
-          </div>
-        </section>
-
         <!-- JavaScript API Section -->
         <section id="javascript-api">
           <h2>JavaScript API</h2>
@@ -1789,6 +1274,856 @@ rich-input::part(suggestion-image) {
               </tbody>
             </table>
           </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section id="examples">
+          <h2>Examples</h2>
+
+          <!-- Query Parsing Inspector -->
+          <section id="playground">
+            <h3>1. Parsed Query Inspector</h3>
+            <p class="section-desc">
+              Inspect real-time tokenization and the structured query data returned by <code>getParsedQuery()</code> as you search.
+            </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Parsed Query Inspector</span>
+              <span class="card-meta">getParsedQuery()</span>
+            </div>
+
+            <!-- Playground <rich-input> Element -->
+            <div style="margin-bottom: 1.25rem;">
+              <rich-input id="playground-search" operators="-" combinators="AND OR" delimiters="()" value='(label:"We Play House Recordings" year:2026 ) OR (year:2024 style:"Deep House")' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+                <datalist id="label" label="Record Label">
+                  <option value="Defected">
+                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                    Defected
+                  </option>
+                  <option value="House">
+                    <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+                    House
+                  </option>
+                  <option value="Keinemusik">
+                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                    Keinemusik
+                  </option>
+                  <option value="Kranky">
+                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                    Kranky
+                  </option>
+                  <option value="Madhouse Records">
+                    <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
+                    Madhouse Records
+                  </option>
+                  <option value="Ninja Tune">
+                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                    Ninja Tune
+                  </option>
+                  <option value="Warp Records">
+                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                    Warp Records
+                  </option>
+                  <option value="We Play House Recordings">
+                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                    We Play House Recordings
+                  </option>
+                  <option value="XL Recordings">
+                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                    XL Recordings
+                  </option>
+                </datalist>
+                <datalist id="year" label="Year" data-type="number">
+                  <option value="2026"></option>
+                  <option value="2025"></option>
+                  <option value="2024"></option>
+                  <option value="1999"></option>
+                </datalist>
+                <datalist id="artist" label="Artist">
+                  <option value="Aphex Twin">
+                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                    Aphex Twin
+                  </option>
+                  <option value="Daft Punk">
+                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                    Daft Punk
+                  </option>
+                  <option value="Four Tet">
+                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                    Four Tet
+                  </option>
+                  <option value="Larry Heard">
+                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                    Larry Heard
+                  </option>
+                  <option value="Moodymann">
+                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                    Moodymann
+                  </option>
+                </datalist>
+                <datalist id="style" label="Style">
+                  <option value="Acid House"></option>
+                  <option value="Ambient"></option>
+                  <option value="Chicago House"></option>
+                  <option value="Deep House"></option>
+                  <option value="Dub Techno"></option>
+                  <option value="Electro"></option>
+                  <option value="Minimal"></option>
+                </datalist>
+              </rich-input>
+            </div>
+
+            <!-- Inspector Panels -->
+            <div class="playground-layout">
+              <div>
+                <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Detected Tokens:</h4>
+                <div id="playground-tokens" style="min-height: 40px; padding: 0.5rem; background: var(--bg-surface-elevated); border-radius: 6px; margin-bottom: 0.75rem;"></div>
+
+                <div class="caret-indicator" id="playground-caret"></div>
+              </div>
+
+              <div>
+                <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Structured Query Output (getParsedQuery()):</h4>
+                <pre class="inspector-box" id="playground-json"></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Example 2: Form Integration -->
+        <section id="example-form">
+          <h3>2. Form Integration</h3>
+          <p class="section-desc">
+            <code>&lt;rich-input&gt;</code> seamlessly participates in form submissions, validation, and FormData extraction via <code>formAssociated = true</code>.
+          </p>
+
+          <div class="card">
+            <form id="demo-form" style="display: flex; flex-direction: column; gap: 1rem;">
+              <div>
+                <label for="form-search" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Search Filter:</label>
+                <rich-input id="form-search" name="q" operators="-" combinators="AND OR" delimiters="()" placeholder="Type query and submit form..." required>
+                  <datalist id="label" label="Record Label">
+                    <option value="Defected">
+                      <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                      Defected
+                    </option>
+                    <option value="House">
+                      <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+                      House
+                    </option>
+                    <option value="Keinemusik">
+                      <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                      Keinemusik
+                    </option>
+                    <option value="Kranky">
+                      <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                      Kranky
+                    </option>
+                    <option value="Madhouse Records">
+                      <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
+                      Madhouse Records
+                    </option>
+                    <option value="Ninja Tune">
+                      <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                      Ninja Tune
+                    </option>
+                    <option value="Warp Records">
+                      <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                      Warp Records
+                    </option>
+                    <option value="We Play House Recordings">
+                      <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                      We Play House Recordings
+                    </option>
+                    <option value="XL Recordings">
+                      <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                      XL Recordings
+                    </option>
+                  </datalist>
+                  <datalist id="year" label="Year" data-type="number">
+                    <option value="2026"></option>
+                    <option value="2025"></option>
+                    <option value="2024"></option>
+                    <option value="1999"></option>
+                  </datalist>
+                  <datalist id="artist" label="Artist">
+                    <option value="Aphex Twin">
+                      <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                      Aphex Twin
+                    </option>
+                    <option value="Daft Punk">
+                      <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                      Daft Punk
+                    </option>
+                    <option value="Four Tet">
+                      <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                      Four Tet
+                    </option>
+                    <option value="Larry Heard">
+                      <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                      Larry Heard
+                    </option>
+                    <option value="Moodymann">
+                      <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                      Moodymann
+                    </option>
+                  </datalist>
+                  <datalist id="style" label="Style">
+                    <option value="Acid House"></option>
+                    <option value="Ambient"></option>
+                    <option value="Chicago House"></option>
+                    <option value="Deep House"></option>
+                    <option value="Dub Techno"></option>
+                    <option value="Electro"></option>
+                    <option value="Minimal"></option>
+                  </datalist>
+                </rich-input>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <button type="submit" class="btn btn-primary">Submit Form</button>
+                <button type="reset" class="btn">Reset Form</button>
+              </div>
+
+              <div id="form-result" class="callout" hidden style="margin: 0.5rem 0 0;"></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Example 3: Shadow Parts Theming -->
+        <section id="example-themes">
+          <h3>3. Shadow Parts Theming (::part)</h3>
+          <p class="section-desc">
+            Style components completely from page CSS without breaking encapsulation.
+          </p>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Pill / Rounded Spotlight Theme</span>
+              </div>
+              <rich-input class="theme-pill" operators="-" combinators="AND OR" delimiters="()" placeholder="Minimalist pill styling via ::part(control)...">
+                <datalist id="label" label="Record Label">
+                  <option value="Defected">
+                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                    Defected
+                  </option>
+                  <option value="House">
+                    <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+                    House
+                  </option>
+                  <option value="Keinemusik">
+                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                    Keinemusik
+                  </option>
+                  <option value="Kranky">
+                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                    Kranky
+                  </option>
+                  <option value="Madhouse Records">
+                    <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
+                    Madhouse Records
+                  </option>
+                  <option value="Ninja Tune">
+                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                    Ninja Tune
+                  </option>
+                  <option value="Warp Records">
+                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                    Warp Records
+                  </option>
+                  <option value="We Play House Recordings">
+                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                    We Play House Recordings
+                  </option>
+                  <option value="XL Recordings">
+                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                    XL Recordings
+                  </option>
+                </datalist>
+                <datalist id="year" label="Year" data-type="number">
+                  <option value="2026"></option>
+                  <option value="2025"></option>
+                  <option value="2024"></option>
+                  <option value="1999"></option>
+                </datalist>
+                <datalist id="artist" label="Artist">
+                  <option value="Aphex Twin">
+                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                    Aphex Twin
+                  </option>
+                  <option value="Daft Punk">
+                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                    Daft Punk
+                  </option>
+                  <option value="Four Tet">
+                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                    Four Tet
+                  </option>
+                  <option value="Larry Heard">
+                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                    Larry Heard
+                  </option>
+                  <option value="Moodymann">
+                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                    Moodymann
+                  </option>
+                </datalist>
+                <datalist id="style" label="Style">
+                  <option value="Acid House"></option>
+                  <option value="Ambient"></option>
+                  <option value="Chicago House"></option>
+                  <option value="Deep House"></option>
+                  <option value="Dub Techno"></option>
+                  <option value="Electro"></option>
+                  <option value="Minimal"></option>
+                </datalist>
+              </rich-input>
+              <micro-lighter language="css" controls="copy">
+                <pre><code>rich-input.theme-pill::part(control) {
+  border-radius: 9999px;
+  border: 2px solid #3b82f6;
+  padding: 0 1.25rem;
+}</code></pre>
+              </micro-lighter>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Retro Terminal Theme</span>
+              </div>
+              <rich-input class="theme-terminal" operators="-" combinators="AND OR" delimiters="()" placeholder="Matrix terminal styling via ::part(input)...">
+                <datalist id="label" label="Record Label">
+                  <option value="Defected">
+                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                    Defected
+                  </option>
+                  <option value="House">
+                    <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+                    House
+                  </option>
+                  <option value="Keinemusik">
+                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                    Keinemusik
+                  </option>
+                  <option value="Kranky">
+                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                    Kranky
+                  </option>
+                  <option value="Madhouse Records">
+                    <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
+                    Madhouse Records
+                  </option>
+                  <option value="Ninja Tune">
+                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                    Ninja Tune
+                  </option>
+                  <option value="Warp Records">
+                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                    Warp Records
+                  </option>
+                  <option value="We Play House Recordings">
+                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                    We Play House Recordings
+                  </option>
+                  <option value="XL Recordings">
+                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                    XL Recordings
+                  </option>
+                </datalist>
+                <datalist id="year" label="Year" data-type="number">
+                  <option value="2026"></option>
+                  <option value="2025"></option>
+                  <option value="2024"></option>
+                  <option value="1999"></option>
+                </datalist>
+                <datalist id="artist" label="Artist">
+                  <option value="Aphex Twin">
+                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                    Aphex Twin
+                  </option>
+                  <option value="Daft Punk">
+                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                    Daft Punk
+                  </option>
+                  <option value="Four Tet">
+                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                    Four Tet
+                  </option>
+                  <option value="Larry Heard">
+                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                    Larry Heard
+                  </option>
+                  <option value="Moodymann">
+                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                    Moodymann
+                  </option>
+                </datalist>
+                <datalist id="style" label="Style">
+                  <option value="Acid House"></option>
+                  <option value="Ambient"></option>
+                  <option value="Chicago House"></option>
+                  <option value="Deep House"></option>
+                  <option value="Dub Techno"></option>
+                  <option value="Electro"></option>
+                  <option value="Minimal"></option>
+                </datalist>
+              </rich-input>
+              <micro-lighter language="css" controls="copy">
+                <pre><code>rich-input.theme-terminal::part(control) {
+  background: #0f172a;
+  border: 1px solid #22c55e;
+}
+rich-input.theme-terminal::part(input) {
+  color: #4ade80;
+  font-family: monospace;
+}
+rich-input.theme-terminal::highlight(label),
+rich-input.theme-terminal::highlight(year),
+rich-input.theme-terminal::highlight(artist),
+rich-input.theme-terminal::highlight(style) {
+  background-color: #4ade80;
+  color: #0f172a;
+}</code></pre>
+              </micro-lighter>
+            </div>
+          </div>
+        </section>
+
+        <!-- Example 4: Rich Option & Image Styling (::part) -->
+        <section id="example-rich-styling">
+          <h3>4. Rich Option &amp; Image Styling (::part)</h3>
+          <p class="section-desc">
+            When options contain images (such as logos, icons, or avatars), the component exposes them via <code>::part(suggestion-image)</code> for external CSS styling.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Circular Logo Avatar via ::part(suggestion-image)</span>
+              <span class="card-meta">CSS Shadow Parts</span>
+            </div>
+            <p>
+              In this example, the record label logos are styled via <code>::part(suggestion-image)</code> as circular avatars:
+            </p>
+
+            <rich-input operators="-" combinators="AND OR" delimiters="()" placeholder="Type 'label:' to preview the circular logos...">
+              <datalist id="label" label="Record Label">
+                <option value="Defected">
+                  <img
+                    src="assets/defected.jpg"
+                    height="50" width="50"
+                    alt="Defected Logo">
+                  Defected
+                </option>
+                <option value="House">
+                  <img
+                    src="assets/house.jpg"
+                    height="50" width="50"
+                    alt="House Logo">
+                  House
+                </option>
+                <option value="Keinemusik">
+                  <img
+                    src="assets/keinemusik.jpg"
+                    height="50" width="50"
+                    alt="Keinemusik Logo">
+                  Keinemusik
+                </option>
+                <option value="Kranky">
+                  <img
+                    src="assets/kranky.jpg"
+                    height="50" width="50"
+                    alt="Kranky Logo">
+                  Kranky
+                </option>
+                <option value="Madhouse Records">
+                  <img
+                    src="assets/madhouse-records.jpg"
+                    height="50" width="50"
+                    alt="Madhouse Records Logo">
+                  Madhouse Records
+                </option>
+                <option value="Ninja Tune">
+                  <img
+                    src="assets/ninja-tune.jpg"
+                    height="50" width="50"
+                    alt="Ninja Tune Logo">
+                  Ninja Tune
+                </option>
+                <option value="Warp Records">
+                  <img
+                    src="assets/warp-records.png"
+                    height="50" width="50"
+                    alt="Warp Records Logo">
+                  Warp Records
+                </option>
+                <option value="We Play House Recordings">
+                  <img
+                    src="assets/we-play-house-recordings.jpg"
+                    height="50" width="50"
+                    alt="We Play House Recordings Logo">
+                  We Play House Recordings
+                </option>
+                <option value="XL Recordings">
+                  <img
+                    src="assets/xl-recordings.jpg"
+                    height="50" width="50"
+                    alt="XL Recordings Logo">
+                  XL Recordings
+                </option>
+              </datalist>
+              <datalist id="year" label="Year" data-type="number">
+                <option value="2026"></option>
+                <option value="2025"></option>
+                <option value="2024"></option>
+                <option value="1999"></option>
+              </datalist>
+              <datalist id="artist" label="Artist">
+                <option value="Aphex Twin">
+                  <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                  Aphex Twin
+                </option>
+                <option value="Daft Punk">
+                  <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                  Daft Punk
+                </option>
+                <option value="Four Tet">
+                  <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                  Four Tet
+                </option>
+                <option value="Larry Heard">
+                  <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                  Larry Heard
+                </option>
+                <option value="Moodymann">
+                  <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                  Moodymann
+                </option>
+              </datalist>
+              <datalist id="style" label="Style">
+                <option value="Acid House"></option>
+                <option value="Ambient"></option>
+                <option value="Chicago House"></option>
+                <option value="Deep House"></option>
+                <option value="Dub Techno"></option>
+                <option value="Electro"></option>
+                <option value="Minimal"></option>
+              </datalist>
+            </rich-input>
+
+            <micro-lighter language="css" controls="copy">
+              <pre><code>/* Style suggestion logos as circular avatar icons */
+rich-input::part(suggestion-image) {
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  object-fit: cover;
+  outline: 1px solid #ccc;
+}</code></pre>
+            </micro-lighter>
+          </div>
+        </section>
+
+        <!-- Example 5: Custom Leading Icon & Slots -->
+        <section id="example-custom-icon">
+          <h3>5. Custom Leading Icon &amp; Slots</h3>
+          <p class="section-desc">
+            Pass a custom icon via <code>slot="leading"</code>. The default search magnifying glass SVG is provided as fallback content inside the slot, so supplying a slotted element automatically replaces it without requiring any CSS overrides.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Music Note Icon via slot="leading"</span>
+              <span class="card-meta">HTML Slots</span>
+            </div>
+            <p>
+              In this example, a custom music note SVG replaces the default search icon, and style values are highlighted via <code>::highlight(style)</code>:
+            </p>
+
+            <rich-input operators="-" combinators="AND OR" delimiters="()" value='style:"Deep House"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'...">
+              <svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 18V5l12-2v13"></path>
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="18" cy="16" r="3"></circle>
+              </svg>
+              <datalist id="label" label="Record Label">
+                <option value="Defected">
+                  <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                  Defected
+                </option>
+                <option value="House">
+                  <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+                  House
+                </option>
+                <option value="Keinemusik">
+                  <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                  Keinemusik
+                </option>
+                <option value="Kranky">
+                  <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                  Kranky
+                </option>
+                <option value="Madhouse Records">
+                  <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
+                  Madhouse Records
+                </option>
+                <option value="Ninja Tune">
+                  <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                  Ninja Tune
+                </option>
+                <option value="Warp Records">
+                  <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                  Warp Records
+                </option>
+                <option value="We Play House Recordings">
+                  <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                  We Play House Recordings
+                </option>
+                <option value="XL Recordings">
+                  <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                  XL Recordings
+                </option>
+              </datalist>
+              <datalist id="year" label="Year" data-type="number">
+                <option value="2026"></option>
+                <option value="2025"></option>
+                <option value="2024"></option>
+                <option value="1999"></option>
+              </datalist>
+              <datalist id="artist" label="Artist">
+                <option value="Aphex Twin">
+                  <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                  Aphex Twin
+                </option>
+                <option value="Daft Punk">
+                  <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                  Daft Punk
+                </option>
+                <option value="Four Tet">
+                  <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                  Four Tet
+                </option>
+                <option value="Larry Heard">
+                  <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                  Larry Heard
+                </option>
+                <option value="Moodymann">
+                  <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                  Moodymann
+                </option>
+              </datalist>
+              <datalist id="style" label="Style">
+                <option value="Acid House"></option>
+                <option value="Ambient"></option>
+                <option value="Chicago House"></option>
+                <option value="Deep House"></option>
+                <option value="Dub Techno"></option>
+                <option value="Electro"></option>
+                <option value="Minimal"></option>
+              </datalist>
+            </rich-input>
+
+            <micro-lighter language="html" controls="copy">
+              <pre><code>&lt;rich-input operators="-" combinators="AND OR" delimiters="()" value='style:"Deep House"' placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'..."&gt;
+  &lt;!-- Custom leading icon replaces the default search magnifying glass --&gt;
+  &lt;svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+    &lt;path d="M9 18V5l12-2v13"&gt;&lt;/path&gt;
+    &lt;circle cx="6" cy="18" r="3"&gt;&lt;/circle&gt;
+    &lt;circle cx="18" cy="16" r="3"&gt;&lt;/circle&gt;
+  &lt;/svg&gt;
+
+  &lt;!-- Same label, year, artist, and style datalists --&gt;
+&lt;/rich-input&gt;</code></pre>
+            </micro-lighter>
+          </div>
+        </section>
+
+        <!-- Example 6: Dynamic Datalists -->
+        <section id="example-dynamic">
+          <h3>6. Dynamic Datalists</h3>
+          <p class="section-desc">
+            Add or update <code>&lt;datalist&gt;</code> elements dynamically at runtime. The component uses a MutationObserver and slotchange event to immediately update available keywords and suggestions.
+          </p>
+
+          <div class="card">
+            <button type="button" class="btn btn-primary" id="btn-add-filter">
+              + Dynamically Add "bpm" Datalist Filter
+            </button>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">
+              Clicking the button above injects <code>&lt;datalist id="bpm" label="Beats Per Minute"&gt;</code> into all <code>&lt;rich-input&gt;</code> instances on the page.
+            </p>
+          </div>
+        </section>
+
+        <!-- Example 7: Operators, Combinators & Delimiters -->
+        <section id="example-syntax">
+          <h3>7. Operators, Combinators &amp; Delimiters</h3>
+          <p class="section-desc">
+            Configure prefix <code>operators</code> (e.g. <code>-</code>, <code>~</code>, <code>+</code>), boolean <code>combinators</code> (e.g. <code>AND</code>, <code>OR</code>, <code>NOT</code>), and grouping <code>delimiters</code> (e.g. <code>()</code>, <code>[]</code>, <code>{}</code>) via HTML attributes or JavaScript properties. Toggle or dynamically register items below to see the generated markup, in-input highlights, and parsed query parts update in real time.
+          </p>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Interactive Syntax Configurator &amp; Query Parts Inspector</span>
+              <span class="card-meta">operators / combinators / delimiters</span>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <rich-input
+                id="syntax-demo-input"
+                operators="-"
+                combinators="AND OR"
+                delimiters="()"
+                value='(artist:"Aphex Twin" OR artist:"Four Tet") AND -style:"Acid House"'
+                placeholder="Type keywords like 'label:', 'year:', 'artist:', or 'style:'..."
+              >
+                <datalist id="label" label="Record Label">
+                  <option value="Defected">
+                    <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
+                    Defected
+                  </option>
+                  <option value="House">
+                    <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
+                    House
+                  </option>
+                  <option value="Keinemusik">
+                    <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
+                    Keinemusik
+                  </option>
+                  <option value="Kranky">
+                    <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
+                    Kranky
+                  </option>
+                  <option value="Madhouse Records">
+                    <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
+                    Madhouse Records
+                  </option>
+                  <option value="Ninja Tune">
+                    <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
+                    Ninja Tune
+                  </option>
+                  <option value="Warp Records">
+                    <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
+                    Warp Records
+                  </option>
+                  <option value="We Play House Recordings">
+                    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
+                    We Play House Recordings
+                  </option>
+                  <option value="XL Recordings">
+                    <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
+                    XL Recordings
+                  </option>
+                </datalist>
+                <datalist id="year" label="Year" data-type="number">
+                  <option value="2026"></option>
+                  <option value="2025"></option>
+                  <option value="2024"></option>
+                  <option value="1999"></option>
+                </datalist>
+                <datalist id="artist" label="Artist">
+                  <option value="Aphex Twin">
+                    <img src="assets/aphex-twin.jpg" height="50" width="50" alt="Aphex Twin">
+                    Aphex Twin
+                  </option>
+                  <option value="Daft Punk">
+                    <img src="assets/daft-punk.jpg" height="50" width="50" alt="Daft Punk">
+                    Daft Punk
+                  </option>
+                  <option value="Four Tet">
+                    <img src="assets/four-tet.jpg" height="50" width="50" alt="Four Tet">
+                    Four Tet
+                  </option>
+                  <option value="Larry Heard">
+                    <img src="assets/larry-heard.jpg" height="50" width="50" alt="Larry Heard">
+                    Larry Heard
+                  </option>
+                  <option value="Moodymann">
+                    <img src="assets/moodymann.jpg" height="50" width="50" alt="Moodymann">
+                    Moodymann
+                  </option>
+                </datalist>
+                <datalist id="style" label="Style">
+                  <option value="Acid House"></option>
+                  <option value="Ambient"></option>
+                  <option value="Chicago House"></option>
+                  <option value="Deep House"></option>
+                  <option value="Dub Techno"></option>
+                  <option value="Electro"></option>
+                  <option value="Minimal"></option>
+                </datalist>
+              </rich-input>
+            </div>
+
+            <!-- Preset Queries for Syntax Demo -->
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; margin-bottom: 0.5rem;">Try a preset query or edit the input above:</p>
+            <div class="preset-buttons" style="margin-top: 0.5rem; margin-bottom: 1.25rem;">
+              <button type="button" class="btn" data-preset='(artist:"Aphex Twin" OR ~artist:"Four Tet") AND -style:"Acid House" [year:2026]'>
+                🧩 Grouped + Operators + Combinators
+              </button>
+              <button type="button" class="btn" data-preset='+label:"Warp Records" AND -style:"Deep House" OR ~year:1999'>
+                ⚡ Prefix Operators (+, -, ~)
+              </button>
+              <button type="button" class="btn" data-preset='{artist:"Daft Punk" XOR artist:"Larry Heard"} NOT !style:Minimal'>
+                🧪 Custom Syntax ({}, XOR, NOT, !)
+              </button>
+            </div>
+
+            <!-- Toggle Controls -->
+            <div class="syntax-config-grid">
+              <!-- Operators -->
+              <div class="syntax-config-box">
+                <div class="syntax-config-header">
+                  <strong>Operators</strong>
+                  <code>operators</code>
+                </div>
+                <p class="syntax-config-desc">Prefix tokens before a keyword (e.g. <code>-style:Minimal</code>, <code>~artist:"Four Tet"</code>).</p>
+                <div id="syntax-operators-chips" class="syntax-chip-list"></div>
+              </div>
+
+              <!-- Combinators -->
+              <div class="syntax-config-box">
+                <div class="syntax-config-header">
+                  <strong>Combinators</strong>
+                  <code>combinators</code>
+                </div>
+                <p class="syntax-config-desc">Standalone logical tokens between filters (suggested via autocomplete).</p>
+                <div id="syntax-combinators-chips" class="syntax-chip-list"></div>
+              </div>
+
+              <!-- Delimiters -->
+              <div class="syntax-config-box">
+                <div class="syntax-config-header">
+                  <strong>Delimiters</strong>
+                  <code>delimiters</code>
+                </div>
+                <p class="syntax-config-desc">Opening &amp; closing character pairs used to group sub-queries.</p>
+                <div id="syntax-delimiters-chips" class="syntax-chip-list"></div>
+              </div>
+            </div>
+
+            <!-- Switchable Live Code (HTML / JS) -->
+            <div style="margin-top: 1.25rem;">
+              <div class="syntax-code-header">
+                <h4 style="font-size: 0.875rem; margin: 0;">Live Configuration Code:</h4>
+                <div class="syntax-code-tabs" role="tablist" aria-label="Code language">
+                  <button type="button" class="syntax-code-tab is-active" data-lang="html" role="tab" aria-selected="true">HTML</button>
+                  <button type="button" class="syntax-code-tab" data-lang="js" role="tab" aria-selected="false">JS</button>
+                </div>
+              </div>
+              <micro-lighter id="syntax-live-lighter" language="html" controls="copy">
+                <pre id="syntax-live-markup"><code id="syntax-live-code"></code></pre>
+              </micro-lighter>
+            </div>
+
+            <!-- Parsed Query Parts Breakdown -->
+            <div style="margin-top: 1.25rem;">
+              <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Parsed Query Parts:</h4>
+              <div id="syntax-parts-breakdown" class="syntax-parts-grid"></div>
+            </div>
+          </div>
+        </section>
         </section>
       </main>
     </div>

@@ -334,14 +334,14 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
       };
     });
 
-    assert.equal(result.value, '-style:Acid ');
+    assert.equal(result.value, '-style:"Acid House" ');
     assert.equal(result.operatorRangesCount, 1);
     assert.equal(result.hasHighlight, true);
     const opKwTokens = result.parsedQuery.tokens.filter((t) => t.type === 'keyword');
     assert.equal(opKwTokens.length, 1);
     assert.equal(opKwTokens[0].operator, '-');
     assert.equal(opKwTokens[0].keyword, 'style');
-    assert.equal(opKwTokens[0].innerValue, 'Acid');
+    assert.equal(opKwTokens[0].innerValue, 'Acid House');
   });
 
   it('applies global operators to newly created instances while keeping existing instances and local overrides independent', async () => {
@@ -640,7 +640,8 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
   it('applies global combinators to newly created instances while keeping existing instances and local overrides independent', async () => {
     const testResult = await page.evaluate(() => {
       const RichInputClass = customElements.get('rich-input');
-      const existingEl = document.querySelector('#form-search'); // form-search has no combinators attribute
+      const existingEl = document.createElement('rich-input');
+      document.body.appendChild(existingEl);
 
       // 1. Verify initial defaults on class (empty array) and existing instance
       const initialClassCombinators = [...RichInputClass.combinators];
@@ -693,6 +694,7 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
       const customAttrUnchanged = [...newCustomAttrEl.combinators];
 
       // Cleanup dynamically created test elements and reset global default
+      existingEl.remove();
       newInheritedEl.remove();
       newCustomAttrEl.remove();
       RichInputClass.combinators = [];

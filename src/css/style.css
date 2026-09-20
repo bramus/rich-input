@@ -148,6 +148,38 @@ rich-input.theme-pill::part(popover) {
 }
 
 /* Theme 2: Terminal / Cyber */
+rich-input.theme-terminal {
+  --ri-placeholder-color: #22c55e;
+  --ri-item-title-color: #4ade80;
+  --ri-item-desc-color: #86efac;
+  --ri-item-active-bg: #1e293b;
+  --ri-clear-bg: #1e293b;
+  --ri-clear-color: #4ade80;
+  --ri-keyword-color: #4ade80;
+  --ri-operator-color: #4ade80;
+  --ri-combinator-color: #4ade80;
+  --ri-delimiter-color: #4ade80;
+}
+
+rich-input.theme-terminal::highlight(label),
+rich-input.theme-terminal::highlight(year),
+rich-input.theme-terminal::highlight(artist),
+rich-input.theme-terminal::highlight(style),
+rich-input.theme-terminal::highlight(genre),
+rich-input.theme-terminal::highlight(bpm) {
+  background-color: #4ade80;
+  color: #0f172a;
+  text-decoration: none;
+}
+
+rich-input.theme-terminal::highlight(rich-input-keyword),
+rich-input.theme-terminal::highlight(rich-input-operator),
+rich-input.theme-terminal::highlight(rich-input-combinator),
+rich-input.theme-terminal::highlight(rich-input-delimiter) {
+  color: #4ade80;
+  text-shadow: none;
+}
+
 rich-input.theme-terminal::part(control) {
   background: #0f172a;
   border: 1px solid #22c55e;
@@ -165,7 +197,7 @@ rich-input.theme-terminal::part(input) {
 }
 
 rich-input.theme-terminal::part(input)::placeholder {
-  color: #166534;
+  color: #22c55e;
 }
 
 rich-input.theme-terminal::part(popover) {
@@ -179,6 +211,10 @@ rich-input.theme-terminal::part(suggestions-header) {
   background: #1e293b;
   color: #22c55e;
   border-color: #334155;
+}
+
+rich-input.theme-terminal::part(suggestion-label) {
+  color: #86efac;
 }
 
 rich-input.theme-terminal::part(suggestion-item-active) {
@@ -458,8 +494,21 @@ section {
   margin-bottom: 3.5rem;
 }
 
+#examples > section:last-child {
+  margin-bottom: 0;
+}
+
 section h2 {
   font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+section > h3 {
+  font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
   display: flex;
@@ -484,6 +533,10 @@ section p.section-desc {
 
 .card:hover {
   box-shadow: var(--card-shadow-lg);
+}
+
+.card > p + rich-input {
+  margin-top: 0.75rem;
 }
 
 .card-header {
@@ -671,9 +724,10 @@ pre {
 }
 
 .inspector-box {
-  background: #0f172a;
-  color: #f8fafc;
-  border-radius: 8px;
+  background-color: var(--code-bg);
+  color: var(--code-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   padding: 1rem;
   font-family: var(--font-mono);
   font-size: 0.8125rem;

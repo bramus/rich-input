@@ -252,7 +252,7 @@ export class RichInputDemoApp {
     const partsBreakdownEl = document.getElementById('syntax-parts-breakdown');
 
     const availableOperators = ['-', '~', '+', '!', '^'];
-    const availableCombinators = ['AND', 'OR', 'NOT', 'XOR', '&&', '||'];
+    const availableCombinators = ['AND', 'OR', 'NOT', 'XOR'];
     const availableDelimiters = ['()', '[]', '{}', '<>'];
 
     const activeOperators = new Set(this.syntaxInput.operators || ['-', '~', '+']);
@@ -453,8 +453,11 @@ export class RichInputDemoApp {
         btn.addEventListener('click', () => {
           const q = btn.getAttribute('data-preset') || '';
           if (q.includes('XOR')) activeCombinators.add('XOR');
-          if (q.includes('&&')) activeCombinators.add('&&');
+          if (q.includes('NOT')) activeCombinators.add('NOT');
           if (q.includes('!style')) activeOperators.add('!');
+          if (q.includes('~')) activeOperators.add('~');
+          if (q.includes('+')) activeOperators.add('+');
+          if (q.includes('[')) activeDelimiters.add('[]');
           if (q.includes('{')) activeDelimiters.add('{}');
           syncToComponent();
         });
