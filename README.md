@@ -5,18 +5,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Custom Elements](https://img.shields.io/badge/Web_Components-Custom_Elements_v1-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements)
 
-The `<rich-input>` component is a rich input field that acts like a standard `<input type="text">` so users can type ordinary text or search terms, but enhances it with contextual autocomplete and in-input highlighting for structured `keyword:value` entries (such as `label:"We Play House Recordings" year:2026 playlist:"WPH Classics"`).
+The `<rich-input>` component is a rich input field that acts like a standard `<input type="text">` so users can type ordinary text or search terms, but enhances it with contextual autocomplete and in-input highlighting for structured queries with `keyword:value` filters, prefix `operators` (e.g. `-`), boolean `combinators` (e.g. `AND`, `OR`), and grouping `delimiters` (e.g. `()`), such as `(label:"We Play House Recordings" OR year:2026) AND -style:"Acid House"`.
 
 ---
 
 ## Features
 
 - **Standard Input Ergonomics**: Acts and feels like a regular `<input type="text">` with standard value access, selection ranges, and events.
-- **Dual Contextual Autocomplete**:
-  - **Keywords**: Typing at the start of a token (e.g. typing `a`) suggests configured keywords like `artist:` and `style:`.
+- **Contextual Autocomplete**:
+  - **Keywords**: Typing at the start of a token or after an operator/delimiter (e.g. typing `a` or `-s`) suggests configured keywords like `artist:` and `-style:`.
+  - **Combinators**: Typing a configured boolean combinator (e.g. `A` or `O` when `combinators="AND OR"` is set) suggests `AND` and `OR`.
   - **Values**: Typing within a keyword value (e.g. `label:"K` or `label:K`) suggests matching options like `"Keinemusik"` and `"Kranky"`.
+- **Configurable Operators, Combinators & Delimiters**: Configure prefix operators (`operators="- ~ +"`), boolean combinators (`combinators="AND OR NOT"`), and grouping delimiter pairs (`delimiters="() [] {}"`) per instance via HTML attributes / JS properties, or globally via static properties on `RichInput`.
 - **Range-Based Positioning via OpaqueRange**: Positions autocomplete dropdown popovers anchored to the start of the active `OpaqueRange` (e.g. at the opening quotation mark of a value) using `range.getBoundingClientRect()`, rather than shifting with the cursor (with a hidden mirror-div fallback in unsupported browsers).
-- **Native In-Input Highlighting via CSS Custom Highlight API**: Highlights keyword values inside the `<input>` control using standard CSS rules like `::highlight(label)` or `::highlight(year)` without brittle mirror-div overlays.
+- **Native In-Input Highlighting via CSS Custom Highlight API**: Highlights keyword values, operators, combinators, delimiters, and invalid tokens inside the `<input>` control using standard CSS rules like `::highlight(label)`, `::highlight(rich-input-operator)`, `::highlight(rich-input-combinator)`, and `::highlight(rich-input-delimiter)` without brittle mirror-div overlays.
 - **Declarative Configuration via `<datalist>`**: Configure keywords and options purely in HTML by nesting standard `<datalist>` elements with `<option>` tags inside `<rich-input>`.
 - **Rich Option Markup**: Embed custom HTML markup (such as logos, images, icons, and avatars) directly inside `<option>` elements for rich, visual suggestion popovers.
 - **Form Associated**: Implements `static formAssociated = true` and `ElementInternals` to participate seamlessly in `<form>` submission, `FormData`, and form reset lifecycles.
@@ -38,8 +40,9 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 - `::part(control)`: The outer input container enclosing the icon, input, and clear button.
 - `::part(icon)`: The default leading search magnifying glass SVG icon (fallback in `slot="leading"`).
 - `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
-- `::highlight(rich-input-operator)`: Target pseudo-element for styling keyword operators (e.g. `-` in `-style:Acid`).
+- `::highlight(rich-input-operator)`: Target pseudo-element for styling keyword operators (e.g. `-` in `-style:"Acid House"`).
 - `::highlight(rich-input-combinator)`: Target pseudo-element for styling query combinators (e.g. `OR` in `artist:"Aphex Twin" OR label:"Defected"`).
+- `::highlight(rich-input-delimiter)`: Target pseudo-element for styling grouping delimiters (e.g. `(` and `)` in `(artist:"Aphex Twin" OR label:"Defected")`).
 - `::highlight(rich-input-keyword)`: Target pseudo-element for styling keyword prefixes (e.g. `label:`, `year:`).
 - `::highlight(rich-input-invalid)`: Target pseudo-element for marking unrecognized keywords or invalid keyword values (not in datalist) with a squiggly underline.
 - `::part(clear-button)`: The clear button (visible when text is present).
@@ -80,10 +83,15 @@ Or via CDN:
 
 ### 2. Basic Usage
 
-Nest `<datalist>` elements inside `<rich-input>` to configure keywords and autocomplete suggestions:
+Nest `<datalist>` elements inside `<rich-input>` to configure keywords and autocomplete suggestions, and optionally configure `operators`, `combinators`, and `delimiters`:
 
 ```html
-<rich-input placeholder="Search music catalog...">
+<rich-input
+  operators="-"
+  combinators="AND OR"
+  delimiters="()"
+  placeholder="Search music catalog..."
+>
   <datalist id="label" label="Record Label">
     <option value="Defected"></option>
     <option value="House"></option>
@@ -102,24 +110,25 @@ Nest `<datalist>` elements inside `<rich-input>` to configure keywords and autoc
     <option value="2024"></option>
   </datalist>
 
-  <datalist id="playlist" label="Playlist">
-    <option value="WPH Classics"></option>
-    <option value="Late Night Grooves"></option>
+  <datalist id="style" label="Style">
+    <option value="Acid House"></option>
+    <option value="Deep House"></option>
+    <option value="Dub Techno"></option>
   </datalist>
 </rich-input>
 ```
 
 ---
 
-## Datalist Configuration
+## Datalist & Syntax Configuration
 
-Configuration is defined by standard HTML `<datalist>` elements placed inside the `<rich-input>` element:
+Configuration is defined by attributes on `<rich-input>` and standard HTML `<datalist>` elements placed inside the `<rich-input>` element:
 
 | Element / Attribute | Type | Description |
 |---|---|---|
-| `<rich-input operators="...">` | `string` | Optional space-separated list of prefix operators (e.g. `operators="- ~ +"`). Defaults to `"-"` (negative filter). |
-| `<rich-input combinators="...">` | `string` | Optional space-separated list of query combinators (e.g. `combinators="AND OR NOT"`). Defaults to `""` (empty array). |
-| `<rich-input delimiters="...">` | `string` | Optional space-separated list of delimiter pairs (e.g. `delimiters="{} () []"`). Defaults to `"()"` (parentheses). |
+| `<rich-input operators="...">` | `string` | Optional space-separated list of single-character prefix operators (e.g. `operators="- ~ +"`). Defaults to `"-"` (negative filter). Set `operators=""` to disable operators. |
+| `<rich-input combinators="...">` | `string` | Optional space-separated list of boolean query combinators (e.g. `combinators="AND OR NOT"`). Defaults to `""` (empty array). |
+| `<rich-input delimiters="...">` | `string` | Optional space-separated list of two-character opening/closing delimiter pairs (e.g. `delimiters="() [] {}"`). Defaults to `"()"` (parentheses). Set `delimiters=""` to disable delimiters. |
 | `<datalist id="...">` | `string` | **Required.** The keyword identifier used in queries (e.g. `id="artist"` produces `artist:`). Case-insensitive. |
 | `<datalist label="...">` | `string` | Human-readable label displayed in suggestion headers. Defaults to capitalized `id`. |
 | `<datalist data-type="...">` | `string` | Optional data type (`"string"` or `"number"`). |
@@ -127,7 +136,26 @@ Configuration is defined by standard HTML `<datalist>` elements placed inside th
 | `<option label="...">` | `string` | Optional descriptive label shown alongside the value. |
 | `<option>` children | `Node` | Optional image (`<img>`) prepended to the suggested value. |
 
-Datalists can be added, updated, or removed dynamically at runtime; `<rich-input>` observes changes via `slotchange` and `MutationObserver`.
+Datalists and syntax attributes can be added, updated, or removed dynamically at runtime; `<rich-input>` observes changes via `attributeChangedCallback`, `slotchange`, and `MutationObserver`.
+
+### Configuring Operators, Combinators & Delimiters via JavaScript
+
+In addition to HTML attributes, you can configure `operators`, `combinators`, and `delimiters` per instance or globally on the `RichInput` class (which sets the default for newly created instances that do not specify a local override):
+
+```javascript
+const RichInput = customElements.get('rich-input');
+
+// Configure global defaults for new <rich-input> elements
+RichInput.operators = ['-', '~', '+'];
+RichInput.combinators = ['AND', 'OR', 'NOT'];
+RichInput.delimiters = ['()', '[]', '{}'];
+
+// Or configure a specific instance (reflects back to the HTML attribute)
+const input = document.querySelector('rich-input');
+input.operators = ['-', '!'];
+input.combinators = ['AND', 'OR'];
+input.delimiters = ['()'];
+```
 
 ---
 
@@ -403,17 +431,30 @@ rich-input::part(suggestion-item-active) {
 
 ### Methods
 
-- `getParsedQuery()`: Returns a parsed object representing the search query:
+- `getParsedQuery()`: Returns a parsed object containing the `raw` query string and an ordered `tokens` array (`keyword`, `combinator`, `delimiter`, `text`, and `whitespace` tokens):
   ```json
   {
-    "raw": "(label:\"We Play House Recordings\" year:2026 ) OR (year:2024 style:\"Deep House\")",
-    "tokens": [...]
+    "raw": "(artist:\"Aphex Twin\" OR year:2026) AND -style:\"Acid House\"",
+    "tokens": [
+      { "type": "delimiter", "raw": "(", "delimiter": "(", "pair": "()", "role": "open", "start": 0, "end": 1 },
+      { "type": "keyword", "operator": null, "keyword": "artist", "innerValue": "Aphex Twin", "start": 1, "end": 20 },
+      { "type": "whitespace", "raw": " ", "start": 20, "end": 21 },
+      { "type": "combinator", "raw": "OR", "combinator": "OR", "start": 21, "end": 23 },
+      { "type": "whitespace", "raw": " ", "start": 23, "end": 24 },
+      { "type": "keyword", "operator": null, "keyword": "year", "innerValue": "2026", "start": 24, "end": 33 },
+      { "type": "delimiter", "raw": ")", "delimiter": ")", "pair": "()", "role": "close", "start": 33, "end": 34 },
+      { "type": "whitespace", "raw": " ", "start": 34, "end": 35 },
+      { "type": "combinator", "raw": "AND", "combinator": "AND", "start": 35, "end": 38 },
+      { "type": "whitespace", "raw": " ", "start": 38, "end": 39 },
+      { "type": "keyword", "operator": "-", "keyword": "style", "innerValue": "Acid House", "start": 39, "end": 58 }
+    ]
   }
   ```
 - `getKeywords()`: Returns an array of configured keyword definitions from the datalists.
 - `getOperators()` / `setOperators(operators)`: Gets or sets the operators for this instance (or globally via `RichInput.getOperators()` / `RichInput.setOperators(operators)`).
 - `getCombinators()` / `setCombinators(combinators)`: Gets or sets the combinators for this instance (or globally via `RichInput.getCombinators()` / `RichInput.setCombinators(combinators)`).
 - `getDelimiters()` / `setDelimiters(delimiters)`: Gets or sets the delimiters for this instance (or globally via `RichInput.getDelimiters()` / `RichInput.setDelimiters(delimiters)`).
+- `getActiveValueRanges()` / `getActiveKeywordRanges()` / `getActiveOperatorRanges()` / `getActiveCombinatorRanges()` / `getActiveDelimiterRanges()` / `getActiveInvalidRanges()`: Returns the active highlight range descriptors for each token category.
 - `focus(options)`: Focuses the internal input.
 - `blur()`: Removes focus from the internal input.
 - `select()`: Selects all text inside the input.
