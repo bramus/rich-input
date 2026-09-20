@@ -997,9 +997,70 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.equal(testResult.afterRemoveAttr, '()');
     assert.deepEqual(testResult.afterRemoveProp, ['()']);
   });
+
+  it('toggles operators, combinators, and delimiters and switches between HTML and JS code in the syntax demo (#example-syntax)', async () => {
+    const result = await page.evaluate(() => {
+      const syntaxInput = document.getElementById('syntax-demo-input');
+      const liveMarkupEl = document.getElementById('syntax-live-markup');
+      const partsBreakdownEl = document.getElementById('syntax-parts-breakdown');
+      const opChips = document.querySelectorAll('#syntax-operators-chips .syntax-chip');
+      const combChips = document.querySelectorAll('#syntax-combinators-chips .syntax-chip');
+      const delimChips = document.querySelectorAll('#syntax-delimiters-chips .syntax-chip');
+      const jsTabBtn = document.querySelector('.syntax-code-tab[data-lang="js"]');
+
+      const initialOperators = [...syntaxInput.operators];
+      const initialCombinators = [...syntaxInput.combinators];
+      const initialDelimiters = [...syntaxInput.delimiters];
+      const initialMarkup = liveMarkupEl.textContent;
+      const initialPartCardsCount = partsBreakdownEl.querySelectorAll('.syntax-part-card').length;
+
+      // Toggle the '!' operator chip, 'NOT' combinator chip, and '[]' delimiter chip
+      const bangChip = Array.from(opChips).find((btn) => btn.textContent.includes('!'));
+      bangChip.click();
+      const notChip = Array.from(combChips).find((btn) => btn.textContent.includes('NOT'));
+      notChip.click();
+      const bracketChip = Array.from(delimChips).find((btn) => btn.textContent.includes('[]'));
+      bracketChip.click();
+
+      const updatedOperators = [...syntaxInput.operators];
+      const updatedCombinators = [...syntaxInput.combinators];
+      const updatedDelimiters = [...syntaxInput.delimiters];
+      const updatedHtmlMarkup = liveMarkupEl.textContent;
+
+      // Switch to JS code tab
+      jsTabBtn.click();
+      const jsCodeOutput = liveMarkupEl.textContent;
+
+      return {
+        initialOperators,
+        initialCombinators,
+        initialDelimiters,
+        initialMarkup,
+        initialPartCardsCount,
+        updatedOperators,
+        updatedCombinators,
+        updatedDelimiters,
+        updatedHtmlMarkup,
+        jsCodeOutput,
+      };
+    });
+
+    assert.deepEqual(result.initialOperators, ['-']);
+    assert.deepEqual(result.initialCombinators, ['AND', 'OR']);
+    assert.deepEqual(result.initialDelimiters, ['()']);
+    assert.equal(result.initialPartCardsCount, 4);
+    assert.ok(result.initialMarkup.includes('operators="-"'));
+    assert.ok(result.initialMarkup.includes('combinators="AND OR"'));
+    assert.ok(result.initialMarkup.includes('delimiters="()"'));
+
+    assert.deepEqual(result.updatedOperators, ['-', '!']);
+    assert.deepEqual(result.updatedCombinators, ['AND', 'OR', 'NOT']);
+    assert.deepEqual(result.updatedDelimiters, ['()', '[]']);
+    assert.ok(result.updatedHtmlMarkup.includes('operators="- !"'));
+    assert.ok(result.updatedHtmlMarkup.includes('combinators="AND OR NOT"'));
+    assert.ok(result.updatedHtmlMarkup.includes('delimiters="() []"'));
+    assert.ok(result.jsCodeOutput.includes('input.operators = ["-","!"];'));
+    assert.ok(result.jsCodeOutput.includes('input.combinators = ["AND","OR","NOT"];'));
+    assert.ok(result.jsCodeOutput.includes('input.delimiters = ["()","[]"];'));
+  });
 });
-
-
-
-
-
