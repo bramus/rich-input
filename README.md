@@ -38,7 +38,7 @@ The visual below illustrates the internal Shadow DOM elements, exposed CSS Shado
 
 - `<rich-input>`: The host custom element wrapping the control, datalists, and suggestions popover.
 - `::part(control)`: The outer input container enclosing the icon, input, and clear button.
-- `::part(icon)`: The default leading search magnifying glass SVG icon (fallback in `slot="leading"`).
+- `::part(icon)`: The leading icon element (defaults to a search magnifying glass, customizable via CSS `content` or `background`).
 - `::highlight(<keyword>)`: Target pseudo-element for styling keyword values via the CSS Custom Highlight API (e.g. `::highlight(label)`, `::highlight(year)`).
 - `::highlight(rich-input-operator)`: Target pseudo-element for styling keyword operators (e.g. `-` in `-style:"Acid House"`).
 - `::highlight(rich-input-combinator)`: Target pseudo-element for styling query combinators (e.g. `OR` in `artist:"Aphex Twin" OR label:"Defected"`).
@@ -136,82 +136,55 @@ Configuration is defined by attributes on `<rich-input>` and standard HTML `<dat
 | `<option label="...">` | `string` | Optional descriptive label shown alongside the value. |
 | `<option>` children | `Node` | Optional image (`<img>`) prepended to the suggested value. |
 
-Datalists and syntax attributes can be added, updated, or removed dynamically at runtime; `<rich-input>` observes changes via `attributeChangedCallback`, `slotchange`, and `MutationObserver`.
+Datalists and syntax attributes can be added, updated, or removed dynamically at runtime; `<rich-input>` observes changes via `attributeChangedCallback` and `MutationObserver`.
 
 ### Configuring Operators, Combinators & Delimiters via JavaScript
 
 In addition to HTML attributes, you can configure `operators`, `combinators`, and `delimiters` per instance or globally on the `RichInput` class (which sets the default for newly created instances that do not specify a local override):
 
 ```javascript
-const RichInput = customElements.get('rich-input');
+import { RichInput } from '@bramus/rich-input';
 
-// Configure global defaults for new <rich-input> elements
-RichInput.operators = ['-', '~', '+'];
+// Set global defaults for newly created <rich-input> elements
+RichInput.operators = ['-', '+'];
 RichInput.combinators = ['AND', 'OR', 'NOT'];
-RichInput.delimiters = ['()', '[]', '{}'];
+RichInput.delimiters = ['()', '[]'];
 
-// Or configure a specific instance (reflects back to the HTML attribute)
+// Or configure an individual instance via properties or methods
 const input = document.querySelector('rich-input');
-input.operators = ['-', '!'];
+input.operators = ['-'];
 input.combinators = ['AND', 'OR'];
 input.delimiters = ['()'];
+
+// Reset an instance or global setting back to defaults by assigning null
+input.operators = null;
 ```
 
 ---
 
-## Rich Option Markup
+## Rich Option Markup (`<img>` Support)
 
-`<rich-input>` supports rich HTML markup inside `<option>` elements. For example, for record labels or artists, you can prepend a logo image:
+Options inside a `<datalist>` can include an `<img>` element to display thumbnails, avatars, or record label logos in the autocomplete suggestions popover:
 
 ```html
-<rich-input placeholder="Search...">
-  <datalist id="label" label="Record Label">
-    <option value="Defected">
-      <img src="assets/defected.jpg" height="50" width="50" alt="Defected Logo">
-      Defected
-    </option>
-    <option value="House">
-      <img src="assets/house.jpg" height="50" width="50" alt="House Logo">
-      House
-    </option>
-    <option value="Keinemusik">
-      <img src="assets/keinemusik.jpg" height="50" width="50" alt="Keinemusik Logo">
-      Keinemusik
-    </option>
-    <option value="Kranky">
-      <img src="assets/kranky.jpg" height="50" width="50" alt="Kranky Logo">
-      Kranky
-    </option>
-    <option value="Madhouse Records">
-      <img src="assets/madhouse-records.jpg" height="50" width="50" alt="Madhouse Records Logo">
-      Madhouse Records
-    </option>
-    <option value="Ninja Tune">
-      <img src="assets/ninja-tune.jpg" height="50" width="50" alt="Ninja Tune Logo">
-      Ninja Tune
-    </option>
-    <option value="Warp Records">
-      <img src="assets/warp-records.png" height="50" width="50" alt="Warp Records Logo">
-      Warp Records
-    </option>
-    <option value="We Play House Recordings">
-      <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="We Play House Recordings Logo">
-      We Play House Recordings
-    </option>
-    <option value="XL Recordings">
-      <img src="assets/xl-recordings.jpg" height="50" width="50" alt="XL Recordings Logo">
-      XL Recordings
-    </option>
-  </datalist>
-</rich-input>
+<datalist id="label" label="Record Label">
+  <option value="We Play House Recordings">
+    <img src="assets/we-play-house-recordings.jpg" height="50" width="50" alt="WPH">
+    We Play House Recordings
+  </option>
+  <option value="Defected">
+    <img src="assets/defected.jpg" height="50" width="50" alt="Defected">
+    Defected
+  </option>
+</datalist>
 ```
 
-When suggesting values for `label:`, `<rich-input>` sniffs the image inside the `<option>`, renders it alongside the option's text content, and exposes `::part(suggestion-image)` for external CSS styling (e.g. as a `1em` circular icon):
+When `<rich-input>` parses a `<datalist>`, it clones any `<img>` found inside `<option>` and renders it inside the corresponding suggestion row with `part="suggestion-image"`. You can style these images from your stylesheet using `::part(suggestion-image)`:
 
 ```css
 rich-input::part(suggestion-image) {
-  width: 1em;
-  height: 1em;
+  width: 2.5em;
+  height: 2.5em;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -219,42 +192,21 @@ rich-input::part(suggestion-image) {
 
 ---
 
-## Custom Leading Icon & Slots
+## Customizing the Leading Icon via `::part(icon)`
 
-`<rich-input>` provides named slots to customize elements inside the control:
+By default, `<rich-input>` renders a leading search magnifying glass icon exposed as `::part(icon)`. You can customize or replace this icon using either the CSS `content` property (for example, to display an emoji) or the CSS `background` property (to display a custom SVG or image):
 
-- **`slot="leading"`**: Replace the leading icon. The default magnifying glass SVG is provided as fallback content inside the slot, so passing a custom element into `slot="leading"` automatically replaces it without needing CSS overrides.
-- **`slot="trailing"`**: Add controls or elements after the clear button (e.g. submit button, voice input, keyboard shortcut badge).
+```css
+/* Option 1: Show an emoji or text via the CSS content property */
+rich-input::part(icon) {
+  content: "🎵";
+}
 
-### Passing a Custom Leading Icon
-
-Provide your own SVG or image with `slot="leading"`:
-
-```html
-<rich-input placeholder="Search music catalog...">
-  <!-- Custom leading music icon -->
-  <svg slot="leading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M9 18V5l12-2v13"></path>
-    <circle cx="6" cy="18" r="3"></circle>
-    <circle cx="18" cy="16" r="3"></circle>
-  </svg>
-
-  <datalist id="genre" label="Genre">
-    <option value="House"></option>
-    <option value="Techno"></option>
-  </datalist>
-</rich-input>
+/* Option 2: Show a custom SVG/image via the CSS background property */
+rich-input::part(icon) {
+  background: url("music-note.svg") no-repeat center / contain;
+}
 ```
-
-When an element with `slot="leading"` is supplied, the default search magnifying glass icon is automatically suppressed. If no slotted element is provided, the default magnifying glass icon renders as fallback.
-
-### Available Slots
-
-| Slot Name | Description |
-|---|---|
-| `leading` | Custom leading icon or content. Defaults to the search magnifying glass icon (`::part(icon)`). |
-| `trailing` | Custom content rendered after the clear button. |
-| *(default)* | Unnamed slot where `<datalist>` configuration elements are placed (visually hidden). |
 
 ---
 
@@ -397,7 +349,7 @@ rich-input::part(suggestion-item-active) {
 |---|---|
 | `::part(control)` | The wrapper container enclosing the search icon, input, and clear button |
 | `::part(input)` | The internal native `<input type="text">` |
-| `::part(icon)` | The default leading search icon SVG (fallback in `slot="leading"`) |
+| `::part(icon)` | The leading icon element (defaults to a search magnifying glass, customizable via CSS `content` or `background`) |
 | `::part(clear-button)` | The clear button (visible when text is present) |
 | `::part(popover)` | The autocomplete popover container |
 | `::part(suggestions-header)` | The header bar at the top of the popover |

@@ -59,25 +59,35 @@ TEMPLATE.innerHTML = `
     cursor: not-allowed;
   }
 
-  slot[name="leading"] {
+  .search-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-right: 0.5rem;
-    color: var(--ri-icon-color, var(--rs-icon-color, #9ca3af));
-  }
-
-  .search-icon {
     width: 1.125rem;
     height: 1.125rem;
-    color: inherit;
+    margin-right: 0.5rem;
+    color: var(--ri-icon-color, var(--rs-icon-color, #9ca3af));
+    background-image: var(--_icon-default-bg, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239ca3af'%3E%3Cpath fill-rule='evenodd' d='M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z' clip-rule='evenodd'/%3E%3C/svg%3E"));
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    font-size: 1rem;
+    line-height: 1;
     pointer-events: none;
+    user-select: none;
   }
 
-  ::slotted([slot="trailing"]) {
-    flex-shrink: 0;
-    margin-left: 0.375rem;
+  .search-icon[data-has-content] {
+    background-image: none;
+  }
+
+  .search-icon[data-content-none] {
+    display: none;
+  }
+
+  .search-icon::before {
+    content: var(--_icon-content, none);
   }
 
   .search-input {
@@ -150,12 +160,6 @@ TEMPLATE.innerHTML = `
     text-decoration-color: var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
     -webkit-text-decoration-color: var(--ri-invalid-color, var(--rs-invalid-color, #ef4444));
     text-decoration-skip-ink: none;
-  }
-
-  /* Visually hide datalists and custom style tags in slot */
-  ::slotted(datalist),
-  ::slotted(style) {
-    display: none !important;
   }
 
   .clear-button {
@@ -285,19 +289,16 @@ TEMPLATE.innerHTML = `
     vertical-align: middle;
   }
 
-  /* Visually hide datalists in slot */
-  ::slotted(datalist) {
+  /* Visually hide datalists and custom style tags in slot */
+  ::slotted(datalist),
+  ::slotted(style) {
     display: none !important;
   }
 </style>
 
 <div part="wrapper" class="wrapper">
   <div part="control" class="control">
-    <slot name="leading">
-      <svg part="icon" class="search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
-      </svg>
-    </slot>
+    <span part="icon" class="search-icon" aria-hidden="true"></span>
     <input
       part="input"
       class="search-input"
@@ -315,7 +316,6 @@ TEMPLATE.innerHTML = `
         <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
       </svg>
     </button>
-    <slot name="trailing"></slot>
   </div>
 
   <div
@@ -504,7 +504,9 @@ export class RichInput extends HTMLElement {
     this._popoverTitle = this.shadowRoot.querySelector('.popover-title');
     this._suggestionsList = this.shadowRoot.querySelector('.suggestions-list');
     this._clearBtn = this.shadowRoot.querySelector('.clear-button');
+    this._icon = this.shadowRoot.querySelector('.search-icon');
     this._slot = this.shadowRoot.querySelector('slot:not([name])');
+    this._lastIconColor = null;
 
     this._configuredKeywords = new Map();
     this._operators = [...RichInput.operators];
@@ -543,6 +545,10 @@ export class RichInput extends HTMLElement {
 
   connectedCallback() {
     this._syncInjectedStyles();
+    this._syncIconStyle();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => this._syncIconStyle());
+    }
     syncDocumentHighlightStyles(this.shadowRoot);
     highlightManager.register(this);
 
@@ -560,12 +566,14 @@ export class RichInput extends HTMLElement {
     // Listen to changes on light DOM datalists and style tags
     this._slot.addEventListener('slotchange', this._onSlotChange);
     this._mutationObserver = new MutationObserver((mutations) => {
+      this._syncIconStyle();
       const hasLightDomChange = mutations.some(
         (m) => !(m.target === this && m.type === 'attributes')
       );
       if (!hasLightDomChange) return;
       this._loadDatalists();
       this._syncInjectedStyles();
+      this._syncIconStyle();
       this.updateHighlights();
     });
     this._mutationObserver.observe(this, { childList: true, subtree: true, attributes: true, characterData: true });
@@ -1094,7 +1102,64 @@ export class RichInput extends HTMLElement {
   _onSlotChange() {
     this._loadDatalists();
     this._syncInjectedStyles();
+    this._syncIconStyle();
     this.updateHighlights();
+  }
+
+  _syncIconStyle() {
+    if (!this._icon || typeof window === 'undefined' || typeof getComputedStyle !== 'function') return;
+
+    const cs = getComputedStyle(this._icon);
+    const content = cs.content;
+    const color = cs.color || '#9ca3af';
+
+    if (this._lastIconColor !== color) {
+      this._lastIconColor = color;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${color}"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>`;
+      this._icon.style.setProperty('--_icon-default-bg', `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
+    }
+
+    if (content === 'none') {
+      if (!this._icon.hasAttribute('data-has-content')) {
+        this._icon.setAttribute('data-has-content', '');
+      }
+      if (!this._icon.hasAttribute('data-content-none')) {
+        this._icon.setAttribute('data-content-none', '');
+      }
+      this._icon.style.removeProperty('--_icon-content');
+      return;
+    }
+
+    if (this._icon.hasAttribute('data-content-none')) {
+      this._icon.removeAttribute('data-content-none');
+    }
+
+    if (content && content !== 'normal') {
+      if (!this._icon.hasAttribute('data-has-content')) {
+        this._icon.setAttribute('data-has-content', '');
+      }
+      if (content.startsWith('"') || content.startsWith("'")) {
+        if (this._icon.style.getPropertyValue('--_icon-content') !== content) {
+          this._icon.style.setProperty('--_icon-content', content);
+        }
+      } else {
+        this._icon.style.removeProperty('--_icon-content');
+      }
+      return;
+    }
+
+    if (this._icon.style.getPropertyValue('--_icon-content')) {
+      this._icon.style.removeProperty('--_icon-content');
+    }
+
+    const beforeContent = getComputedStyle(this._icon, '::before').content;
+    if (beforeContent && beforeContent !== 'none' && beforeContent !== 'normal') {
+      if (!this._icon.hasAttribute('data-has-content')) {
+        this._icon.setAttribute('data-has-content', '');
+      }
+    } else if (this._icon.hasAttribute('data-has-content')) {
+      this._icon.removeAttribute('data-has-content');
+    }
   }
 
   // --- Public Properties ---

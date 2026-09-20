@@ -1311,52 +1311,83 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.equal(result.lenExcludeQuotes, 'Aphex Twin'.length);
   });
 
-  it('supports leading/trailing slots, child <style> injection into shadow DOM, and ARIA / input property reflection', async () => {
+  it('has no named slots, keeps unnamed slot for <style> and <datalist>, and supports ::part(icon) customization via CSS content and background', async () => {
     const result = await page.evaluate(async () => {
-      const el = document.createElement('rich-input');
-      el.setAttribute('aria-label', 'Custom Catalog Search');
-      el.setAttribute('readonly', '');
-      el.innerHTML = `
-        <span slot="leading" id="custom-lead">L</span>
-        <span slot="trailing" id="custom-trail">T</span>
+      const styleEl = document.createElement('style');
+      styleEl.textContent = `
+        rich-input#test-emoji-icon::part(icon) {
+          content: "🎵";
+        }
+        rich-input#test-bg-icon::part(icon) {
+          background: url("data:image/svg+xml,%3Csvg id='custom-svg' xmlns='http://www.w3.org/2000/svg'/%3E") no-repeat center / contain;
+        }
+      `;
+      document.head.appendChild(styleEl);
+
+      const elEmoji = document.createElement('rich-input');
+      elEmoji.id = 'test-emoji-icon';
+      elEmoji.setAttribute('aria-label', 'Custom Catalog Search');
+      elEmoji.setAttribute('readonly', '');
+      elEmoji.innerHTML = `
         <style>::highlight(customkw) { background-color: rgb(12, 34, 56); }</style>
         <datalist id="customkw"><option value="foo"></option></datalist>
       `;
-      document.body.appendChild(el);
-      await new Promise((r) => setTimeout(r, 20));
+      document.body.appendChild(elEmoji);
 
-      const leadingSlot = el.shadowRoot.querySelector('slot[name="leading"]');
-      const trailingSlot = el.shadowRoot.querySelector('slot[name="trailing"]');
-      const injectedStyle = el.shadowRoot.getElementById('ri-injected-styles');
+      const elBg = document.createElement('rich-input');
+      elBg.id = 'test-bg-icon';
+      document.body.appendChild(elBg);
 
-      el.placeholder = 'Updated placeholder';
-      el.disabled = true;
-      const isDisabled = el.disabled && el.hasAttribute('disabled');
-      el.disabled = false;
-      el.removeAttribute('readonly');
+      await new Promise((r) => setTimeout(r, 30));
 
-      el.value = 'customkw:foo';
-      el.focus();
-      el.select();
-      const selectedLength = el.selectionEnd - el.selectionStart;
-      const ariaLabel = el.inputElement.getAttribute('aria-label');
+      const namedSlotCount = elEmoji.shadowRoot.querySelectorAll('slot[name]').length;
+      const defaultSlot = elEmoji.shadowRoot.querySelector('slot:not([name])');
+      const defaultSlotAssignedCount = defaultSlot ? defaultSlot.assignedElements().length : 0;
+      const emojiIcon = elEmoji.shadowRoot.querySelector('[part="icon"]');
+      const emojiIconCs = getComputedStyle(emojiIcon);
+      const emojiIconBefore = getComputedStyle(emojiIcon, '::before');
+
+      const bgIcon = elBg.shadowRoot.querySelector('[part="icon"]');
+      const bgIconCs = getComputedStyle(bgIcon);
+
+      const injectedStyle = elEmoji.shadowRoot.getElementById('ri-injected-styles');
+
+      elEmoji.placeholder = 'Updated placeholder';
+      elEmoji.disabled = true;
+      const isDisabled = elEmoji.disabled && elEmoji.hasAttribute('disabled');
+      elEmoji.disabled = false;
+      elEmoji.removeAttribute('readonly');
+
+      elEmoji.value = 'customkw:foo';
+      elEmoji.focus();
+      elEmoji.select();
+      const selectedLength = elEmoji.selectionEnd - elEmoji.selectionStart;
+      const ariaLabel = elEmoji.inputElement.getAttribute('aria-label');
 
       const out = {
-        leadingAssigned: leadingSlot.assignedElements().length,
-        trailingAssigned: trailingSlot.assignedElements().length,
+        namedSlotCount,
+        defaultSlotAssignedCount,
+        emojiBgImage: emojiIconCs.backgroundImage,
+        emojiBeforeContent: emojiIconBefore.content,
+        customBgHasSvg: bgIconCs.backgroundImage.includes('custom-svg'),
         hasInjectedStyle: Boolean(injectedStyle && injectedStyle.textContent.includes('::highlight(customkw)')),
-        placeholder: el.placeholder,
+        placeholder: elEmoji.placeholder,
         isDisabled,
         selectedLength,
         ariaLabel,
       };
 
-      el.remove();
+      elEmoji.remove();
+      elBg.remove();
+      styleEl.remove();
       return out;
     });
 
-    assert.equal(result.leadingAssigned, 1);
-    assert.equal(result.trailingAssigned, 1);
+    assert.equal(result.namedSlotCount, 0);
+    assert.equal(result.defaultSlotAssignedCount, 2);
+    assert.equal(result.emojiBgImage, 'none');
+    assert.equal(result.emojiBeforeContent, '"🎵"');
+    assert.equal(result.customBgHasSvg, true);
     assert.equal(result.hasInjectedStyle, true);
     assert.equal(result.placeholder, 'Updated placeholder');
     assert.equal(result.isDisabled, true);
