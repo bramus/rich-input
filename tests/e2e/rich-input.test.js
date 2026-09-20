@@ -1063,4 +1063,367 @@ describe('<rich-input> End-to-End Browser Tests (Puppeteer + WebDriver BiDi)', (
     assert.ok(result.jsCodeOutput.includes('input.combinators = ["AND","OR","NOT"];'));
     assert.ok(result.jsCodeOutput.includes('input.delimiters = ["()","[]"];'));
   });
+
+  it('dispatches rich-input-select, search, and change events with expected details', async () => {
+    await page.evaluate(() => {
+      window.__testEvents = {
+        selects: [],
+        searches: [],
+        changes: 0,
+      };
+      const el = document.querySelector('#demo-search');
+      el.addEventListener('rich-input-select', (e) => window.__testEvents.selects.push(e.detail));
+      el.addEventListener('search', (e) => window.__testEvents.searches.push(e.detail));
+      el.addEventListener('change', () => window.__testEvents.changes++);
+      el.value = '';
+      el.focus();
+    });
+
+    // Type `-yr` -> no match, clear and type `-ye` -> matches `year:`
+    await page.keyboard.type('-ye');
+    await page.keyboard.press('Enter'); // Accepts `-year:` (rich-input-select for keyword)
+
+    // Type `2026` and accept via Enter (rich-input-select for value)
+    await page.keyboard.type('2026');
+    await page.keyboard.press('Enter');
+
+    // Close suggestions with Escape, then press Enter to trigger `search` event
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Enter');
+
+    // Click clear button to trigger `change` event
+    await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      el.shadowRoot.querySelector('.clear-button').click();
+    });
+
+    const events = await page.evaluate(() => window.__testEvents);
+
+    assert.equal(events.selects.length, 2);
+    assert.equal(events.selects[0].type, 'keyword');
+    assert.equal(events.selects[0].operator, '-');
+    assert.equal(events.selects[0].keyword, 'year');
+    assert.equal(events.selects[0].query, '-year:');
+
+    assert.equal(events.selects[1].type, 'value');
+    assert.equal(events.selects[1].operator, '-');
+    assert.equal(events.selects[1].keyword, 'year');
+    assert.equal(events.selects[1].value, '2026');
+    assert.equal(events.selects[1].query, '-year:2026 ');
+
+    assert.equal(events.searches.length, 1);
+    assert.equal(events.searches[0].value, '-year:2026 ');
+    assert.equal(events.searches[0].parsed.tokens.filter((t) => t.type === 'keyword')[0].innerValue, '2026');
+
+    assert.ok(events.changes >= 1);
+  });
+
+  it('supports form reset (formResetCallback), fieldset disabling (formDisabledCallback), and disconnectedCallback cleanup', async () => {
+    const result = await page.evaluate(() => {
+      const form = document.createElement('form');
+      const fieldset = document.createElement('fieldset');
+      const ri = document.createElement('rich-input');
+      ri.setAttribute('name', 'custom_q');
+      ri.setAttribute('value', 'year:2025');
+      ri.innerHTML = `<datalist id="year"><option value="2025"></option><option value="2026"></option></datalist>`;
+
+      fieldset.appendChild(ri);
+      form.appendChild(fieldset);
+      document.body.appendChild(form);
+
+      const initialValue = ri.value;
+      ri.value = 'year:2026';
+      const dirtyValue = ri.value;
+
+      // 1. Test formResetCallback
+      form.reset();
+      const afterResetValue = ri.value;
+
+      // 2. Test formDisabledCallback via fieldset.disabled
+      fieldset.disabled = true;
+      const disabledWhenFieldsetDisabled = ri.disabled;
+      fieldset.disabled = false;
+      const disabledWhenFieldsetEnabled = ri.disabled;
+
+      // 3. Test disconnectedCallback cleanup from highlightManager
+      ri.value = 'year:2025';
+      ri.updateHighlights();
+      const activeRangesBeforeRemove = ri.getActiveHighlightRanges().get('year')?.valueRanges?.length || 0;
+      form.remove();
+      const activeRangesAfterRemove = ri.getActiveHighlightRanges().size;
+
+      return {
+        initialValue,
+        dirtyValue,
+        afterResetValue,
+        disabledWhenFieldsetDisabled,
+        disabledWhenFieldsetEnabled,
+        activeRangesBeforeRemove,
+        activeRangesAfterRemove,
+      };
+    });
+
+    assert.equal(result.initialValue, 'year:2025');
+    assert.equal(result.dirtyValue, 'year:2026');
+    assert.equal(result.afterResetValue, 'year:2025');
+    assert.equal(result.disabledWhenFieldsetDisabled, true);
+    assert.equal(result.disabledWhenFieldsetEnabled, false);
+    assert.equal(result.activeRangesBeforeRemove, 1);
+    assert.equal(result.activeRangesAfterRemove, 0);
+  });
+
+  it('dynamically updates keywords, suggestions, and highlights when datalists are added, and renders rich option images with part="suggestion-image"', async () => {
+    const result = await page.evaluate(async () => {
+      const el = document.querySelector('#demo-search');
+      const hadBpmBefore = el.getKeywords().some((k) => k.idLower === 'bpm');
+
+      // Click the demo's "+ Dynamically Add bpm Datalist Filter" button
+      const addBpmBtn = document.getElementById('btn-add-filter');
+      addBpmBtn.click();
+
+      // Wait a microtask/tick for slotchange & MutationObserver
+      await new Promise((r) => setTimeout(r, 50));
+
+      const hasBpmAfter = el.getKeywords().some((k) => k.idLower === 'bpm');
+      el.value = 'bpm:125';
+      el.updateHighlights();
+      const bpmHighlightCount = CSS.highlights.get('bpm')?.size || 0;
+
+      // Check rich option image rendering for label:
+      el.value = 'label:';
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+      el.updateSuggestions('input');
+
+      const suggestionImages = Array.from(
+        el.shadowRoot.querySelectorAll('.suggestion-item img[part~="suggestion-image"]')
+      );
+
+      return {
+        hadBpmBefore,
+        hasBpmAfter,
+        bpmHighlightCount,
+        suggestionImagesCount: suggestionImages.length,
+        firstImgAlt: suggestionImages[0]?.getAttribute('alt') || '',
+      };
+    });
+
+    assert.equal(result.hadBpmBefore, false);
+    assert.equal(result.hasBpmAfter, true);
+    assert.ok(result.bpmHighlightCount >= 1);
+    assert.ok(result.suggestionImagesCount > 0);
+    assert.ok(result.firstImgAlt.includes('Logo'));
+  });
+
+  it('supports Tab key and mouse click suggestion acceptance, outside click popover dismissal, and aria-selected / suggestion-item-selected echoing', async () => {
+    await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      el.value = '';
+      el.focus();
+    });
+
+    // 1. Accept keyword suggestion via Tab key
+    await page.keyboard.type('ye');
+    await page.keyboard.press('Tab');
+
+    const afterTabKeyword = await page.evaluate(() => document.querySelector('#demo-search').value);
+    assert.equal(afterTabKeyword, 'year:');
+
+    // 2. Accept value suggestion via mouse click on suggestion item
+    await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      const items = Array.from(el.shadowRoot.querySelectorAll('.suggestion-item'));
+      const item2024 = items.find((li) => li.textContent.includes('2024'));
+      item2024.click();
+    });
+
+    const afterMouseClickValue = await page.evaluate(() => document.querySelector('#demo-search').value);
+    assert.equal(afterMouseClickValue, 'year:2024 ');
+
+    // 3. Place caret back inside `year:2024` and verify `2024` is marked with `aria-selected="true"` and `suggestion-item-selected`
+    const selectedEchoState = await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      el.setSelectionRange(7, 7); // inside `2024`
+      el.updateSuggestions('caret');
+      const selectedItem = el.shadowRoot.querySelector('.suggestion-item.selected');
+      return {
+        hasSelectedItem: Boolean(selectedItem),
+        ariaSelected: selectedItem?.getAttribute('aria-selected'),
+        partAttr: selectedItem?.getAttribute('part') || '',
+        text: selectedItem?.textContent.trim() || '',
+      };
+    });
+
+    assert.equal(selectedEchoState.hasSelectedItem, true);
+    assert.equal(selectedEchoState.ariaSelected, 'true');
+    assert.ok(selectedEchoState.partAttr.includes('suggestion-item-selected'));
+    assert.ok(selectedEchoState.text.includes('2024'));
+
+    // 4. Click outside <rich-input> to dismiss open popover
+    const isClosedAfterOutsideClick = await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      document.body.click();
+      return !el.shadowRoot.querySelector('.popover').matches(':popover-open');
+    });
+
+    assert.equal(isClosedAfterOutsideClick, true);
+  });
+
+  it('suppresses invalid highlight ranges while editing a token and supports highlight-quotes="exclude"', async () => {
+    const result = await page.evaluate(() => {
+      const el = document.querySelector('#demo-search');
+      el.focus();
+      el.value = 'year:1800';
+      el.setSelectionRange(9, 9); // caret at end of `year:1800` while focused
+      el.updateHighlights();
+      const invalidWhileEditing = el.getActiveInvalidRanges().length;
+
+      // Move caret to another token or blur -> should now mark `year:1800` as invalid
+      el.value = 'year:1800 ';
+      el.setSelectionRange(10, 10);
+      el.updateHighlights();
+      const invalidAfterMovingCaret = el.getActiveInvalidRanges().length;
+
+      // Test highlight-quotes="exclude" vs default
+      el.value = 'artist:"Aphex Twin"';
+      el.removeAttribute('highlight-quotes');
+      el.updateHighlights();
+      const rangeIncludeQuotes = el.getActiveHighlightRanges().get('artist').valueRanges[0];
+      const lenIncludeQuotes = rangeIncludeQuotes.endOffset - rangeIncludeQuotes.startOffset;
+
+      el.setAttribute('highlight-quotes', 'exclude');
+      el.updateHighlights();
+      const rangeExcludeQuotes = el.getActiveHighlightRanges().get('artist').valueRanges[0];
+      const lenExcludeQuotes = rangeExcludeQuotes.endOffset - rangeExcludeQuotes.startOffset;
+      el.removeAttribute('highlight-quotes');
+
+      return {
+        invalidWhileEditing,
+        invalidAfterMovingCaret,
+        lenIncludeQuotes,
+        lenExcludeQuotes,
+      };
+    });
+
+    assert.equal(result.invalidWhileEditing, 0);
+    assert.equal(result.invalidAfterMovingCaret, 1);
+    assert.equal(result.lenIncludeQuotes, '"Aphex Twin"'.length);
+    assert.equal(result.lenExcludeQuotes, 'Aphex Twin'.length);
+  });
+
+  it('supports leading/trailing slots, child <style> injection into shadow DOM, and ARIA / input property reflection', async () => {
+    const result = await page.evaluate(async () => {
+      const el = document.createElement('rich-input');
+      el.setAttribute('aria-label', 'Custom Catalog Search');
+      el.setAttribute('readonly', '');
+      el.innerHTML = `
+        <span slot="leading" id="custom-lead">L</span>
+        <span slot="trailing" id="custom-trail">T</span>
+        <style>::highlight(customkw) { background-color: rgb(12, 34, 56); }</style>
+        <datalist id="customkw"><option value="foo"></option></datalist>
+      `;
+      document.body.appendChild(el);
+      await new Promise((r) => setTimeout(r, 20));
+
+      const leadingSlot = el.shadowRoot.querySelector('slot[name="leading"]');
+      const trailingSlot = el.shadowRoot.querySelector('slot[name="trailing"]');
+      const injectedStyle = el.shadowRoot.getElementById('ri-injected-styles');
+
+      el.placeholder = 'Updated placeholder';
+      el.disabled = true;
+      const isDisabled = el.disabled && el.hasAttribute('disabled');
+      el.disabled = false;
+      el.removeAttribute('readonly');
+
+      el.value = 'customkw:foo';
+      el.focus();
+      el.select();
+      const selectedLength = el.selectionEnd - el.selectionStart;
+      const ariaLabel = el.inputElement.getAttribute('aria-label');
+
+      const out = {
+        leadingAssigned: leadingSlot.assignedElements().length,
+        trailingAssigned: trailingSlot.assignedElements().length,
+        hasInjectedStyle: Boolean(injectedStyle && injectedStyle.textContent.includes('::highlight(customkw)')),
+        placeholder: el.placeholder,
+        isDisabled,
+        selectedLength,
+        ariaLabel,
+      };
+
+      el.remove();
+      return out;
+    });
+
+    assert.equal(result.leadingAssigned, 1);
+    assert.equal(result.trailingAssigned, 1);
+    assert.equal(result.hasInjectedStyle, true);
+    assert.equal(result.placeholder, 'Updated placeholder');
+    assert.equal(result.isDisabled, true);
+    assert.equal(result.selectedLength, 'customkw:foo'.length);
+    assert.equal(result.ariaLabel, 'Custom Catalog Search');
+  });
+
+  it('positions popover with mirror-div measurement and viewport clamping, and supports contenteditable adapter fallback', async () => {
+    const result = await page.evaluate(async () => {
+      const { getCaretLeftWithMirrorDiv, positionPopover } = await import(
+        './js/rich-input/utils/positioning.js'
+      );
+      const { setupContentEditableAdapter, getSingleTextNode } = await import(
+        './js/rich-input/utils/contenteditable-adapter.js'
+      );
+
+      const input = document.querySelector('#demo-search').inputElement;
+      input.value = 'artist:"Aphex Twin"';
+      const leftAtStart = getCaretLeftWithMirrorDiv(input, 0);
+      const leftAtEnd = getCaretLeftWithMirrorDiv(input, input.value.length);
+
+      // Test positionPopover viewport right-edge clamp & bottom-edge flip
+      const dummyPopover = document.createElement('div');
+      Object.defineProperty(dummyPopover, 'offsetWidth', { value: 300 });
+      Object.defineProperty(dummyPopover, 'offsetHeight', { value: 200 });
+      document.body.appendChild(dummyPopover);
+
+      positionPopover(dummyPopover, {
+        left: window.innerWidth + 500,
+        top: window.innerHeight - 10,
+        bottom: window.innerHeight - 2,
+        height: 20,
+      });
+      const clampedLeft = parseInt(dummyPopover.style.left, 10);
+      const flippedTop = parseInt(dummyPopover.style.top, 10);
+      dummyPopover.remove();
+
+      // Test contenteditable adapter
+      const ceDiv = document.createElement('div');
+      document.body.appendChild(ceDiv);
+      setupContentEditableAdapter(ceDiv);
+      ceDiv.value = 'label:Warp';
+      ceDiv.setSelectionRange(2, 6);
+      const selStart = ceDiv.selectionStart;
+      const selEnd = ceDiv.selectionEnd;
+      const domRange = ceDiv.createValueRange(6, 10);
+      const rangeText = domRange.toString();
+      const singleNode = getSingleTextNode(ceDiv);
+      ceDiv.remove();
+
+      return {
+        mirrorProgressesRight: leftAtEnd > leftAtStart,
+        clampedLeftValid: clampedLeft <= window.innerWidth - 300 - 12,
+        flippedTopValid: flippedTop < window.innerHeight - 200,
+        selStart,
+        selEnd,
+        rangeText,
+        isTextNode: singleNode.nodeType === Node.TEXT_NODE,
+      };
+    });
+
+    assert.equal(result.mirrorProgressesRight, true);
+    assert.equal(result.clampedLeftValid, true);
+    assert.equal(result.flippedTopValid, true);
+    assert.equal(result.selStart, 2);
+    assert.equal(result.selEnd, 6);
+    assert.equal(result.rangeText, 'Warp');
+    assert.equal(result.isTextNode, true);
+  });
 });
