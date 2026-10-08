@@ -293,7 +293,8 @@ header {
 }
 
 .github-btn,
-.npm-btn {
+.npm-btn,
+.bramus-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -309,14 +310,16 @@ header {
 }
 
 .github-btn:hover,
-.npm-btn:hover {
+.npm-btn:hover,
+.bramus-btn:hover {
   background: var(--bg-surface-elevated);
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
 
 .github-btn svg,
-.npm-btn svg {
+.npm-btn svg,
+.bramus-btn svg {
   flex-shrink: 0;
 }
 
